@@ -1,0 +1,34 @@
+# Build output
+bin/
+obj/
+
+# User-specific
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# Logs
+*.log
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Node
+node_modules/
+
+# Python
+__pycache__/
+*.pyc
+
+# Env
+.env
+.env.*
+
+# IDE
+.vscode/
+.idea/
+
+# Local settings
+appsettings.Development.json
