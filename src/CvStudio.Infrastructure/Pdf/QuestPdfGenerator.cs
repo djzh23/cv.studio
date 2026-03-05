@@ -1,4 +1,4 @@
-using QuestPDF.Fluent;
+ï»¿using QuestPDF.Fluent;
 using QuestPDF.Helpers;
 using QuestPDF.Infrastructure;
 using CvStudio.Application;
@@ -12,6 +12,7 @@ public sealed class QuestPdfGenerator : IPdfGenerator
 {
     private const string DefaultProfileImageUrl = "https://i.ibb.co/CpTGqYTz/bewerbungsfoto.png";
     private const string DefaultGithubUrl = "https://github.com/djzh23";
+    private const string DefaultPdfFontFamily = "Lato";
 
     private static readonly HttpClient ImageHttpClient = new()
     {
@@ -72,7 +73,7 @@ public sealed class QuestPdfGenerator : IPdfGenerator
                 page.Size(PageSizes.A4);
                 page.Margin(24);
                 page.DefaultTextStyle(x => x
-                    .FontFamily("Arial")
+                    .FontFamily(DefaultPdfFontFamily)
                     .FontSize(Style.BaseFont)
                     .FontColor(Style.Body)
                     .LineHeight(1.22f));
@@ -132,7 +133,7 @@ public sealed class QuestPdfGenerator : IPdfGenerator
                 page.Size(PageSizes.A4);
                 page.Margin(24);
                 page.DefaultTextStyle(x => x
-                    .FontFamily("Times New Roman")
+                    .FontFamily(DefaultPdfFontFamily)
                     .FontSize(10.8f)
                     .FontColor("#222222")
                     .LineHeight(1.26f));
@@ -177,7 +178,7 @@ public sealed class QuestPdfGenerator : IPdfGenerator
                         {
                             foreach (var skill in data.Skills.Where(s => !string.IsNullOrWhiteSpace(s.CategoryName)))
                             {
-                                var skills = string.Join(" · ", skill.Items.Where(static x => !string.IsNullOrWhiteSpace(x)));
+                                var skills = string.Join(" Â· ", skill.Items.Where(static x => !string.IsNullOrWhiteSpace(x)));
                                 if (string.IsNullOrWhiteSpace(skills))
                                 {
                                     continue;
@@ -349,7 +350,7 @@ public sealed class QuestPdfGenerator : IPdfGenerator
 
             foreach (var bullet in item.Bullets.Where(static x => !string.IsNullOrWhiteSpace(x)))
             {
-                column.Item().PaddingLeft(12).Text($"• {bullet.Trim()}").FontSize(10.9f);
+                column.Item().PaddingLeft(12).Text($"â€¢ {bullet.Trim()}").FontSize(10.9f);
             }
         });
     }
@@ -476,7 +477,7 @@ public sealed class QuestPdfGenerator : IPdfGenerator
 
             foreach (var bullet in item.Bullets.Where(static x => !string.IsNullOrWhiteSpace(x)))
             {
-                column.Item().PaddingLeft(8).Text($"• {bullet.Trim()}").FontColor(Style.Body);
+                column.Item().PaddingLeft(8).Text($"â€¢ {bullet.Trim()}").FontColor(Style.Body);
             }
         });
     }
@@ -724,7 +725,7 @@ public sealed class QuestPdfGenerator : IPdfGenerator
 
     private static string JoinItemsWithDot(IEnumerable<string> items)
     {
-        return string.Join(" · ", items.Where(static x => !string.IsNullOrWhiteSpace(x)).Select(static x => x.Trim()));
+        return string.Join(" Â· ", items.Where(static x => !string.IsNullOrWhiteSpace(x)).Select(static x => x.Trim()));
     }
 
     private static string BuildDateRange(string startDate, string endDate)
@@ -776,4 +777,5 @@ public sealed class QuestPdfGenerator : IPdfGenerator
         return value;
     }
 }
+
 
