@@ -50,3 +50,4 @@ await app.Services.ApplyMigrationsAsync(app.Environment.IsDevelopment());
 
 app.Run();
 
+public partial class Program;
