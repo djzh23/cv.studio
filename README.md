@@ -1,6 +1,7 @@
-# cv.studio
+﻿# cv.studio
 
-> Personal CV & Application Manager - Blazor � .NET 8 � Clean Architecture
+> Personal CV & Application Manager.
+> Built with Blazor Server, .NET 8, and Clean Architecture.
 
 ![.NET](https://img.shields.io/badge/.NET-8-purple)
 ![Blazor](https://img.shields.io/badge/Blazor-Server-blue)
@@ -8,13 +9,23 @@
 ![Docker](https://img.shields.io/badge/Docker-ready-blue)
 ![CI](https://github.com/djzh23/cv.studio/actions/workflows/ci.yml/badge.svg)
 
-## Overview
-cv.studio is a portfolio-focused application to create, version, and export CVs.
-It follows Clean Architecture with clear separation between Domain, Application, Infrastructure, API, and Blazor UI.
+## Features
+- CV templates (Software, IT Support, Service)
+- Auto-save, snapshot variants, live editing workflow
+- Export as PDF (QuestPDF) and DOCX (OpenXML)
 
-## Planned Stack
-- Blazor Server
-- ASP.NET Core Web API
-- PostgreSQL + EF Core
-- QuestPDF + OpenXML
-- Docker + GitHub Actions
+## Stack
+Blazor Server · ASP.NET Core Web API · .NET 8 · PostgreSQL · EF Core · Docker
+
+## Architecture
+Domain -> Application -> Infrastructure -> API -> Blazor
+
+## Local Start
+```bash
+docker-compose up --build
+dotnet build cv.studio.sln
+dotnet test cv.studio.sln
+```
+
+## Live Demo
+https://cv-studio.railway.app
