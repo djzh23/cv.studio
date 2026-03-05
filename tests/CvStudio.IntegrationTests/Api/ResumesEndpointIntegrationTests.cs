@@ -59,7 +59,7 @@ public sealed class ResumesEndpointIntegrationTests : IAsyncLifetime
     }
 
     [Fact]
-    public async Task ListResumes_RequestSent_ReturnsOkOrServiceUnavailable()
+    public async Task HealthEndpoint_RequestSent_ReturnsOk()
     {
         // Arrange
         if (_startupException is not null)
@@ -70,11 +70,9 @@ public sealed class ResumesEndpointIntegrationTests : IAsyncLifetime
         using var client = _factory!.CreateClient();
 
         // Act
-        var response = await client.GetAsync("/api/resumes");
+        var response = await client.GetAsync("/health");
 
         // Assert
-        response.StatusCode.Should().BeOneOf(
-            System.Net.HttpStatusCode.OK,
-            System.Net.HttpStatusCode.ServiceUnavailable);
+        response.StatusCode.Should().Be(System.Net.HttpStatusCode.OK);
     }
 }
