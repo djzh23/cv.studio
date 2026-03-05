@@ -1,0 +1,12 @@
+{
+  "ConnectionStrings": {
+    "Postgres": "Host=<railway-host>;Port=<railway-port>;Database=<railway-db>;Username=<railway-user>;Password=<railway-password>;SSL Mode=Require;Trust Server Certificate=true"
+  },
+  "Logging": {
+    "LogLevel": {
+      "Default": "Information",
+      "Microsoft.AspNetCore": "Warning"
+    }
+  },
+  "AllowedHosts": "*"
+}
