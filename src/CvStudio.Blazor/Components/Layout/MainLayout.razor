@@ -1,0 +1,23 @@
+@inherits LayoutComponentBase
+
+<div class="gradient-bar"></div>
+
+<header class="top-nav">
+    <nav>
+        <span class="nav-logo">CV<span>.</span>Studio</span>
+        <NavLink href="/" Match="NavLinkMatch.All"><i class="bi bi-house"></i> Start</NavLink>
+        <NavLink href="/varianten"><i class="bi bi-layers"></i> Varianten</NavLink>
+        <NavLink href="/hilfe"><i class="bi bi-question-circle"></i> Hilfe</NavLink>
+    </nav>
+</header>
+
+<div class="main-layout">
+    @Body
+</div>
+
+<div id="blazor-error-ui" data-nosnippet>
+    An unhandled error has occurred.
+    <a href="." class="reload">Reload</a>
+    <span class="dismiss">x</span>
+</div>
+
