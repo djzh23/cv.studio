@@ -1,9 +1,9 @@
 [build]
-builder = "NIXPACKS"
-buildCommand = "dotnet publish src/CvStudio.Api/CvStudio.Api.csproj -c Release -o out"
+builder = "DOCKERFILE"
+dockerfilePath = "Dockerfile"
 
 [deploy]
-startCommand = "ASPNETCORE_URLS=http://0.0.0.0:$PORT dotnet out/CvStudio.Api.dll"
+startCommand = "dotnet CvStudio.Api.dll"
 healthcheckPath = "/health"
 healthcheckTimeout = 300
 restartPolicyType = "ON_FAILURE"
