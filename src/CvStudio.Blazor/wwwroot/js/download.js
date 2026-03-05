@@ -1,4 +1,4 @@
-window.resumeVersioner = {
+window.CvStudio = {
     downloadFile: function (fileName, base64Content, contentType) {
         const link = document.createElement('a');
         link.download = fileName;
@@ -20,3 +20,6 @@ window.resumeVersioner = {
         window.alert(message);
     }
 };
+
+// Backward compatibility for older calls.
+window.resumeVersioner = window.CvStudio;
