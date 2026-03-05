@@ -1,0 +1,696 @@
+@page "/"
+@page "/arbeitsversion/{Id:guid}"
+@page "/resume/{Id:guid}"
+@implements IDisposable
+@rendermode InteractiveServer
+@inject ResumeEditorViewModel Vm
+@inject NavigationManager Navigation
+@inject IJSRuntime Js
+@using Microsoft.AspNetCore.Components
+@using Microsoft.AspNetCore.Components.Forms
+@using CvStudio.Application.Services
+
+<PageTitle>CvStudio</PageTitle>
+
+@if (Vm.CurrentResume is null)
+{
+    <section class="empty-state">
+        <h1>CvStudio</h1>
+        <p>1) Vorlage waehlen. 2) Arbeitsversion erstellen. 3) Varianten speichern und exportieren.</p>
+
+        <div class="template-grid">
+            @foreach (var vorlage in Vm.Vorlagen)
+            {
+                <button type="button"
+                        class='template-card @(Vm.GewaehlteVorlage == vorlage.Key ? "active" : string.Empty)'
+                        @onclick='() => Vm.GewaehlteVorlage = vorlage.Key'
+                        disabled="@Vm.IsBusy">
+                    <i class="@TemplateIconClass(vorlage.Key) template-icon"></i>
+                    <strong>@vorlage.DisplayName</strong>
+                    <span>@vorlage.Description</span>
+                </button>
+            }
+        </div>
+
+        @if (!string.IsNullOrWhiteSpace(Vm.ErrorMessage))
+        {
+            <div class="alert alert-danger" role="alert">@Vm.ErrorMessage</div>
+        }
+
+        <div class="toolbar-actions">
+            <button class="btn btn-primary-action" @onclick="NeueArbeitsversionAsync" disabled="@Vm.IsBusy"><i class="bi bi-plus-circle"></i> Arbeitsversion erstellen</button>
+            <button class="btn btn-tertiary-action" @onclick='() => Navigation.NavigateTo("/hilfe")'><i class="bi bi-book"></i> So funktioniert es</button>
+            <button class="btn btn-danger-action" @onclick="FreshStartAsync" disabled="@Vm.IsBusy"><i class="bi bi-trash3"></i> Fresh Start</button>
+        </div>
+
+        @if (Vm.Arbeitsversionen.Count > 0)
+        {
+            <section class="versions-panel" style="margin-top: 1rem; text-align: left;">
+                <h2>Bestehende Arbeitsversionen</h2>
+                <div class="versions-list">
+                    @foreach (var arbeitsversion in Vm.Arbeitsversionen.Take(12))
+                    {
+                        <button class="version-item" @onclick="() => OeffneArbeitsversion(arbeitsversion.Id)">
+                            <strong>@arbeitsversion.Title</strong>
+                            <span>ID: @arbeitsversion.Id</span>
+                            <small>Zuletzt geaendert: @arbeitsversion.UpdatedAtUtc.ToLocalTime().ToString("g")</small>
+                        </button>
+                    }
+                </div>
+            </section>
+        }
+    </section>
+}
+else
+{
+    <section class="resume-shell">
+        <header class="toolbar">
+            <div class="toolbar-left">
+                <h1>@Vm.CurrentResume.Title</h1>
+                <small class="header-meta-row">
+                    <span><i class="bi bi-pencil-square"></i> @Vm.AktivKontextText</span>
+                    <span class="meta-dot">•</span>
+                    <span class="autosave-state"><span class="autosave-dot"></span>@Vm.AutoSaveText</span>
+                </small>
+                <small class="mono-meta">Arbeitsversion-ID: @Vm.CurrentResume.Id</small>
+            </div>
+            <div class="toolbar-actions">
+                <button class="btn btn-primary-action" @onclick="NeueArbeitsversionAsync" disabled="@Vm.IsBusy"><i class="bi bi-plus-circle"></i> Neue Arbeitsversion</button>
+                <button class="btn btn-secondary-action" @onclick='() => Navigation.NavigateTo($"/varianten/{Vm.CurrentResume.Id}")'><i class="bi bi-git"></i> Varianten verwalten</button>
+                <button class="btn btn-tertiary-action" @onclick='() => Navigation.NavigateTo("/hilfe")'><i class="bi bi-book"></i> So funktioniert es</button>
+            </div>
+        </header>
+
+        <section class="versions-panel">
+            <h2 class="section-label"><i class="bi bi-grid-3x3-gap"></i> Neue Arbeitsversion aus Vorlage</h2>
+            <div class="template-grid">
+                @foreach (var vorlage in Vm.Vorlagen)
+                {
+                    <button type="button"
+                            class='template-card @(Vm.GewaehlteVorlage == vorlage.Key ? "active" : string.Empty)'
+                            @onclick='() => Vm.GewaehlteVorlage = vorlage.Key'
+                            disabled="@Vm.IsBusy">
+                        <i class="@TemplateIconClass(vorlage.Key) template-icon"></i>
+                        <strong>@vorlage.DisplayName</strong>
+                        <span>@vorlage.Description</span>
+                    </button>
+                }
+            </div>
+            <div class="toolbar-actions">
+                <button class="btn btn-primary-action" @onclick="NeueArbeitsversionAsync" disabled="@Vm.IsBusy"><i class="bi bi-plus-circle"></i> Arbeitsversion mit gewaehlter Vorlage erstellen</button>
+            </div>
+        </section>
+
+        @if (!string.IsNullOrWhiteSpace(Vm.ErrorMessage))
+        {
+            <div class="alert alert-danger" role="alert">@Vm.ErrorMessage</div>
+        }
+
+        <div class="context-banner" role="status">
+            <i class="bi bi-pencil-square"></i>
+            <strong>Du bearbeitest: @Vm.AktivKontextText</strong>
+        </div>
+
+        <main class="grid-area">
+            <section class="editor-panel">
+                <div class="editor-scroll">
+                    @if (_editContext is not null)
+                    {
+                        <EditForm EditContext="_editContext">
+                            <DataAnnotationsValidator />
+                            <ValidationSummary />
+
+                            <div class="tab-nav">
+                                <button type="button" class='tab-btn @TabClass("profil")' @onclick='() => ActiveTab = "profil"'><i class="bi bi-person"></i> Profil</button>
+                                <button type="button" class='tab-btn @TabClass("beruf")' @onclick='() => ActiveTab = "beruf"'><i class="bi bi-building"></i> Beruf</button>
+                                <button type="button" class='tab-btn @TabClass("ausbildung")' @onclick='() => ActiveTab = "ausbildung"'><i class="bi bi-mortarboard"></i> Ausbildung</button>
+                                <button type="button" class='tab-btn @TabClass("kenntnisse")' @onclick='() => ActiveTab = "kenntnisse"'><i class="bi bi-tools"></i> Kenntnisse</button>
+                                <button type="button" class='tab-btn @TabClass("hobby")' @onclick='() => ActiveTab = "hobby"'><i class="bi bi-heart"></i> Hobbys</button>
+                            </div>
+
+                            @if (ActiveTab == "profil")
+                            {
+                                <div class="tab-content">
+                                <h2>Profil</h2>
+                                <div class="field-grid">
+                                    <label>Titel <InputText class="form-control" @bind-Value="Vm.CurrentResume.Title" /></label>
+                                    <label>Vorname <InputText class="form-control" @bind-Value="Vm.CurrentResume.ResumeData.Profile.FirstName" /></label>
+                                    <label>Nachname <InputText class="form-control" @bind-Value="Vm.CurrentResume.ResumeData.Profile.LastName" /></label>
+                                    <label>Headline <InputText class="form-control" @bind-Value="Vm.CurrentResume.ResumeData.Profile.Headline" /></label>
+                                    <label>E-Mail <InputText class="form-control" @bind-Value="Vm.CurrentResume.ResumeData.Profile.Email" /></label>
+                                    <label>Telefon <InputText class="form-control" @bind-Value="Vm.CurrentResume.ResumeData.Profile.Phone" /></label>
+                                    <label>Ort <InputText class="form-control" @bind-Value="Vm.CurrentResume.ResumeData.Profile.Location" /></label>
+                                    <label>Profilbild URL <InputText class="form-control" @bind-Value="Vm.CurrentResume.ResumeData.Profile.ProfileImageUrl" /></label>
+                                </div>
+                                <label>Zusammenfassung
+                                    <InputTextArea class="form-control" @bind-Value="Vm.CurrentResume.ResumeData.Profile.Summary" rows="6" />
+                                </label>
+                                </div>
+                            }
+
+                            @if (ActiveTab == "beruf")
+                            {
+                                <div class="tab-content">
+                                <h2>Berufserfahrung</h2>
+                                @for (var i = 0; i < Vm.CurrentResume.ResumeData.WorkItems.Count; i++)
+                                {
+                                    var item = Vm.CurrentResume.ResumeData.WorkItems[i];
+                                    <div class="list-card">
+                                        <div class="field-grid">
+                                            <label>Unternehmen <InputText class="form-control" @bind-Value="item.Company" /></label>
+                                            <label>Rolle <InputText class="form-control" @bind-Value="item.Role" /></label>
+                                            <label>Start <InputText class="form-control" @bind-Value="item.StartDate" /></label>
+                                            <label>Ende <InputText class="form-control" @bind-Value="item.EndDate" /></label>
+                                        </div>
+                                        <label>Kurzbeschreibung
+                                            <InputTextArea class="form-control" @bind-Value="item.Description" rows="3" />
+                                        </label>
+                                        <label>Stichpunkte (eine Zeile = ein Punkt)
+                                            <textarea class="form-control" rows="4" value="@string.Join('\n', item.Bullets)" @onchange="e => UpdateBullets(item, e.Value?.ToString())"></textarea>
+                                        </label>
+                                        <button type="button" class="btn btn-sm btn-danger-action" @onclick="() => RemoveWork(i)"><i class="bi bi-trash3"></i> Entfernen</button>
+                                    </div>
+                                }
+                                <button type="button" class="btn btn-sm btn-secondary-action" @onclick="AddWork"><i class="bi bi-plus-circle"></i> Eintrag hinzufuegen</button>
+                                </div>
+                            }
+
+                            @if (ActiveTab == "ausbildung")
+                            {
+                                <div class="tab-content">
+                                <h2>Ausbildung</h2>
+                                @for (var i = 0; i < Vm.CurrentResume.ResumeData.EducationItems.Count; i++)
+                                {
+                                    var item = Vm.CurrentResume.ResumeData.EducationItems[i];
+                                    <div class="list-card">
+                                        <div class="field-grid">
+                                            <label>Schule <InputText class="form-control" @bind-Value="item.School" /></label>
+                                            <label>Abschluss <InputText class="form-control" @bind-Value="item.Degree" /></label>
+                                            <label>Start <InputText class="form-control" @bind-Value="item.StartDate" /></label>
+                                            <label>Ende <InputText class="form-control" @bind-Value="item.EndDate" /></label>
+                                        </div>
+                                        <button type="button" class="btn btn-sm btn-danger-action" @onclick="() => RemoveEducation(i)"><i class="bi bi-trash3"></i> Entfernen</button>
+                                    </div>
+                                }
+                                <button type="button" class="btn btn-sm btn-secondary-action" @onclick="AddEducation"><i class="bi bi-plus-circle"></i> Eintrag hinzufuegen</button>
+                                </div>
+                            }
+
+                            @if (ActiveTab == "kenntnisse")
+                            {
+                                <div class="tab-content">
+                                <h2>Kenntnisse</h2>
+                                @for (var i = 0; i < Vm.CurrentResume.ResumeData.Skills.Count; i++)
+                                {
+                                    var group = Vm.CurrentResume.ResumeData.Skills[i];
+                                    <div class="list-card">
+                                        <div class="field-grid">
+                                            <label>Kategorie <InputText class="form-control" @bind-Value="group.CategoryName" /></label>
+                                            <label>Eintraege (kommagetrennt)
+                                                <input class="form-control" value="@string.Join(", ", group.Items)" @onchange="e => UpdateSkillItems(group, e.Value?.ToString())" />
+                                            </label>
+                                        </div>
+                                        <button type="button" class="btn btn-sm btn-danger-action" @onclick="() => RemoveSkill(i)"><i class="bi bi-trash3"></i> Entfernen</button>
+                                    </div>
+                                }
+                                <button type="button" class="btn btn-sm btn-secondary-action" @onclick="AddSkill"><i class="bi bi-plus-circle"></i> Kategorie hinzufuegen</button>
+                                </div>
+                            }
+
+                            @if (ActiveTab == "hobby")
+                            {
+                                <div class="tab-content">
+                                <h2>Hobbys</h2>
+                                <label>Hobbys (eine Zeile = ein Hobby)
+                                    <textarea class="form-control" rows="8" value="@string.Join('\n', Vm.CurrentResume.ResumeData.Hobbies)" @onchange="e => UpdateHobbies(e.Value?.ToString())"></textarea>
+                                </label>
+                                </div>
+                            }
+                        </EditForm>
+                    }
+                </div>
+            </section>
+
+            <section class="preview-panel">
+                <h2 class="preview-label"><i class="bi bi-eye"></i> Live-Vorschau</h2>
+                <div class="preview-scroll">
+                    <div class="preview-card">
+                        <div class="preview-header">
+                            @if (!string.IsNullOrWhiteSpace(Vm.CurrentResume.ResumeData.Profile.ProfileImageUrl))
+                            {
+                                <img class="profile-image" src="@Vm.CurrentResume.ResumeData.Profile.ProfileImageUrl" alt="Profile image" />
+                            }
+                            <div>
+                                <h3>@Vm.CurrentResume.ResumeData.Profile.FirstName @Vm.CurrentResume.ResumeData.Profile.LastName</h3>
+                                <p class="muted">@Vm.CurrentResume.ResumeData.Profile.Headline</p>
+                            </div>
+                        </div>
+                        <p class="muted">@Vm.CurrentResume.ResumeData.Profile.Email | @Vm.CurrentResume.ResumeData.Profile.Phone | @Vm.CurrentResume.ResumeData.Profile.Location</p>
+                        <p>@Vm.CurrentResume.ResumeData.Profile.Summary</p>
+
+                        <h4>Berufserfahrung</h4>
+                        @if (Vm.CurrentResume.ResumeData.WorkItems.Count == 0)
+                        {
+                            <p class="muted">Keine Eintraege</p>
+                        }
+                        else
+                        {
+                            @foreach (var work in Vm.CurrentResume.ResumeData.WorkItems)
+                            {
+                                <article>
+                                    <strong>@work.Role - @work.Company</strong>
+                                    <div class="muted">@work.StartDate - @work.EndDate</div>
+                                    @if (!string.IsNullOrWhiteSpace(work.Description))
+                                    {
+                                        <p>@work.Description</p>
+                                    }
+                                    @if (work.Bullets.Count > 0)
+                                    {
+                                        <ul>
+                                            @foreach (var bullet in work.Bullets)
+                                            {
+                                                <li>@bullet</li>
+                                            }
+                                        </ul>
+                                    }
+                                </article>
+                            }
+                        }
+
+                        <h4>Ausbildung</h4>
+                        @if (Vm.CurrentResume.ResumeData.EducationItems.Count == 0)
+                        {
+                            <p class="muted">Keine Eintraege</p>
+                        }
+                        else
+                        {
+                            @foreach (var edu in Vm.CurrentResume.ResumeData.EducationItems)
+                            {
+                                <article>
+                                    <strong>@edu.Degree</strong>
+                                    <div>@edu.School</div>
+                                    <div class="muted">@edu.StartDate - @edu.EndDate</div>
+                                </article>
+                            }
+                        }
+
+                        <h4>Kenntnisse</h4>
+                        @if (Vm.CurrentResume.ResumeData.Skills.Count == 0)
+                        {
+                            <p class="muted">Keine Eintraege</p>
+                        }
+                        else
+                        {
+                            @foreach (var skill in Vm.CurrentResume.ResumeData.Skills)
+                            {
+                                <div><strong>@skill.CategoryName:</strong> @string.Join(", ", skill.Items)</div>
+                            }
+                        }
+
+                        <h4>Hobbys</h4>
+                        @if (Vm.CurrentResume.ResumeData.Hobbies.Count == 0)
+                        {
+                            <p class="muted">Keine Eintraege</p>
+                        }
+                        else
+                        {
+                            <p>@string.Join(" | ", Vm.CurrentResume.ResumeData.Hobbies)</p>
+                        }
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <section class="versions-panel">
+            <h2><i class="bi bi-layers"></i> Gespeicherte Varianten</h2>
+            <p class="muted">2. Schritt: Variante speichern. 3. Schritt: Direkt aus Variante exportieren.</p>
+
+            <div class="toolbar-actions" style="margin-bottom:0.75rem;">
+                <label class="pdf-design-selector">
+                    PDF Design
+                    <InputSelect class="form-control" @bind-Value="Vm.AusgewaehltesPdfDesign">
+                        <option value="@PdfDesign.DesignA">Design A (Aktuell)</option>
+                        <option value="@PdfDesign.DesignB">Design B (Live-Vorschau)</option>
+                    </InputSelect>
+                </label>
+                <input class="form-control version-label" placeholder="Variantenname, z.B. SAP Bewerbung" @bind="Vm.VariantenNameEntwurf" />
+                <button class="btn btn-secondary-action" @onclick="VarianteSpeichernAsync" disabled="@Vm.IsBusy"><i class="bi bi-floppy"></i> Variante speichern</button>
+                <button class="btn btn-primary-action" @onclick="ExportArbeitsversionPdfAsync" disabled="@Vm.IsBusy"><i class="bi bi-download"></i> Arbeitsversion PDF</button>
+                <button class="btn btn-primary-action" @onclick="ExportArbeitsversionDocxAsync" disabled="@Vm.IsBusy"><i class="bi bi-download"></i> Arbeitsversion DOCX</button>
+            </div>
+
+            @if (Vm.GespeicherteVarianten.Count == 0)
+            {
+                <p class="muted">Noch keine gespeicherte Variante vorhanden.</p>
+            }
+            else
+            {
+                <div class="versions-list">
+                    @foreach (var variante in Vm.GespeicherteVarianten)
+                    {
+                        <div class="version-item">
+                            <strong><span class='version-badge @VersionBadgeClass(variante.VersionNumber)'>v@variante.VersionNumber</span> @ResumeEditorViewModel.FormatVariantenName(variante)</strong>
+                            <small>@variante.CreatedAtUtc.ToLocalTime().ToString("g")</small>
+                            <div class="toolbar-actions">
+                                <button class="btn btn-sm btn-secondary-action" @onclick="() => VarianteLadenAsync(variante.Id)"><i class="bi bi-pencil-square"></i> Als Arbeitsversion laden</button>
+                                <button class="btn btn-sm btn-primary-action" @onclick="() => ExportVariantePdfAsync(variante)"><i class="bi bi-download"></i> PDF</button>
+                                <button class="btn btn-sm btn-primary-action" @onclick="() => ExportVarianteDocxAsync(variante)"><i class="bi bi-download"></i> DOCX</button>
+                            </div>
+                        </div>
+                    }
+                </div>
+            }
+        </section>
+    </section>
+}
+
+@code {
+    [Parameter]
+    public Guid? Id { get; set; }
+
+    [SupplyParameterFromQuery]
+    public Guid? VersionId { get; set; }
+
+    private string ActiveTab { get; set; } = "profil";
+    private EditContext? _editContext;
+    private ResumeDto? _editModel;
+
+    protected override async Task OnInitializedAsync()
+    {
+        Vm.StateChanged += OnVmStateChanged;
+        await Vm.LoadTemplatesAsync();
+        await TryLoadFromRouteOrLastAsync();
+        EnsureEditContext();
+    }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        if (Id.HasValue && Vm.CurrentResume?.Id != Id.Value)
+        {
+            await Vm.ArbeitsversionLadenAsync(Id.Value);
+            if (VersionId.HasValue)
+            {
+                await Vm.VarianteInEditorLadenAsync(VersionId.Value);
+            }
+            EnsureEditContext();
+        }
+        else if (Id.HasValue && VersionId.HasValue)
+        {
+            await Vm.VarianteInEditorLadenAsync(VersionId.Value);
+            EnsureEditContext();
+        }
+    }
+
+    private async Task TryLoadFromRouteOrLastAsync()
+    {
+        if (Id.HasValue)
+        {
+            await Vm.ArbeitsversionLadenAsync(Id.Value);
+            return;
+        }
+
+        var lastResumeId = await Vm.TryGetLastResumeIdAsync();
+        if (lastResumeId.HasValue)
+        {
+            await Vm.ArbeitsversionLadenAsync(lastResumeId.Value);
+            if (Vm.CurrentResume is not null)
+            {
+                Navigation.NavigateTo($"/arbeitsversion/{Vm.CurrentResume.Id}", replace: true);
+            }
+        }
+    }
+
+    private void EnsureEditContext()
+    {
+        if (Vm.CurrentResume is null)
+        {
+            _editContext = null;
+            _editModel = null;
+            return;
+        }
+
+        if (ReferenceEquals(_editModel, Vm.CurrentResume) && _editContext is not null)
+        {
+            return;
+        }
+
+        if (_editContext is not null)
+        {
+            _editContext.OnFieldChanged -= EditContextOnFieldChanged;
+        }
+
+        _editModel = Vm.CurrentResume;
+        _editContext = new EditContext(_editModel);
+        _editContext.OnFieldChanged += EditContextOnFieldChanged;
+    }
+
+    private void EditContextOnFieldChanged(object? sender, FieldChangedEventArgs e)
+    {
+        Vm.OnEditorChanged();
+    }
+
+    private string TabClass(string tabName) => ActiveTab == tabName ? "active" : string.Empty;
+
+    private static string TemplateIconClass(string templateKey) => templateKey switch
+    {
+        "softwareentwickler" => "bi bi-code-slash",
+        "it-support" => "bi bi-headset",
+        "service-gastro-zustellung" => "bi bi-briefcase",
+        _ => "bi bi-file-earmark-text"
+    };
+
+    private static string VersionBadgeClass(int versionNumber)
+    {
+        var index = (versionNumber - 1) % 3;
+        return index switch
+        {
+            0 => "badge-v1",
+            1 => "badge-v2",
+            _ => "badge-v3"
+        };
+    }
+
+    private async Task NeueArbeitsversionAsync()
+    {
+        var id = await Vm.NeueArbeitsversionErstellenAsync();
+        if (id == Guid.Empty)
+        {
+            return;
+        }
+
+        Navigation.NavigateTo($"/arbeitsversion/{id}");
+    }
+
+    private void OeffneArbeitsversion(Guid resumeId)
+    {
+        Navigation.NavigateTo($"/arbeitsversion/{resumeId}");
+    }
+
+    private async Task VarianteSpeichernAsync()
+    {
+        var variante = await Vm.VarianteSpeichernAsync();
+        if (variante is null)
+        {
+            return;
+        }
+
+        await Js.InvokeVoidAsync("CvStudio.notify", $"Gespeicherte Variante erstellt: {ResumeEditorViewModel.FormatVariantenName(variante)}");
+    }
+
+    private async Task VarianteLadenAsync(Guid variantenId)
+    {
+        await Vm.VarianteInEditorLadenAsync(variantenId);
+        await Js.InvokeVoidAsync("CvStudio.notify", "Variante als Arbeitsversion geladen.");
+    }
+
+    private async Task ExportArbeitsversionPdfAsync()
+    {
+        if (!await ConfirmVariantBeforeExportAsync())
+        {
+            return;
+        }
+
+        var bytes = await Vm.ExportArbeitsversionPdfAsync();
+        if (Vm.CurrentResume is null || bytes.Length == 0)
+        {
+            return;
+        }
+
+        await Js.InvokeVoidAsync("CvStudio.downloadFile", $"arbeitsversion-{Vm.CurrentResume.Id}.pdf", Convert.ToBase64String(bytes), "application/pdf");
+    }
+
+    private async Task ExportArbeitsversionDocxAsync()
+    {
+        if (!await ConfirmVariantBeforeExportAsync())
+        {
+            return;
+        }
+
+        var bytes = await Vm.ExportArbeitsversionDocxAsync();
+        if (Vm.CurrentResume is null || bytes.Length == 0)
+        {
+            return;
+        }
+
+        await Js.InvokeVoidAsync("CvStudio.downloadFile", $"arbeitsversion-{Vm.CurrentResume.Id}.docx", Convert.ToBase64String(bytes), "application/vnd.openxmlformats-officedocument.wordprocessingml.document");
+    }
+
+    private async Task ExportVariantePdfAsync(ResumeVersionDto variante)
+    {
+        var bytes = await Vm.ExportVariantePdfAsync(variante.Id);
+        if (bytes.Length == 0)
+        {
+            return;
+        }
+
+        var name = ResumeEditorViewModel.FormatVariantenName(variante).Replace(' ', '-');
+        await Js.InvokeVoidAsync("CvStudio.downloadFile", $"variante-{name}.pdf", Convert.ToBase64String(bytes), "application/pdf");
+    }
+
+    private async Task ExportVarianteDocxAsync(ResumeVersionDto variante)
+    {
+        var bytes = await Vm.ExportVarianteDocxAsync(variante.Id);
+        if (bytes.Length == 0)
+        {
+            return;
+        }
+
+        var name = ResumeEditorViewModel.FormatVariantenName(variante).Replace(' ', '-');
+        await Js.InvokeVoidAsync("CvStudio.downloadFile", $"variante-{name}.docx", Convert.ToBase64String(bytes), "application/vnd.openxmlformats-officedocument.wordprocessingml.document");
+    }
+
+    private async Task<bool> ConfirmVariantBeforeExportAsync()
+    {
+        var speichern = await Js.InvokeAsync<bool>("confirm", "Moechtest du den aktuellen Stand vor dem Export als gespeicherte Variante sichern?");
+        if (!speichern)
+        {
+            return true;
+        }
+
+        var vorgeschlagen = $"Variante {DateTime.Now:yyyy-MM-dd HH:mm}";
+        var name = await Js.InvokeAsync<string?>("prompt", "Name fuer gespeicherte Variante:", vorgeschlagen);
+        if (name is null)
+        {
+            return false;
+        }
+
+        await Vm.VarianteSpeichernAsync(name);
+        return string.IsNullOrWhiteSpace(Vm.ErrorMessage);
+    }
+
+    private async Task FreshStartAsync()
+    {
+        var confirmed = await Js.InvokeAsync<bool>("confirm", "Alle Arbeitsversionen und gespeicherten Varianten loeschen?");
+        if (!confirmed)
+        {
+            return;
+        }
+
+        await Vm.ResetAllDataAsync();
+        Navigation.NavigateTo("/", replace: true);
+    }
+
+    private void UpdateBullets(CvStudio.Application.Contracts.WorkItemData item, string? input)
+    {
+        item.Bullets = SplitLines(input);
+        Vm.OnEditorChanged();
+    }
+
+    private void UpdateSkillItems(CvStudio.Application.Contracts.SkillGroupData group, string? input)
+    {
+        group.Items = SplitComma(input);
+        Vm.OnEditorChanged();
+    }
+
+    private void UpdateHobbies(string? input)
+    {
+        if (Vm.CurrentResume is null)
+        {
+            return;
+        }
+
+        Vm.CurrentResume.ResumeData.Hobbies = SplitLines(input);
+        Vm.OnEditorChanged();
+    }
+
+    private static List<string> SplitLines(string? input)
+    {
+        return (input ?? string.Empty)
+            .Split('\n', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+            .ToList();
+    }
+
+    private static List<string> SplitComma(string? input)
+    {
+        return (input ?? string.Empty)
+            .Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+            .ToList();
+    }
+
+    private void AddWork()
+    {
+        Vm.CurrentResume?.ResumeData.WorkItems.Add(new CvStudio.Application.Contracts.WorkItemData());
+        Vm.OnEditorChanged();
+    }
+
+    private void RemoveWork(int index)
+    {
+        if (Vm.CurrentResume is null || index < 0 || index >= Vm.CurrentResume.ResumeData.WorkItems.Count)
+        {
+            return;
+        }
+
+        Vm.CurrentResume.ResumeData.WorkItems.RemoveAt(index);
+        Vm.OnEditorChanged();
+    }
+
+    private void AddEducation()
+    {
+        Vm.CurrentResume?.ResumeData.EducationItems.Add(new CvStudio.Application.Contracts.EducationItemData());
+        Vm.OnEditorChanged();
+    }
+
+    private void RemoveEducation(int index)
+    {
+        if (Vm.CurrentResume is null || index < 0 || index >= Vm.CurrentResume.ResumeData.EducationItems.Count)
+        {
+            return;
+        }
+
+        Vm.CurrentResume.ResumeData.EducationItems.RemoveAt(index);
+        Vm.OnEditorChanged();
+    }
+
+    private void AddSkill()
+    {
+        Vm.CurrentResume?.ResumeData.Skills.Add(new CvStudio.Application.Contracts.SkillGroupData());
+        Vm.OnEditorChanged();
+    }
+
+    private void RemoveSkill(int index)
+    {
+        if (Vm.CurrentResume is null || index < 0 || index >= Vm.CurrentResume.ResumeData.Skills.Count)
+        {
+            return;
+        }
+
+        Vm.CurrentResume.ResumeData.Skills.RemoveAt(index);
+        Vm.OnEditorChanged();
+    }
+
+    private void OnVmStateChanged()
+    {
+        EnsureEditContext();
+        InvokeAsync(StateHasChanged);
+    }
+
+    public void Dispose()
+    {
+        Vm.StateChanged -= OnVmStateChanged;
+        if (_editContext is not null)
+        {
+            _editContext.OnFieldChanged -= EditContextOnFieldChanged;
+        }
+    }
+}
+
