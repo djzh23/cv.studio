@@ -11,6 +11,7 @@ public sealed class AtsScoreResult
     public int FormattingScore { get; set; } // 0-10
     public int LanguageScore { get; set; } // 0-5
     public List<string> MatchedKeywords { get; set; } = [];
+    public List<string> MatchedSkillKeywords { get; set; } = [];
     public List<string> MissingKeywords { get; set; } = [];
     public List<string> MissingMustHaveKeywords { get; set; } = [];
     public List<AtsImprovement> Improvements { get; set; } = [];
