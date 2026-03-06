@@ -15,6 +15,7 @@ builder.Services.AddHttpClient<ResumeApiClient>(client =>
     var baseUrl = builder.Configuration[ApiBaseUrlKey] ?? DefaultApiBaseUrl;
     client.BaseAddress = new Uri(baseUrl);
 });
+builder.Services.AddScoped<CvStudio.Application.Services.IAtsScoreService, CvStudio.Application.Services.AtsScoreService>();
 builder.Services.AddScoped<ResumeEditorViewModel>();
 builder.Services.AddScoped<PasscodeGateService>();
 
