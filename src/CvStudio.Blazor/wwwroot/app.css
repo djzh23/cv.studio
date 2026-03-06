@@ -435,12 +435,31 @@ body::before {
     padding-right: 0.3rem;
 }
 
-.tab-nav {
+.editor-toolbar {
+    position: sticky;
+    top: 55px;
+    z-index: 50;
+    background: rgba(250, 247, 242, 0.97);
+    backdrop-filter: blur(8px);
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    margin-bottom: 1.15rem;
+}
+
+.editor-tabs {
     display: flex;
     flex-wrap: wrap;
     gap: 0;
-    border-bottom: 1px solid var(--border);
-    margin-bottom: 1.15rem;
+}
+
+.editor-toolbar-actions {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding-right: 0.35rem;
 }
 
 .tab-btn {
@@ -734,6 +753,18 @@ body::before {
     .toolbar {
         flex-direction: column;
         align-items: flex-start;
+    }
+
+    .editor-toolbar {
+        top: 48px;
+        flex-direction: column;
+        align-items: stretch;
+        padding: 0.4rem 0;
+    }
+
+    .editor-toolbar-actions {
+        flex-wrap: wrap;
+        padding: 0 0.35rem 0.45rem;
     }
 
     .editor-scroll,
