@@ -25,20 +25,19 @@ public sealed class DesignCDocument : IDocument
         {
             page.Size(PageSizes.A4);
             page.Margin(0);
-            page.DefaultTextStyle(x => x
-                .FontFamily("Arial")
-                .FontSize(DesignCStyles.BodyText)
-                .FontColor(DesignCStyles.MainText));
+            page.DefaultTextStyle(x =>
+                x.FontFamily("Arial")
+                 .FontSize(DesignCStyles.BodyText)
+                 .FontColor(DesignCStyles.MainText));
 
             page.Content().Row(row =>
             {
-                row.ConstantItem(168).Background(DesignCStyles.SidebarBg)
-                    .Padding(20)
+                row.ConstantItem(DesignCStyles.SidebarWidth)
+                    .Background(DesignCStyles.SidebarBg)
                     .Column(ComposeSidebar);
 
-                // ATS-REGEL 7: Weißer Hintergrund für Haupttext.
-                row.RelativeItem().Background("#FFFFFF")
-                    .Padding(28)
+                row.RelativeItem()
+                    .Background(DesignCStyles.MainBg)
                     .Column(ComposeMain);
             });
         });
@@ -46,147 +45,228 @@ public sealed class DesignCDocument : IDocument
 
     private void ComposeSidebar(ColumnDescriptor col)
     {
-        // ATS-REGEL 1: Kein Text in Grafiken (Foto ohne Text-Overlay).
-        if (_profileImageBytes is not null)
-        {
-            col.Item().AlignCenter().Width(90).Height(90).Element(c =>
-            {
-                c.Border(1).BorderColor(DesignCStyles.Accent).Padding(2).Image(_profileImageBytes).FitArea();
-            });
-            col.Item().Height(16);
-        }
+        col.Item().Height(20);
+        ComposePhotoWithAccent(col);
+        col.Item().Height(16);
 
-        ComposeSidebarSection(col, "KONTAKT");
-        if (!string.IsNullOrWhiteSpace(_data.Profile.Phone))
-            ComposeSidebarItem(col, _data.Profile.Phone);
-        if (!string.IsNullOrWhiteSpace(_data.Profile.Email))
-            ComposeSidebarItem(col, _data.Profile.Email);
-        if (!string.IsNullOrWhiteSpace(_data.Profile.Location))
-            ComposeSidebarItem(col, _data.Profile.Location);
-
-        var languageGroup = _data.Skills.FirstOrDefault(s =>
-            s.CategoryName.Contains("sprach", StringComparison.OrdinalIgnoreCase));
-        if (languageGroup is not null && languageGroup.Items.Count > 0)
+        ComposeSidebarSectionLabel(col, "\u2709", "CONTACTS");
+        col.Item().PaddingHorizontal(16).Column(inner =>
         {
-            col.Item().Height(DesignCStyles.SectionGap);
-            // ATS-REGEL 2: Sprachen als Plain-Text (keine Punkte-Grafik).
-            ComposeSidebarSection(col, "SPRACHEN");
-            foreach (var language in languageGroup.Items.Where(x => !string.IsNullOrWhiteSpace(x)))
+            if (!string.IsNullOrWhiteSpace(_data.Profile.Phone))
             {
-                col.Item().Text(language.Trim())
+                inner.Item().Text(_data.Profile.Phone.Trim())
                     .FontSize(DesignCStyles.SidebarBody)
                     .FontColor(DesignCStyles.SidebarText);
-                col.Item().Height(3);
+                inner.Item().Height(3);
             }
+
+            if (!string.IsNullOrWhiteSpace(_data.Profile.Email))
+            {
+                inner.Item().Text(_data.Profile.Email.Trim())
+                    .FontSize(DesignCStyles.SidebarBody)
+                    .FontColor(DesignCStyles.SidebarText);
+                inner.Item().Height(3);
+            }
+
+            if (!string.IsNullOrWhiteSpace(_data.Profile.Location))
+            {
+                inner.Item().Text(_data.Profile.Location.Trim())
+                    .FontSize(DesignCStyles.SidebarBody)
+                    .FontColor(DesignCStyles.SidebarText);
+            }
+        });
+
+        col.Item().Height(14);
+
+        if (!string.IsNullOrWhiteSpace(_data.Profile.Summary))
+        {
+            ComposeSidebarSectionLabel(col, "\u2630", "SUMMARY");
+            col.Item().PaddingHorizontal(16)
+                .Text(_data.Profile.Summary.Trim())
+                .FontSize(DesignCStyles.SidebarBody)
+                .FontColor(DesignCStyles.SidebarMuted)
+                .LineHeight(1.4f);
+            col.Item().Height(14);
+        }
+
+        var languages = ResolveLanguages();
+        if (languages.Count > 0)
+        {
+            ComposeSidebarSectionLabel(col, "\u25C9", "LANGUAGES");
+            col.Item().PaddingHorizontal(16).Column(inner =>
+            {
+                foreach (var lang in languages)
+                {
+                    inner.Item().Row(r =>
+                    {
+                        r.RelativeItem()
+                            .Text(lang.Name.ToUpperInvariant())
+                            .FontSize(DesignCStyles.SidebarLabel)
+                            .FontColor(DesignCStyles.SidebarText)
+                            .Bold();
+
+                        r.ConstantItem(52).AlignRight()
+                            .Text(GetLanguageDots(lang.Level))
+                            .FontSize(9)
+                            .FontColor(DesignCStyles.Cyan);
+                    });
+                    inner.Item().Height(4);
+                }
+            });
+            col.Item().Height(14);
         }
 
         var skillGroups = _data.Skills
-            .Where(s => !s.CategoryName.Contains("sprach", StringComparison.OrdinalIgnoreCase))
-            .Where(s => s.Items.Count > 0)
+            .Where(g => !g.CategoryName.Contains("sprach", StringComparison.OrdinalIgnoreCase))
+            .Where(g => g.Items.Count > 0)
             .ToList();
 
         if (skillGroups.Count > 0)
         {
-            col.Item().Height(DesignCStyles.SectionGap);
-            // ATS-REGEL 3: Skills nach Kategorien gruppiert.
-            ComposeSidebarSection(col, "SKILLS");
-            foreach (var group in skillGroups)
+            ComposeSidebarSectionLabel(col, "\u2605", "SKILLS");
+            col.Item().PaddingHorizontal(16).Column(inner =>
             {
-                col.Item().Text(group.CategoryName.Trim())
-                    .FontSize(DesignCStyles.SmallText)
-                    .FontColor(DesignCStyles.Accent)
-                    .Bold();
-                col.Item().Height(2);
+                foreach (var group in skillGroups)
+                {
+                    inner.Item()
+                        .Text(group.CategoryName.Trim())
+                        .FontSize(DesignCStyles.SidebarLabel)
+                        .FontColor(DesignCStyles.SidebarText)
+                        .Bold();
+                    inner.Item().Height(2);
 
-                col.Item().Text(string.Join(" · ", group.Items.Where(x => !string.IsNullOrWhiteSpace(x)).Select(x => x.Trim())))
-                    .FontSize(DesignCStyles.SidebarBody)
-                    .FontColor(DesignCStyles.SidebarText)
-                    .LineHeight(1.3f);
-                col.Item().Height(6);
-            }
+                    var items = group.Items.Where(x => !string.IsNullOrWhiteSpace(x)).Select(x => x.Trim());
+                    inner.Item()
+                        .Text(string.Join(" \u00B7 ", items))
+                        .FontSize(DesignCStyles.SidebarBody)
+                        .FontColor(DesignCStyles.SidebarMuted)
+                        .LineHeight(1.35f);
+                    inner.Item().Height(7);
+                }
+            });
         }
     }
 
-    private static void ComposeSidebarSection(ColumnDescriptor col, string title)
+    private void ComposePhotoWithAccent(ColumnDescriptor col)
     {
-        col.Item().BorderBottom(1).BorderColor(DesignCStyles.Accent).PaddingBottom(3)
-            .Text(title)
-            .FontSize(DesignCStyles.SidebarTitle)
-            .FontColor(DesignCStyles.Accent)
-            .Bold()
-            .LetterSpacing(0.08f);
-        col.Item().Height(6);
+        col.Item().AlignCenter().Width(110).Height(104).Layers(layers =>
+        {
+            // Kleiner cyan Kreis-Akzent unten links am Foto.
+            layers.Layer().AlignLeft().AlignBottom().PaddingLeft(2).PaddingBottom(2)
+                .Text("\u25CF")
+                .FontSize(18)
+                .FontColor(DesignCStyles.Cyan);
+
+            layers.PrimaryLayer().AlignCenter().Width(100).Height(100).Element(container =>
+            {
+                container.Border(1).BorderColor(DesignCStyles.CyanDark).Padding(4);
+                if (_profileImageBytes is not null)
+                {
+                    container.Image(_profileImageBytes).FitArea();
+                }
+                else
+                {
+                    container.Background("#1E3A5F")
+                        .AlignCenter()
+                        .AlignMiddle()
+                        .Text(GetInitials())
+                        .FontSize(28)
+                        .FontColor(DesignCStyles.Cyan)
+                        .Bold();
+                }
+            });
+        });
     }
 
-    private static void ComposeSidebarItem(ColumnDescriptor col, string text)
+    private static void ComposeSidebarSectionLabel(ColumnDescriptor col, string icon, string label)
     {
-        col.Item().Text(text.Trim())
-            .FontSize(DesignCStyles.SmallText)
-            .FontColor(DesignCStyles.SidebarText)
-            .LineHeight(1.3f);
-        col.Item().Height(4);
+        col.Item().PaddingHorizontal(16)
+            .BorderBottom(1).BorderColor(DesignCStyles.Cyan)
+            .PaddingBottom(4)
+            .Row(r =>
+            {
+                r.ConstantItem(14)
+                    .Text(icon)
+                    .FontSize(8)
+                    .FontColor(DesignCStyles.Cyan);
+                r.RelativeItem()
+                    .Text(label)
+                    .FontSize(DesignCStyles.SidebarLabel)
+                    .FontColor(DesignCStyles.Cyan)
+                    .Bold()
+                    .LetterSpacing(0.08f);
+            });
+        col.Item().Height(7);
     }
 
     private void ComposeMain(ColumnDescriptor col)
     {
-        var fullName = $"{_data.Profile.FirstName} {_data.Profile.LastName}".Trim();
-        col.Item().Text(fullName)
-            .FontSize(DesignCStyles.NameSize)
-            .FontColor(DesignCStyles.MainText)
-            .Bold();
-
-        col.Item().Height(6);
-
-        if (!string.IsNullOrWhiteSpace(_data.Profile.Headline))
+        col.Item().Padding(24).Column(inner =>
         {
-            col.Item().Background(DesignCStyles.HeadlineBg).PaddingHorizontal(5).PaddingVertical(3)
-                .Text(_data.Profile.Headline.Trim())
-                .FontSize(DesignCStyles.HeadlineSize)
-                .FontColor(DesignCStyles.HeadlineText)
-                .Bold();
-        }
-
-        col.Item().Height(12);
-
-        if (!string.IsNullOrWhiteSpace(_data.Profile.Summary))
-        {
-            col.Item().Text(_data.Profile.Summary.Trim())
-                .FontSize(DesignCStyles.BodyText)
+            var fullName = $"{_data.Profile.FirstName} {_data.Profile.LastName}".Trim().ToUpperInvariant();
+            inner.Item().Text(fullName)
+                .FontSize(28f)
                 .FontColor(DesignCStyles.MainText)
-                .LineHeight(1.5f);
-            col.Item().Height(DesignCStyles.SectionGap);
-        }
+                .Bold()
+                .LetterSpacing(0.02f);
 
-        if (_data.WorkItems.Count > 0)
-        {
-            // ATS-REGEL 4: Section-Titel als echter Text (keine Grafik).
-            ComposeMainSection(col, "BERUFSERFAHRUNG");
-            foreach (var work in _data.WorkItems)
-            {
-                ComposeWorkItem(col, work);
-            }
-        }
+            inner.Item().Height(6);
 
-        if (_data.EducationItems.Count > 0)
-        {
-            ComposeMainSection(col, "AUSBILDUNG");
-            foreach (var edu in _data.EducationItems)
+            if (!string.IsNullOrWhiteSpace(_data.Profile.Headline))
             {
-                ComposeEducationItem(col, edu);
+                inner.Item()
+                    .Background(DesignCStyles.Cyan)
+                    .PaddingHorizontal(6)
+                    .PaddingVertical(4)
+                    .Text(_data.Profile.Headline.Trim().ToUpperInvariant())
+                    .FontSize(DesignCStyles.HeadlineSize)
+                    .FontColor(DesignCStyles.MainBg)
+                    .Bold()
+                    .LetterSpacing(0.05f);
             }
-        }
+
+            inner.Item().Height(14);
+
+            if (_data.WorkItems.Count > 0)
+            {
+                ComposeMainSection(inner, "\u2630", "EXPERIENCE");
+                foreach (var work in _data.WorkItems)
+                    ComposeWorkItem(inner, work);
+                inner.Item().Height(4);
+            }
+
+            if (_data.EducationItems.Count > 0)
+            {
+                ComposeMainSection(inner, "\u25CE", "EDUCATION");
+                foreach (var edu in _data.EducationItems)
+                    ComposeEduItem(inner, edu);
+                inner.Item().Height(4);
+            }
+
+            if (_data.Projects.Count > 0)
+            {
+                ComposeMainSection(inner, "\u25C8", "PROJECTS");
+                foreach (var project in _data.Projects)
+                    ComposeProjectItem(inner, project);
+            }
+        });
     }
 
-    private static void ComposeMainSection(ColumnDescriptor col, string title)
+    private static void ComposeMainSection(ColumnDescriptor col, string icon, string title)
     {
         col.Item().Row(r =>
         {
+            r.ConstantItem(16)
+                .Text(icon)
+                .FontSize(9)
+                .FontColor(DesignCStyles.Cyan);
             r.RelativeItem()
                 .BorderBottom(1.5f)
-                .BorderColor("#111827")
+                .BorderColor(DesignCStyles.MainText)
                 .PaddingBottom(3)
                 .Text(title)
                 .FontSize(DesignCStyles.SectionTitle)
+                .FontColor(DesignCStyles.MainText)
                 .Bold()
                 .LetterSpacing(0.06f);
         });
@@ -197,19 +277,29 @@ public sealed class DesignCDocument : IDocument
     {
         var (company, location) = SplitByPipe(work.Company);
 
-        // ATS-REGEL 5: Firma links, Datum rechts als getrennte Textspalten.
         col.Item().Row(r =>
         {
-            r.RelativeItem().Text(company).FontSize(DesignCStyles.BodyText).Bold();
-            r.ConstantItem(80).AlignRight().Text(location ?? string.Empty)
-                .FontSize(DesignCStyles.SmallText).FontColor(DesignCStyles.MainMuted);
+            r.RelativeItem()
+                .Text(company)
+                .FontSize(DesignCStyles.BodyText)
+                .FontColor(DesignCStyles.MainText)
+                .Bold();
+            r.ConstantItem(70).AlignRight()
+                .Text(location ?? string.Empty)
+                .FontSize(DesignCStyles.SmallText)
+                .FontColor(DesignCStyles.MainMuted);
         });
 
         col.Item().Row(r =>
         {
-            r.RelativeItem().Text(work.Role).FontSize(DesignCStyles.BodyText).FontColor(DesignCStyles.MainMuted);
-            r.ConstantItem(100).AlignRight().Text(BuildDateRange(work.StartDate, work.EndDate))
-                .FontSize(DesignCStyles.SmallText).FontColor(DesignCStyles.MainMuted);
+            r.RelativeItem()
+                .Text(work.Role)
+                .FontSize(DesignCStyles.SmallText)
+                .FontColor(DesignCStyles.MainMuted);
+            r.ConstantItem(90).AlignRight()
+                .Text(BuildDateRange(work.StartDate, work.EndDate))
+                .FontSize(DesignCStyles.SmallText)
+                .FontColor(DesignCStyles.MainMuted);
         });
 
         col.Item().Height(3);
@@ -220,40 +310,154 @@ public sealed class DesignCDocument : IDocument
             {
                 col.Item().Row(r =>
                 {
-                    // ATS-REGEL 6: Bullet als echtes Zeichen.
-                    r.ConstantItem(DesignCStyles.BulletIndent).Text("•")
-                        .FontSize(DesignCStyles.BodyText).FontColor(DesignCStyles.Accent);
-                    r.RelativeItem().Text(bullet.Trim()).FontSize(DesignCStyles.BodyText).LineHeight(1.4f);
+                    r.ConstantItem(DesignCStyles.BulletIndent)
+                        .Text("\u2022")
+                        .FontSize(DesignCStyles.BodyText)
+                        .FontColor(DesignCStyles.BulletColor);
+                    r.RelativeItem()
+                        .Text(bullet.Trim())
+                        .FontSize(DesignCStyles.BodyText)
+                        .FontColor(DesignCStyles.MainText)
+                        .LineHeight(1.35f);
                 });
                 col.Item().Height(2);
             }
         }
         else if (!string.IsNullOrWhiteSpace(work.Description))
         {
-            col.Item().Text(work.Description.Trim()).FontSize(DesignCStyles.BodyText).LineHeight(1.4f);
+            col.Item().Row(r =>
+            {
+                r.ConstantItem(DesignCStyles.BulletIndent)
+                    .Text("\u2022")
+                    .FontColor(DesignCStyles.BulletColor);
+                r.RelativeItem()
+                    .Text(work.Description.Trim())
+                    .FontSize(DesignCStyles.BodyText)
+                    .LineHeight(1.35f);
+            });
         }
 
         col.Item().Height(DesignCStyles.ItemGap);
     }
 
-    private static void ComposeEducationItem(ColumnDescriptor col, EducationItemData edu)
+    private static void ComposeEduItem(ColumnDescriptor col, EducationItemData edu)
     {
         var (school, location) = SplitByPipe(edu.School);
+
         col.Item().Row(r =>
         {
-            r.RelativeItem().Text(school).FontSize(DesignCStyles.BodyText).Bold();
-            r.ConstantItem(80).AlignRight().Text(location ?? string.Empty)
-                .FontSize(DesignCStyles.SmallText).FontColor(DesignCStyles.MainMuted);
+            r.RelativeItem()
+                .Text(school)
+                .FontSize(DesignCStyles.BodyText)
+                .Bold();
+            r.ConstantItem(70).AlignRight()
+                .Text(location ?? string.Empty)
+                .FontSize(DesignCStyles.SmallText)
+                .FontColor(DesignCStyles.MainMuted);
         });
 
         col.Item().Row(r =>
         {
-            r.RelativeItem().Text(edu.Degree).FontSize(DesignCStyles.BodyText).FontColor(DesignCStyles.MainMuted);
-            r.ConstantItem(100).AlignRight().Text(BuildDateRange(edu.StartDate, edu.EndDate))
-                .FontSize(DesignCStyles.SmallText).FontColor(DesignCStyles.MainMuted);
+            r.RelativeItem()
+                .Text(edu.Degree)
+                .FontSize(DesignCStyles.SmallText)
+                .FontColor(DesignCStyles.MainMuted);
+            r.ConstantItem(90).AlignRight()
+                .Text(BuildDateRange(edu.StartDate, edu.EndDate))
+                .FontSize(DesignCStyles.SmallText)
+                .FontColor(DesignCStyles.MainMuted);
         });
 
         col.Item().Height(DesignCStyles.ItemGap);
+    }
+
+    private static void ComposeProjectItem(ColumnDescriptor col, ResumeProjectItem project)
+    {
+        col.Item().Text(project.Name)
+            .FontSize(DesignCStyles.BodyText)
+            .Bold();
+
+        if (!string.IsNullOrWhiteSpace(project.Description))
+        {
+            col.Item().Row(r =>
+            {
+                r.ConstantItem(DesignCStyles.BulletIndent)
+                    .Text("\u2022")
+                    .FontColor(DesignCStyles.BulletColor);
+                r.RelativeItem()
+                    .Text(project.Description.Trim())
+                    .FontSize(DesignCStyles.BodyText)
+                    .FontColor(DesignCStyles.MainText)
+                    .LineHeight(1.35f);
+            });
+        }
+
+        if (project.Technologies.Count > 0)
+        {
+            var tech = project.Technologies.Where(x => !string.IsNullOrWhiteSpace(x)).Select(x => x.Trim());
+            col.Item().PaddingLeft(DesignCStyles.BulletIndent)
+                .Text(string.Join(" \u00B7 ", tech))
+                .FontSize(DesignCStyles.SmallText)
+                .FontColor(DesignCStyles.CyanDark);
+        }
+
+        col.Item().Height(DesignCStyles.ItemGap);
+    }
+
+    private List<(string Name, string? Level)> ResolveLanguages()
+    {
+        var languageGroup = _data.Skills.FirstOrDefault(s =>
+            s.CategoryName.Contains("sprach", StringComparison.OrdinalIgnoreCase));
+
+        if (languageGroup is null || languageGroup.Items.Count == 0)
+            return [];
+
+        return languageGroup.Items
+            .Where(x => !string.IsNullOrWhiteSpace(x))
+            .Select(ParseLanguage)
+            .ToList();
+    }
+
+    private static (string Name, string? Level) ParseLanguage(string raw)
+    {
+        var value = raw.Trim();
+        var open = value.IndexOf('(');
+        var close = value.IndexOf(')');
+        if (open > 0 && close > open)
+        {
+            var name = value[..open].Trim();
+            var level = value[(open + 1)..close].Trim();
+            return (name, level);
+        }
+
+        var parts = value.Split(' ', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries);
+        if (parts.Length >= 2)
+        {
+            var last = parts[^1];
+            if (last.Length <= 3 || last.Contains('-'))
+                return (string.Join(" ", parts[..^1]), last);
+        }
+
+        return (value, null);
+    }
+
+    private string GetInitials()
+    {
+        var first = _data.Profile.FirstName.FirstOrDefault();
+        var last = _data.Profile.LastName.FirstOrDefault();
+        return $"{first}{last}".ToUpperInvariant();
+    }
+
+    private static string GetLanguageDots(string? level)
+    {
+        return level?.ToLowerInvariant() switch
+        {
+            "c2" or "advanced" or "muttersprache" or "native" => "\u25CF\u25CF\u25CF\u25CF",
+            "c1" or "upper-intermediate" => "\u25CF\u25CF\u25CF\u25CB",
+            "b2" or "intermediate" => "\u25CF\u25CF\u25CB\u25CB",
+            "b1" or "lower-intermediate" => "\u25CF\u25CB\u25CB\u25CB",
+            _ => "\u25CF\u25CF\u25CB\u25CB"
+        };
     }
 
     private static (string Name, string? Location) SplitByPipe(string raw)
@@ -282,7 +486,7 @@ public sealed class DesignCDocument : IDocument
         if (string.IsNullOrWhiteSpace(normalizedStart))
             return normalizedEnd;
 
-        return $"{normalizedStart} – {normalizedEnd}";
+        return $"{normalizedStart} \u2013 {normalizedEnd}";
     }
 
     private static string NormalizeDate(string raw)
@@ -301,9 +505,7 @@ public sealed class DesignCDocument : IDocument
 
         var formats = new[] { "MM/yyyy", "M/yyyy", "MM.yyyy", "M.yyyy", "yyyy-MM", "yyyy" };
         if (DateTime.TryParseExact(value, formats, CultureInfo.InvariantCulture, DateTimeStyles.None, out var dt))
-        {
             return dt.ToString("MM/yyyy", CultureInfo.InvariantCulture);
-        }
 
         return value;
     }
