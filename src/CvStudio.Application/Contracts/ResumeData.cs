@@ -9,6 +9,7 @@ public sealed class ResumeData
 
     public List<WorkItemData> WorkItems { get; set; } = [];
     public List<EducationItemData> EducationItems { get; set; } = [];
+    public List<ResumeProjectItem> Projects { get; set; } = [];
     public List<SkillGroupData> Skills { get; set; } = [];
     public List<string> Hobbies { get; set; } = [];
 }
@@ -91,3 +92,13 @@ public sealed class SkillGroupData
     public List<string> Items { get; set; } = [];
 }
 
+public sealed class ResumeProjectItem
+{
+    [MaxLength(160)]
+    public string Name { get; set; } = string.Empty;
+
+    [MaxLength(2400)]
+    public string Description { get; set; } = string.Empty;
+
+    public List<string> Technologies { get; set; } = [];
+}
