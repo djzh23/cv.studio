@@ -146,7 +146,28 @@ else
                                 <div class="editor-toolbar-actions">
                                     <button class="btn btn-secondary-action" @onclick="ExportArbeitsversionPdfAsync" disabled="@Vm.IsBusy"><i class="bi bi-download"></i> PDF</button>
                                     <button class="btn btn-secondary-action" @onclick="ExportArbeitsversionDocxAsync" disabled="@Vm.IsBusy"><i class="bi bi-download"></i> DOCX</button>
-                                    <button class="btn btn-primary-action" @onclick="VarianteSpeichernAsync" disabled="@Vm.IsBusy"><i class="bi bi-floppy"></i> Variante speichern</button>
+                                    <div class="save-dropdown-container">
+                                        <button class="btn btn-primary-action" @onclick="ToggleSaveDropdown" disabled="@Vm.IsBusy"><i class="bi bi-floppy"></i> Variante speichern</button>
+                                        @if (_showSaveDropdown)
+                                        {
+                                            <div class="save-dropdown">
+                                                <div class="save-dropdown-title">💾 Variante speichern</div>
+                                                <input class="form-control" placeholder="z.B. SAP Bewerbung" @bind="Vm.VariantenNameEntwurf" />
+                                                <label class="pdf-design-selector">
+                                                    PDF-Layout
+                                                    <InputSelect class="form-control" @bind-Value="Vm.AusgewaehltesPdfDesign">
+                                                        <option value="@PdfDesign.DesignA">Design A</option>
+                                                        <option value="@PdfDesign.DesignB">Design B</option>
+                                                    </InputSelect>
+                                                </label>
+                                                <div class="save-dropdown-actions">
+                                                    <button class="btn btn-secondary-action" @onclick="SaveWithoutExportAsync" disabled="@Vm.IsBusy">Speichern ohne Export</button>
+                                                    <button class="btn btn-primary-action" @onclick="SaveAndExportPdfAsync" disabled="@Vm.IsBusy">Speichern + PDF exportieren</button>
+                                                    <button class="btn btn-primary-action" @onclick="SaveAndExportDocxAsync" disabled="@Vm.IsBusy">Speichern + DOCX exportieren</button>
+                                                </div>
+                                            </div>
+                                        }
+                                    </div>
                                 </div>
                             </div>
 
@@ -347,18 +368,6 @@ else
             <h2><i class="bi bi-layers"></i> Gespeicherte Varianten</h2>
             <p class="muted">2. Schritt: Variante speichern. 3. Schritt: Direkt aus Variante exportieren.</p>
 
-            <div class="toolbar-actions" style="margin-bottom:0.75rem;">
-                <label class="pdf-design-selector">
-                    PDF Design
-                    <InputSelect class="form-control" @bind-Value="Vm.AusgewaehltesPdfDesign">
-                        <option value="@PdfDesign.DesignA">Design A (Aktuell)</option>
-                        <option value="@PdfDesign.DesignB">Design B (Live-Vorschau)</option>
-                    </InputSelect>
-                </label>
-                <input class="form-control version-label" placeholder="Variantenname, z.B. SAP Bewerbung" @bind="Vm.VariantenNameEntwurf" />
-                <button class="btn btn-secondary-action" @onclick="VarianteSpeichernAsync" disabled="@Vm.IsBusy"><i class="bi bi-floppy"></i> Variante speichern</button>
-            </div>
-
             @if (Vm.GespeicherteVarianten.Count == 0)
             {
                 <p class="muted">Noch keine gespeicherte Variante vorhanden.</p>
@@ -396,6 +405,7 @@ else
     private ResumeDto? _editModel;
     private bool _accessChecked;
     private bool _bootstrapCompleted;
+    private bool _showSaveDropdown;
 
     protected override async Task OnInitializedAsync()
     {
@@ -551,6 +561,55 @@ else
         }
 
         await Js.InvokeVoidAsync("CvStudio.notify", $"Gespeicherte Variante erstellt: {ResumeEditorViewModel.FormatVariantenName(variante)}");
+    }
+
+    private void ToggleSaveDropdown()
+    {
+        _showSaveDropdown = !_showSaveDropdown;
+    }
+
+    private async Task SaveWithoutExportAsync()
+    {
+        await VarianteSpeichernAsync();
+        _showSaveDropdown = false;
+    }
+
+    private async Task SaveAndExportPdfAsync()
+    {
+        var variante = await Vm.VarianteSpeichernAsync();
+        if (variante is null)
+        {
+            return;
+        }
+
+        var bytes = await Vm.ExportVariantePdfAsync(variante.Id);
+        if (bytes.Length == 0)
+        {
+            return;
+        }
+
+        var name = ResumeEditorViewModel.FormatVariantenName(variante).Replace(' ', '-');
+        await Js.InvokeVoidAsync("CvStudio.downloadFile", $"variante-{name}.pdf", Convert.ToBase64String(bytes), "application/pdf");
+        _showSaveDropdown = false;
+    }
+
+    private async Task SaveAndExportDocxAsync()
+    {
+        var variante = await Vm.VarianteSpeichernAsync();
+        if (variante is null)
+        {
+            return;
+        }
+
+        var bytes = await Vm.ExportVarianteDocxAsync(variante.Id);
+        if (bytes.Length == 0)
+        {
+            return;
+        }
+
+        var name = ResumeEditorViewModel.FormatVariantenName(variante).Replace(' ', '-');
+        await Js.InvokeVoidAsync("CvStudio.downloadFile", $"variante-{name}.docx", Convert.ToBase64String(bytes), "application/vnd.openxmlformats-officedocument.wordprocessingml.document");
+        _showSaveDropdown = false;
     }
 
     private async Task VarianteLadenAsync(Guid variantenId)
