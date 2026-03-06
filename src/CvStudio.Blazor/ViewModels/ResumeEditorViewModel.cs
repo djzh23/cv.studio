@@ -41,8 +41,8 @@ public sealed class ResumeEditorViewModel : IDisposable
     public bool HasUnsavedChanges { get; private set; }
     public PdfDesign AusgewaehltesPdfDesign { get; set; } = PdfDesign.DesignA;
     public string AktivKontextText => AktiveVariante is null
-        ? "Du bearbeitest: Arbeitsversion"
-        : $"Du bearbeitest: Gespeicherte Variante {FormatVariantenName(AktiveVariante)}";
+        ? "Arbeitsversion"
+        : $"Gespeicherte Variante {FormatVariantenName(AktiveVariante)}";
 
     public string AutoSaveText
     {
@@ -480,4 +480,3 @@ public sealed class ResumeEditorViewModel : IDisposable
         }
     }
 }
-
