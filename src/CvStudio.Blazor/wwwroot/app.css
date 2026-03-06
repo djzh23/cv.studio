@@ -985,6 +985,19 @@ body::before {
     font-weight: 700;
 }
 
+.keyword-chip-skill {
+    background: #eff6ff;
+    color: #1d4ed8;
+    border: 1px solid #bfdbfe;
+    font-weight: 700;
+}
+
+.keyword-chip-info {
+    background: #f5f0e8;
+    color: #6b7280;
+    border: 1px solid #e8e0d4;
+}
+
 .ats-improvement-item {
     display: flex;
     gap: 0.75rem;

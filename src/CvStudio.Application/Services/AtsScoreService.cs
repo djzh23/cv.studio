@@ -87,6 +87,7 @@ public sealed class AtsScoreService : IAtsScoreService
             .Where(t => !cvText.Contains(t, StringComparison.OrdinalIgnoreCase))
             .Take(40)
             .ToList();
+        result.MatchedSkillKeywords = BuildMatchedSkillKeywords(catalog, result.MatchedKeywords);
 
         var mustHaveMatched = profile.RequiredSkillKeywords
             .Where(k => cvText.Contains(k, StringComparison.OrdinalIgnoreCase))
@@ -148,6 +149,16 @@ public sealed class AtsScoreService : IAtsScoreService
 
         var ratio = scoreWeight / totalWeight;
         return (int)Math.Min(25, Math.Round(ratio * 25, MidpointRounding.AwayFromZero));
+    }
+
+    private static List<string> BuildMatchedSkillKeywords(IReadOnlyList<SkillDefinition> catalog, IReadOnlyCollection<string> matchedKeywords)
+    {
+        var matchedSet = matchedKeywords.ToHashSet(StringComparer.OrdinalIgnoreCase);
+        return catalog
+            .Where(skill => skill.Variants.Any(v => matchedSet.Contains(v)))
+            .Select(skill => skill.Name)
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .ToList();
     }
 
     private static int CalcEvidenceScore(ResumeData resume, CategoryProfile profile, string cvText)
