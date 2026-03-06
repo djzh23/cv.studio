@@ -139,7 +139,7 @@ public sealed class DesignCDocument : IDocument
 
         if (!string.IsNullOrWhiteSpace(_data.Profile.Headline))
         {
-            col.Item().Background(DesignCStyles.HeadlineBg).Padding(5, 3)
+            col.Item().Background(DesignCStyles.HeadlineBg).PaddingHorizontal(5).PaddingVertical(3)
                 .Text(_data.Profile.Headline.Trim())
                 .FontSize(DesignCStyles.HeadlineSize)
                 .FontColor(DesignCStyles.HeadlineText)
