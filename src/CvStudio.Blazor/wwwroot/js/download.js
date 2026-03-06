@@ -35,4 +35,5 @@ window.CvStudio = {
     }
 };
 
+// Backward compatibility for older calls.
 window.resumeVersioner = window.CvStudio;
