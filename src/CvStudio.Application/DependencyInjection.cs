@@ -12,6 +12,7 @@ public static class DependencyInjection
         services.AddScoped<IPdfExportService, PdfExportService>();
         services.AddScoped<IDocxExportService, DocxExportService>();
         services.AddScoped<IAtsScoreService, AtsScoreService>();
+        services.AddScoped<IResumeAtsAnalyzer, ResumeAtsAnalyzer>();
 
         return services;
     }
