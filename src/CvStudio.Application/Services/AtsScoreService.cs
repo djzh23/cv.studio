@@ -42,20 +42,20 @@ public sealed class AtsScoreService : IAtsScoreService
             ? DetectCategory(jobDescription)
             : category;
 
+        var profile = CategoryProfiles.Get(effectiveCategory);
+
         var result = new AtsScoreResult
         {
             KeywordScore = CalcKeywords(resume, jobDescription),
             CompletenessScore = CalcCompleteness(resume),
             FormattingScore = CalcFormatting(resume),
-            LanguageScore = CalcLanguage(resume)
+            LanguageScore = CalcLanguage(resume, profile)
         };
 
         result.Score = Math.Min(100, result.KeywordScore + result.CompletenessScore + result.FormattingScore + result.LanguageScore);
         result.MatchedKeywords = GetMatchedKeywords(resume, jobDescription);
         result.MissingKeywords = GetMissingKeywords(resume, jobDescription, result.MatchedKeywords);
-        result.Improvements = BuildImprovements(result, resume);
-
-        _ = effectiveCategory;
+        result.Improvements = BuildImprovements(result, resume, profile, effectiveCategory);
         return result;
     }
 
@@ -190,29 +190,23 @@ public sealed class AtsScoreService : IAtsScoreService
         return Math.Min(20, score);
     }
 
-    private static int CalcLanguage(ResumeData cv)
+    private static int CalcLanguage(ResumeData cv, CategoryProfile profile)
     {
         var score = 0;
         var cvText = GetAllCvText(cv);
 
-        string[] strongVerbs =
-        [
-            "entwickelt", "koordiniert", "implementiert", "optimiert", "verantwortlich", "durchgeführt",
-            "erreicht", "verbessert", "geleitet", "aufgebaut", "designed", "managed", "delivered", "reduced"
-        ];
-
-        if (strongVerbs.Any(v => cvText.Contains(v, StringComparison.OrdinalIgnoreCase)))
+        if (profile.StrongVerbs.Any(v => cvText.Contains(v, StringComparison.OrdinalIgnoreCase)))
         {
             score += 5;
         }
 
-        if (Regex.IsMatch(cvText, @"\d+\s*(%|euro|€|kunden|nutzer|team)", RegexOptions.IgnoreCase))
+        var hasMetrics = profile.MetricPatterns.Any(pattern => Regex.IsMatch(cvText, pattern, RegexOptions.IgnoreCase));
+        if (hasMetrics)
         {
             score += 5;
         }
 
-        string[] genericPhrases = ["teamfähig", "motiviert", "kommunikativ", "flexibel", "zuverlässig"];
-        var genericCount = genericPhrases.Count(p => cvText.Contains(p, StringComparison.OrdinalIgnoreCase));
+        var genericCount = profile.GenericPhrases.Count(p => cvText.Contains(p, StringComparison.OrdinalIgnoreCase));
         if (genericCount <= 1)
         {
             score += 5;
@@ -248,21 +242,43 @@ public sealed class AtsScoreService : IAtsScoreService
             .ToList();
     }
 
-    private static List<AtsImprovement> BuildImprovements(AtsScoreResult result, ResumeData resume)
+    private static List<AtsImprovement> BuildImprovements(
+        AtsScoreResult result,
+        ResumeData resume,
+        CategoryProfile profile,
+        JobCategory category)
     {
         var improvements = new List<AtsImprovement>();
 
         if (result.KeywordScore < 28)
         {
-            improvements.Add(new AtsImprovement
+            var missing = result.MissingKeywords.Take(5).ToList();
+            var techMissing = missing
+                .Where(k => profile.RequiredSkillKeywords.Contains(k, StringComparer.OrdinalIgnoreCase))
+                .ToList();
+            var otherMissing = missing.Except(techMissing, StringComparer.OrdinalIgnoreCase).ToList();
+
+            if (techMissing.Count > 0)
             {
-                Category = "Keywords",
-                Issue = "Wichtige Keywords aus der Stellenbeschreibung fehlen.",
-                Suggestion = result.MissingKeywords.Count > 0
-                    ? $"Füge relevante Begriffe ein: {string.Join(", ", result.MissingKeywords.Take(4))}."
-                    : "Ergänze fehlende Fachbegriffe im Profil und in der Berufserfahrung.",
-                Priority = "Hoch"
-            });
+                improvements.Add(new AtsImprovement
+                {
+                    Category = "Keywords",
+                    Issue = "Wichtige Fachbegriffe fehlen.",
+                    Suggestion = $"Ergänze: {string.Join(", ", techMissing)}. {profile.SkillsHint}",
+                    Priority = "Hoch"
+                });
+            }
+
+            if (otherMissing.Count > 0)
+            {
+                improvements.Add(new AtsImprovement
+                {
+                    Category = "Keywords",
+                    Issue = "Weitere Begriffe aus der Stelle fehlen.",
+                    Suggestion = $"Erwähne: {string.Join(", ", otherMissing)}",
+                    Priority = "Mittel"
+                });
+            }
         }
 
         if (result.CompletenessScore < 18)
@@ -271,7 +287,7 @@ public sealed class AtsScoreService : IAtsScoreService
             {
                 Category = "Vollständigkeit",
                 Issue = "Der CV ist in zentralen Bereichen unvollständig.",
-                Suggestion = "Ergänze Kontaktdaten, eine aussagekräftige Zusammenfassung sowie Berufs- und Ausbildungsstationen.",
+                Suggestion = profile.SummaryHint,
                 Priority = "Hoch"
             });
         }
@@ -282,30 +298,20 @@ public sealed class AtsScoreService : IAtsScoreService
             {
                 Category = "Formatierung",
                 Issue = "Struktur und Datumsangaben sind nicht konsistent genug.",
-                Suggestion = "Nutze konsistente Datumsformate (MM/YYYY) und Bullet-Points pro Station.",
+                Suggestion = profile.ExperienceHint,
                 Priority = "Mittel"
             });
         }
 
-        if (result.LanguageScore < 10)
+        var summaryLen = resume.Profile.Summary?.Length ?? 0;
+        if (summaryLen < 100)
         {
             improvements.Add(new AtsImprovement
             {
-                Category = "Sprache",
-                Issue = "Aussagen sind zu generisch oder enthalten zu wenige Kennzahlen.",
-                Suggestion = "Nutze stärkere Verben und ergänze messbare Ergebnisse (%, Anzahl, Zeitersparnis).",
-                Priority = "Mittel"
-            });
-        }
-
-        if (improvements.Count == 0)
-        {
-            improvements.Add(new AtsImprovement
-            {
-                Category = "Gesamt",
-                Issue = "Dein CV ist bereits ATS-freundlich aufgebaut.",
-                Suggestion = "Feinschliff: passe Keywords noch enger auf die konkrete Stellenbeschreibung an.",
-                Priority = "Niedrig"
+                Category = "Zusammenfassung",
+                Issue = $"Zusammenfassung zu kurz ({summaryLen} Zeichen).",
+                Suggestion = profile.SummaryHint,
+                Priority = summaryLen < 50 ? "Hoch" : "Mittel"
             });
         }
 
@@ -315,13 +321,76 @@ public sealed class AtsScoreService : IAtsScoreService
             {
                 Category = "Berufserfahrung",
                 Issue = "Keine Berufserfahrung eingetragen.",
-                Suggestion = "Füge mindestens eine relevante Station hinzu.",
+                Suggestion = profile.ExperienceHint,
                 Priority = "Hoch"
             });
         }
+        else if (result.LanguageScore < 10)
+        {
+            improvements.Add(new AtsImprovement
+            {
+                Category = "Berufserfahrung",
+                Issue = "Beschreibungen zu generisch.",
+                Suggestion = profile.ExperienceHint,
+                Priority = "Mittel"
+            });
+        }
 
-        return improvements;
+        var cvText = GetAllCvText(resume);
+        var missingRequired = profile.RequiredSkillKeywords
+            .Where(k => !cvText.Contains(k, StringComparison.OrdinalIgnoreCase))
+            .Take(3)
+            .ToList();
+        if (missingRequired.Count > 0)
+        {
+            improvements.Add(new AtsImprovement
+            {
+                Category = "Pflicht-Skills",
+                Issue = $"Typische Skills für {CategoryLabel(category)} fehlen.",
+                Suggestion = $"Ergänze in Kenntnisse: {string.Join(", ", missingRequired)}",
+                Priority = "Mittel"
+            });
+        }
+
+        if (string.IsNullOrWhiteSpace(resume.Profile.ProfileImageUrl))
+        {
+            improvements.Add(new AtsImprovement
+            {
+                Category = "Profil",
+                Issue = "Kein Profilbild hinterlegt.",
+                Suggestion = "In Deutschland wird ein Bewerbungsfoto erwartet.",
+                Priority = "Niedrig"
+            });
+        }
+
+        if (!improvements.Any(i => i.Priority == "Hoch"))
+        {
+            improvements.Add(new AtsImprovement
+            {
+                Category = "Gesamt",
+                Issue = "CV ist bereits gut aufgebaut.",
+                Suggestion = "Passe Keywords noch enger auf diese konkrete Stelle an.",
+                Priority = "Niedrig"
+            });
+        }
+
+        return improvements
+            .OrderBy(i => i.Priority switch
+            {
+                "Hoch" => 0,
+                "Mittel" => 1,
+                "Niedrig" => 2,
+                _ => 3
+            })
+            .ToList();
     }
+
+    private static string CategoryLabel(JobCategory category) => category switch
+    {
+        JobCategory.SoftwareEntwickler => "Software-Entwicklung",
+        JobCategory.ItSupport => "IT-Support",
+        _ => "Service / Logistik"
+    };
 
     private static string GetAllCvText(ResumeData cv)
     {
