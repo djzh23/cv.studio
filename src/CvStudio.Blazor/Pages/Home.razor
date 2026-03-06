@@ -152,7 +152,13 @@ else
                                     <button type="button" class='tab-btn @TabClass("hobby")' @onclick='() => ActiveTab = "hobby"'><i class="bi bi-heart"></i> Hobbys</button>
                                 </div>
                                 <div class="editor-toolbar-actions">
-                                    <button class="btn btn-export-pdf" @onclick="ExportArbeitsversionPdfAsync" disabled="@Vm.IsBusy"><i class="bi bi-download"></i> PDF</button>
+                                    <div class="export-group">
+                                        <InputSelect class="design-select" @bind-Value="Vm.AusgewaehltesPdfDesign">
+                                            <option value="@PdfDesign.DesignA">Design A</option>
+                                            <option value="@PdfDesign.DesignB">Design B</option>
+                                        </InputSelect>
+                                        <button class="btn btn-export-pdf btn-md" @onclick="ExportArbeitsversionPdfAsync" disabled="@Vm.IsBusy"><i class="bi bi-download"></i> PDF</button>
+                                    </div>
                                     <button class="btn btn-export-docx" @onclick="ExportArbeitsversionDocxAsync" disabled="@Vm.IsBusy"><i class="bi bi-download"></i> DOCX</button>
                                     <div class="save-dropdown-container">
                                         <button class="btn btn-primary" @onclick="ToggleSaveDropdown" disabled="@Vm.IsBusy"><i class="bi bi-floppy"></i> Variante speichern</button>
@@ -161,13 +167,6 @@ else
                                             <div class="save-dropdown">
                                                 <div class="save-dropdown-title">Variante speichern</div>
                                                 <input class="form-control" placeholder="z.B. SAP Bewerbung" @bind="Vm.VariantenNameEntwurf" />
-                                                <label class="pdf-design-selector">
-                                                    PDF-Layout
-                                                    <InputSelect class="form-control" @bind-Value="Vm.AusgewaehltesPdfDesign">
-                                                        <option value="@PdfDesign.DesignA">Design A</option>
-                                                        <option value="@PdfDesign.DesignB">Design B</option>
-                                                    </InputSelect>
-                                                </label>
                                                 <div class="save-dropdown-actions">
                                                     <button class="btn btn-secondary" @onclick="SaveWithoutExportAsync" disabled="@Vm.IsBusy">Speichern ohne Export</button>
                                                     <button class="btn btn-primary" @onclick="SaveAndExportPdfAsync" disabled="@Vm.IsBusy">Speichern + PDF exportieren</button>
