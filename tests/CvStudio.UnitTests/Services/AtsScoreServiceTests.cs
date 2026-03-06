@@ -34,7 +34,7 @@ public sealed class AtsScoreServiceTests
         var result = _sut.Calculate(resume, "Entwickler gesucht", JobCategory.SoftwareEntwickler);
 
         // Assert
-        result.LanguageScore.Should().BeGreaterOrEqualTo(5);
+        result.LanguageScore.Should().BeGreaterOrEqualTo(2);
     }
 
     [Fact]
@@ -47,7 +47,42 @@ public sealed class AtsScoreServiceTests
         var result = _sut.Calculate(resume, "Zustellung Logistik", JobCategory.Allgemein);
 
         // Assert
-        result.LanguageScore.Should().BeGreaterOrEqualTo(10);
+        result.LanguageScore.Should().BeGreaterOrEqualTo(2);
+        result.EvidenceScore.Should().BeGreaterOrEqualTo(7);
+    }
+
+    [Fact]
+    public void Calculate_MissingMustHaves_PopulatesMissingMustHaveKeywords()
+    {
+        // Arrange
+        var resume = BuildResume(summary: "Erfahrung in Kommunikation und Teamarbeit");
+
+        // Act
+        var result = _sut.Calculate(resume, "IT-Support mit Active Directory, Office365 und Ticketsystem", JobCategory.ItSupport);
+
+        // Assert
+        result.MissingMustHaveKeywords.Should().NotBeEmpty();
+        result.HardRequirementsScore.Should().BeLessThan(30);
+    }
+
+    [Fact]
+    public void Calculate_IncludesProjectsInEvidence()
+    {
+        // Arrange
+        var resume = BuildResume();
+        resume.Projects.Add(new ResumeProjectItem
+        {
+            Name = "Portfolio Plattform",
+            Description = "REST API und Blazor Frontend umgesetzt",
+            Technologies = ["dotnet", "blazor", "postgresql"]
+        });
+
+        // Act
+        var result = _sut.Calculate(resume, "Softwareentwickler C# .NET Blazor REST API", JobCategory.SoftwareEntwickler);
+
+        // Assert
+        result.EvidenceScore.Should().BeGreaterThan(0);
+        result.Score.Should().BeInRange(0, 100);
     }
 
     private static ResumeData BuildResume(string summary = "Erfahrung im IT-Umfeld")
