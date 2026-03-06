@@ -317,23 +317,3 @@ public sealed class AtsScoreService : IAtsScoreService
         return normalized.Split(' ', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
     }
 }
-
-public sealed class AtsScoreResult
-{
-    public int Score { get; set; }
-    public int KeywordScore { get; set; }
-    public int CompletenessScore { get; set; }
-    public int FormattingScore { get; set; }
-    public int LanguageScore { get; set; }
-    public List<string> MatchedKeywords { get; set; } = [];
-    public List<string> MissingKeywords { get; set; } = [];
-    public List<AtsImprovement> Improvements { get; set; } = [];
-}
-
-public sealed class AtsImprovement
-{
-    public string Category { get; set; } = string.Empty;
-    public string Issue { get; set; } = string.Empty;
-    public string Suggestion { get; set; } = string.Empty;
-    public string Priority { get; set; } = "Mittel";
-}
