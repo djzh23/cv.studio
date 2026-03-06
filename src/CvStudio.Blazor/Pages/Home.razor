@@ -135,12 +135,19 @@ else
                             <DataAnnotationsValidator />
                             <ValidationSummary />
 
-                            <div class="tab-nav">
-                                <button type="button" class='tab-btn @TabClass("profil")' @onclick='() => ActiveTab = "profil"'><i class="bi bi-person"></i> Profil</button>
-                                <button type="button" class='tab-btn @TabClass("beruf")' @onclick='() => ActiveTab = "beruf"'><i class="bi bi-building"></i> Beruf</button>
-                                <button type="button" class='tab-btn @TabClass("ausbildung")' @onclick='() => ActiveTab = "ausbildung"'><i class="bi bi-mortarboard"></i> Ausbildung</button>
-                                <button type="button" class='tab-btn @TabClass("kenntnisse")' @onclick='() => ActiveTab = "kenntnisse"'><i class="bi bi-tools"></i> Kenntnisse</button>
-                                <button type="button" class='tab-btn @TabClass("hobby")' @onclick='() => ActiveTab = "hobby"'><i class="bi bi-heart"></i> Hobbys</button>
+                            <div class="editor-toolbar">
+                                <div class="editor-tabs">
+                                    <button type="button" class='tab-btn @TabClass("profil")' @onclick='() => ActiveTab = "profil"'><i class="bi bi-person"></i> Profil</button>
+                                    <button type="button" class='tab-btn @TabClass("beruf")' @onclick='() => ActiveTab = "beruf"'><i class="bi bi-building"></i> Beruf</button>
+                                    <button type="button" class='tab-btn @TabClass("ausbildung")' @onclick='() => ActiveTab = "ausbildung"'><i class="bi bi-mortarboard"></i> Ausbildung</button>
+                                    <button type="button" class='tab-btn @TabClass("kenntnisse")' @onclick='() => ActiveTab = "kenntnisse"'><i class="bi bi-tools"></i> Kenntnisse</button>
+                                    <button type="button" class='tab-btn @TabClass("hobby")' @onclick='() => ActiveTab = "hobby"'><i class="bi bi-heart"></i> Hobbys</button>
+                                </div>
+                                <div class="editor-toolbar-actions">
+                                    <button class="btn btn-secondary-action" @onclick="ExportArbeitsversionPdfAsync" disabled="@Vm.IsBusy"><i class="bi bi-download"></i> PDF</button>
+                                    <button class="btn btn-secondary-action" @onclick="ExportArbeitsversionDocxAsync" disabled="@Vm.IsBusy"><i class="bi bi-download"></i> DOCX</button>
+                                    <button class="btn btn-primary-action" @onclick="VarianteSpeichernAsync" disabled="@Vm.IsBusy"><i class="bi bi-floppy"></i> Variante speichern</button>
+                                </div>
                             </div>
 
                             @if (ActiveTab == "profil")
@@ -350,8 +357,6 @@ else
                 </label>
                 <input class="form-control version-label" placeholder="Variantenname, z.B. SAP Bewerbung" @bind="Vm.VariantenNameEntwurf" />
                 <button class="btn btn-secondary-action" @onclick="VarianteSpeichernAsync" disabled="@Vm.IsBusy"><i class="bi bi-floppy"></i> Variante speichern</button>
-                <button class="btn btn-primary-action" @onclick="ExportArbeitsversionPdfAsync" disabled="@Vm.IsBusy"><i class="bi bi-download"></i> Arbeitsversion PDF</button>
-                <button class="btn btn-primary-action" @onclick="ExportArbeitsversionDocxAsync" disabled="@Vm.IsBusy"><i class="bi bi-download"></i> Arbeitsversion DOCX</button>
             </div>
 
             @if (Vm.GespeicherteVarianten.Count == 0)
