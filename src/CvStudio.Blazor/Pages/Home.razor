@@ -33,19 +33,28 @@ else if (Vm.CurrentResume is null)
         <h1>CvStudio</h1>
         <p>1) Vorlage waehlen. 2) Arbeitsversion erstellen. 3) Varianten speichern und exportieren.</p>
 
-        <div class="template-grid">
-            @foreach (var vorlage in Vm.Vorlagen)
-            {
-                <button type="button"
-                        class='template-card @(Vm.GewaehlteVorlage == vorlage.Key ? "active" : string.Empty)'
-                        @onclick='() => Vm.GewaehlteVorlage = vorlage.Key'
-                        disabled="@Vm.IsBusy">
-                    <i class="@TemplateIconClass(vorlage.Key) template-icon"></i>
-                    <strong>@vorlage.DisplayName</strong>
-                    <span>@vorlage.Description</span>
-                </button>
-            }
-        </div>
+        @if (Vm.Vorlagen.Count == 0)
+        {
+            <div class="alert alert-warning" role="alert">
+                Vorlagen konnten aktuell nicht geladen werden. Bitte erneut versuchen.
+            </div>
+        }
+        else
+        {
+            <div class="template-grid">
+                @foreach (var vorlage in Vm.Vorlagen)
+                {
+                    <button type="button"
+                            class='template-card @(Vm.GewaehlteVorlage == vorlage.Key ? "active" : string.Empty)'
+                            @onclick='() => Vm.GewaehlteVorlage = vorlage.Key'
+                            disabled="@Vm.IsBusy">
+                        <i class="@TemplateIconClass(vorlage.Key) template-icon"></i>
+                        <strong>@vorlage.DisplayName</strong>
+                        <span>@vorlage.Description</span>
+                    </button>
+                }
+            </div>
+        }
 
         @if (!string.IsNullOrWhiteSpace(Vm.ErrorMessage))
         {
@@ -53,6 +62,7 @@ else if (Vm.CurrentResume is null)
         }
 
         <div class="toolbar-actions">
+            <button class="btn btn-secondary" @onclick="ReloadTemplatesAsync" disabled="@Vm.IsBusy"><i class="bi bi-arrow-repeat"></i> Vorlagen neu laden</button>
             <button class="btn btn-primary" @onclick="NeueArbeitsversionAsync" disabled="@Vm.IsBusy"><i class="bi bi-plus-circle"></i> Arbeitsversion erstellen</button>
             <button class="btn btn-danger" @onclick="FreshStartAsync" disabled="@Vm.IsBusy"><i class="bi bi-trash3"></i> Fresh Start</button>
         </div>
@@ -83,7 +93,7 @@ else
                 <h1>@Vm.CurrentResume.Title</h1>
                 <small class="header-meta-row">
                     <span><i class="bi bi-pencil-square"></i> Du bearbeitest: @Vm.AktivKontextText</span>
-                    <span class="meta-dot">•</span>
+                    <span class="meta-dot">&bull;</span>
                     <span class="autosave-state"><span class="autosave-dot"></span>@Vm.AutoSaveText</span>
                 </small>
                 <small class="mono-meta">Arbeitsversion-ID: @Vm.CurrentResume.Id</small>
@@ -149,7 +159,7 @@ else
                                         @if (_showSaveDropdown)
                                         {
                                             <div class="save-dropdown">
-                                                <div class="save-dropdown-title">💾 Variante speichern</div>
+                                                <div class="save-dropdown-title">Variante speichern</div>
                                                 <input class="form-control" placeholder="z.B. SAP Bewerbung" @bind="Vm.VariantenNameEntwurf" />
                                                 <label class="pdf-design-selector">
                                                     PDF-Layout
@@ -546,6 +556,12 @@ else
         }
 
         Navigation.NavigateTo($"/arbeitsversion/{id}");
+    }
+
+    private async Task ReloadTemplatesAsync()
+    {
+        await Vm.LoadTemplatesAsync();
+        await InvokeAsync(StateHasChanged);
     }
 
     private void OeffneArbeitsversion(Guid resumeId)

@@ -160,13 +160,30 @@ else
 
         if (!_pageInitialized)
         {
-            _pageInitialized = true;
-            Arbeitsversionen = (await Api.ListResumesAsync()).ToList();
-            if (ResumeId.HasValue)
+            try
             {
-                await LoadArbeitsversionAsync(ResumeId.Value);
+                IsBusy = true;
+                ErrorMessage = null;
+
+                Arbeitsversionen = (await Api.ListResumesAsync()).ToList();
+                if (ResumeId.HasValue)
+                {
+                    await LoadArbeitsversionAsync(ResumeId.Value);
+                }
+                _pageInitialized = true;
             }
+            catch (Exception ex)
+            {
+                _pageInitialized = false;
+                ErrorMessage = ex.Message;
+            }
+            finally
+            {
+                IsBusy = false;
+            }
+
             await InvokeAsync(StateHasChanged);
+            return;
         }
 
         if (!firstRender)
