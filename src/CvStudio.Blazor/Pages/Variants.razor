@@ -30,7 +30,7 @@ else
 <section class="resume-shell">
     <header class="toolbar">
         <div class="toolbar-left">
-            <h1>Gespeicherte Varianten verwalten</h1>
+            <h1>Gespeicherte Varianten</h1>
             <small>@(CurrentArbeitsversionTitle ?? "Arbeitsversion waehlen")</small>
             @if (ActiveArbeitsversionId.HasValue)
             {
@@ -52,8 +52,8 @@ else
                     <option value="@arbeitsversion.Id">@arbeitsversion.Title (@arbeitsversion.UpdatedAtUtc.ToLocalTime().ToString("g"))</option>
                 }
             </select>
-            <button class="btn btn-primary-action" @onclick="LoadSelectedAsync" disabled="@IsBusy"><i class="bi bi-arrow-repeat"></i> Laden</button>
-            <button class="btn btn-secondary-action" @onclick="GoEditorAsync"><i class="bi bi-pencil-square"></i> Zur Arbeitsversion</button>
+            <button class="btn btn-secondary" @onclick="LoadSelectedAsync" disabled="@IsBusy"><i class="bi bi-arrow-repeat"></i> Laden</button>
+            <button class="btn btn-secondary" @onclick="GoEditorAsync"><i class="bi bi-arrow-return-left"></i> Zur Arbeitsversion</button>
         </div>
     </header>
 
@@ -96,18 +96,18 @@ else
                 @foreach (var variante in Varianten)
                 {
                     <tr>
-                        <td><span class='version-badge @VersionBadgeClass(variante.VersionNumber)'>v@variante.VersionNumber</span></td>
+                        <td><span class='version-badge @VersionBadgeClass(variante.VersionNumber)'>v@DisplayVersionNumber(variante.VersionNumber)</span></td>
                         <td style="min-width: 280px;">
                             <input class="form-control" @bind="variante.Label" />
                         </td>
                         <td>@variante.CreatedAtUtc.ToLocalTime().ToString("g")</td>
                         <td>
-                            <div class="toolbar-actions">
-                                <button class="btn btn-sm btn-secondary-action" @onclick="() => AlsArbeitsversionLadenAsync(variante)"><i class="bi bi-pencil-square"></i> Als Arbeitsversion laden</button>
-                                <button class="btn btn-sm btn-secondary-action" @onclick="() => UmbenennenAsync(variante)" disabled="@IsBusy"><i class="bi bi-pencil"></i> Umbenennen</button>
-                                <button class="btn btn-sm btn-primary-action" @onclick="() => ExportPdfAsync(variante)"><i class="bi bi-download"></i> PDF</button>
-                                <button class="btn btn-sm btn-primary-action" @onclick="() => ExportDocxAsync(variante)"><i class="bi bi-download"></i> DOCX</button>
-                                <button class="btn btn-sm btn-danger-action" @onclick="() => LoeschenAsync(variante)" disabled="@IsBusy"><i class="bi bi-trash3"></i> Loeschen</button>
+                            <div class="variants-actions">
+                                <button class="btn btn-sm btn-ghost" @onclick="() => AlsArbeitsversionLadenAsync(variante)"><i class="bi bi-pencil-square"></i> Als Arbeitsversion</button>
+                                <button class="btn btn-sm btn-ghost" @onclick="() => UmbenennenAsync(variante)" disabled="@IsBusy"><i class="bi bi-pencil"></i> Umbenennen</button>
+                                <button class="btn btn-sm btn-export-pdf" @onclick="() => ExportPdfAsync(variante)"><i class="bi bi-download"></i> PDF</button>
+                                <button class="btn btn-sm btn-export-docx" @onclick="() => ExportDocxAsync(variante)"><i class="bi bi-download"></i> DOCX</button>
+                                <button class="btn btn-sm btn-danger variant-delete-btn" @onclick="() => LoeschenAsync(variante)" disabled="@IsBusy"><i class="bi bi-trash3"></i> <span class="variant-delete-label">Loeschen</span></button>
                             </div>
                         </td>
                     </tr>
@@ -363,7 +363,8 @@ else
 
     private static string VersionBadgeClass(int versionNumber)
     {
-        var index = (versionNumber - 1) % 3;
+        var normalized = Math.Max(versionNumber, 1);
+        var index = (normalized - 1) % 3;
         return index switch
         {
             0 => "badge-v1",
@@ -371,4 +372,6 @@ else
             _ => "badge-v3"
         };
     }
+
+    private static int DisplayVersionNumber(int versionNumber) => Math.Max(versionNumber, 1);
 }

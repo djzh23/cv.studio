@@ -4,10 +4,18 @@
 
 <header class="top-nav">
     <nav>
-        <span class="nav-logo">CV<span>.</span>Studio</span>
-        <NavLink href="/" Match="NavLinkMatch.All"><i class="bi bi-house"></i> Start</NavLink>
-        <NavLink href="/varianten"><i class="bi bi-layers"></i> Varianten</NavLink>
-        <NavLink href="/hilfe"><i class="bi bi-question-circle"></i> Hilfe</NavLink>
+        <div class="nav-brand">
+            <span class="nav-logo">CV<span>.</span>Studio</span>
+        </div>
+        <div class="nav-center">
+            <NavLink href="/" Match="NavLinkMatch.All"><i class="bi bi-house"></i> Start</NavLink>
+            <NavLink href="/varianten"><i class="bi bi-layers"></i> Varianten</NavLink>
+            <NavLink href="/hilfe"><i class="bi bi-question-circle"></i> Hilfe</NavLink>
+        </div>
+        <div class="nav-status" aria-label="Auto-Save Status">
+            <span class="nav-autosave-dot"></span>
+            <span>Auto-Save aktiv</span>
+        </div>
     </nav>
 </header>
 
@@ -20,4 +28,3 @@
     <a href="." class="reload">Reload</a>
     <span class="dismiss">x</span>
 </div>
-

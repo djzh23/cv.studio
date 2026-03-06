@@ -64,11 +64,15 @@ body::before {
     padding: 0 1.75rem;
     display: flex;
     align-items: center;
-    gap: 1.6rem;
+    justify-content: space-between;
+    gap: 1rem;
+}
+
+.nav-brand {
+    min-width: 220px;
 }
 
 .nav-logo {
-    margin-right: auto;
     color: var(--text);
     font-family: "Playfair Display", Georgia, serif;
     font-size: 2rem;
@@ -79,6 +83,12 @@ body::before {
 
 .nav-logo span {
     color: var(--accent-red);
+}
+
+.nav-center {
+    display: inline-flex;
+    align-items: center;
+    gap: 1.4rem;
 }
 
 .top-nav a {
@@ -98,6 +108,25 @@ body::before {
 .top-nav a.active {
     color: var(--text);
     border-bottom: 1.5px solid var(--text);
+}
+
+.nav-status {
+    min-width: 220px;
+    justify-content: flex-end;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    color: #16a34a;
+    font-size: 0.86rem;
+    font-family: "JetBrains Mono", ui-monospace, monospace;
+}
+
+.nav-autosave-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: #16a34a;
+    animation: pulse 1.8s ease-in-out infinite;
 }
 
 .main-layout {
@@ -226,15 +255,16 @@ body::before {
 }
 
 .btn {
-    border-radius: 3px;
-    border: 1px solid transparent;
-    font-family: "Source Serif 4", Georgia, serif;
-    font-size: 0.95rem;
-    font-weight: 600;
-    letter-spacing: 0.01em;
     display: inline-flex;
     align-items: center;
-    gap: 0.4rem;
+    gap: 0.35rem;
+    border-radius: 4px;
+    border: 1px solid transparent;
+    font-family: inherit;
+    font-size: 0.82rem;
+    padding: 0.45rem 0.9rem;
+    cursor: pointer;
+    white-space: nowrap;
     transition: all 0.12s ease;
 }
 
@@ -242,52 +272,85 @@ body::before {
     transform: scale(0.97);
 }
 
+.btn-primary,
 .btn-primary-action {
     background: var(--accent-red);
     border-color: var(--accent-red);
     color: #fff;
-    box-shadow: 0 1px 3px rgba(201, 57, 43, 0.3);
 }
 
+.btn-primary:hover:not(:disabled),
+.btn-primary:focus-visible,
 .btn-primary-action:hover:not(:disabled),
 .btn-primary-action:focus-visible {
     background: var(--accent-red-hover);
     border-color: var(--accent-red-hover);
     color: #fff;
-    box-shadow: 0 2px 6px rgba(201, 57, 43, 0.4);
 }
 
+.btn-secondary,
 .btn-secondary-action {
     background: #fff;
     border-color: var(--border);
     color: var(--text);
 }
 
+.btn-secondary:hover:not(:disabled),
+.btn-secondary:focus-visible,
 .btn-secondary-action:hover:not(:disabled),
 .btn-secondary-action:focus-visible {
     background: #f5f0e8;
-    border-color: #c8b9a8;
     color: var(--text);
 }
 
+.btn-ghost,
 .btn-tertiary-action {
     background: transparent;
     border-color: var(--border);
     color: var(--muted);
 }
 
+.btn-ghost:hover:not(:disabled),
+.btn-ghost:focus-visible,
 .btn-tertiary-action:hover:not(:disabled),
 .btn-tertiary-action:focus-visible {
     background: #f5f0e8;
     color: var(--text);
 }
 
+.btn-export-pdf {
+    background: #eff6ff;
+    color: #1d4ed8;
+    border: 1px solid #bfdbfe;
+}
+
+.btn-export-pdf:hover:not(:disabled),
+.btn-export-pdf:focus-visible {
+    background: #1d4ed8;
+    color: #fff;
+}
+
+.btn-export-docx {
+    background: #f0fdf4;
+    color: #15803d;
+    border: 1px solid #bbf7d0;
+}
+
+.btn-export-docx:hover:not(:disabled),
+.btn-export-docx:focus-visible {
+    background: #15803d;
+    color: #fff;
+}
+
+.btn-danger,
 .btn-danger-action {
     background: #fef2f2;
     border-color: #fecaca;
     color: var(--accent-red);
 }
 
+.btn-danger:hover:not(:disabled),
+.btn-danger:focus-visible,
 .btn-danger-action:hover:not(:disabled),
 .btn-danger-action:focus-visible {
     background: var(--accent-red);
@@ -295,12 +358,19 @@ body::before {
     color: #fff;
 }
 
-.btn-sm.btn-primary-action,
-.btn-sm.btn-secondary-action,
-.btn-sm.btn-tertiary-action,
-.btn-sm.btn-danger-action {
+.btn-sm {
     padding: 0.25rem 0.6rem;
-    font-size: 0.85rem;
+    font-size: 0.75rem;
+}
+
+.btn-md {
+    padding: 0.45rem 0.9rem;
+    font-size: 0.82rem;
+}
+
+.btn-lg {
+    padding: 0.6rem 1.2rem;
+    font-size: 0.9rem;
 }
 
 .template-grid {
@@ -406,12 +476,69 @@ body::before {
     padding-right: 0.3rem;
 }
 
-.tab-nav {
+.editor-toolbar {
+    position: sticky;
+    top: 55px;
+    z-index: 50;
+    background: rgba(250, 247, 242, 0.97);
+    backdrop-filter: blur(8px);
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    margin-bottom: 1.15rem;
+}
+
+.editor-tabs {
     display: flex;
     flex-wrap: wrap;
     gap: 0;
-    border-bottom: 1px solid var(--border);
-    margin-bottom: 1.15rem;
+}
+
+.editor-toolbar-actions {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding-right: 0.35rem;
+}
+
+.save-dropdown-container {
+    position: relative;
+}
+
+.save-dropdown {
+    position: absolute;
+    top: calc(100% + 8px);
+    right: 0;
+    width: 300px;
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+    padding: 1rem;
+    z-index: 100;
+}
+
+.save-dropdown-title {
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: var(--text);
+    margin-bottom: 0.75rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid #f0ebe3;
+}
+
+.save-dropdown .form-control {
+    width: 100%;
+    margin-bottom: 0.5rem;
+}
+
+.save-dropdown-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+    margin-top: 0.75rem;
 }
 
 .tab-btn {
@@ -608,6 +735,13 @@ body::before {
     background: #fdf8f3;
 }
 
+.variants-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.35rem;
+    align-items: center;
+}
+
 .howto-card {
     max-width: 880px;
     margin: 1.5rem auto;
@@ -707,6 +841,18 @@ body::before {
         align-items: flex-start;
     }
 
+    .editor-toolbar {
+        top: 48px;
+        flex-direction: column;
+        align-items: stretch;
+        padding: 0.4rem 0;
+    }
+
+    .editor-toolbar-actions {
+        flex-wrap: wrap;
+        padding: 0 0.35rem 0.45rem;
+    }
+
     .editor-scroll,
     .preview-scroll {
         max-height: none;
@@ -724,8 +870,24 @@ body::before {
         font-size: 1.5rem;
     }
 
+    .nav-brand,
+    .nav-status {
+        min-width: auto;
+    }
+
+    .nav-status span:last-child {
+        display: none;
+    }
+
+    .nav-center {
+        gap: 0.75rem;
+    }
+
     .main-layout {
         padding: 1rem 0.75rem;
     }
-}
 
+    .variant-delete-label {
+        display: none;
+    }
+}
