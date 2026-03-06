@@ -4,6 +4,7 @@ using QuestPDF.Infrastructure;
 using CvStudio.Application;
 using CvStudio.Application.Contracts;
 using CvStudio.Application.Services;
+using CvStudio.Infrastructure.Pdf.Designs.DesignC;
 using System.Diagnostics;
 
 namespace CvStudio.Infrastructure.Pdf;
@@ -59,9 +60,12 @@ public sealed class QuestPdfGenerator : IPdfGenerator
         var data = CvStudioMapper.Deserialize(resumeJson);
         var profileImageBytes = LoadProfileImageBytes(data.Profile.ProfileImageUrl);
 
-        return design == PdfDesign.DesignB
-            ? GenerateDesignB(data, profileImageBytes)
-            : GenerateDesignA(data, profileImageBytes);
+        return design switch
+        {
+            PdfDesign.DesignB => GenerateDesignB(data, profileImageBytes),
+            PdfDesign.DesignC => GenerateDesignC(data, profileImageBytes),
+            _ => GenerateDesignA(data, profileImageBytes)
+        };
     }
 
     private static byte[] GenerateDesignA(ResumeData data, byte[]? profileImageBytes)
@@ -195,6 +199,11 @@ public sealed class QuestPdfGenerator : IPdfGenerator
                 });
             });
         }).GeneratePdf();
+    }
+
+    private static byte[] GenerateDesignC(ResumeData data, byte[]? profileImageBytes)
+    {
+        return new DesignCDocument(data, profileImageBytes).GeneratePdf();
     }
 
     private static void RenderHeader(IContainer container, ResumeData data, byte[]? profileImageBytes)
@@ -777,5 +786,4 @@ public sealed class QuestPdfGenerator : IPdfGenerator
         return value;
     }
 }
-
 
