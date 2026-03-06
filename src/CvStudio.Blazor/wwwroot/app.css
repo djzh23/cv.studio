@@ -929,7 +929,7 @@ body::before {
 
 .ats-subscores {
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
+    grid-template-columns: repeat(3, 1fr);
     gap: 0.5rem;
     margin: 1rem 0;
 }
@@ -976,6 +976,13 @@ body::before {
     background: #fef2f2;
     color: #c9392b;
     border: 1px solid #fecaca;
+}
+
+.keyword-chip-must {
+    background: #c9392b;
+    color: #fff;
+    border: 1px solid #c9392b;
+    font-weight: 700;
 }
 
 .ats-improvement-item {
