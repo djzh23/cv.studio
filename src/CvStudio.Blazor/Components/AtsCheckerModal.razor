@@ -1,0 +1,223 @@
+﻿@using CvStudio.Application.Contracts
+@using CvStudio.Application.Services
+@inject IAtsScoreService AtsService
+
+@if (IsOpen)
+{
+    <div class="ats-modal-overlay" @onclick="HandleOverlayClick" @onkeydown:window="HandleWindowKeyDown">
+        <div class="ats-modal" @onclick:stopPropagation="true">
+            <div class="ats-modal-header">
+                <h2>🎯 ATS-Score Checker</h2>
+                <button type="button" class="ats-modal-close" @onclick="CloseAsync" aria-label="Schließen">✕</button>
+            </div>
+
+            <div class="ats-modal-body">
+                <h3>Schritt 1 - Stellenbeschreibung</h3>
+                <textarea class="form-control" rows="7" placeholder="Füge hier die Stellenbeschreibung ein... (min. 100 Zeichen)" @bind="_jobDescription"></textarea>
+                <small class="muted">Zeichen: @_jobDescription.Length / empfohlen: 200+</small>
+
+                <div class="ats-source-hint">
+                    Geprüft wird:
+                    @if (!string.IsNullOrWhiteSpace(_sourceHint))
+                    {
+                        <span>@_sourceHint</span>
+                    }
+                </div>
+
+                @if (!string.IsNullOrWhiteSpace(_analyzeError))
+                {
+                    <div class="alert alert-danger" role="alert">@_analyzeError</div>
+                }
+
+                <div class="toolbar-actions">
+                    <button type="button" class="btn btn-primary btn-sm" @onclick="AnalyzeAsync" disabled="@(!CanAnalyze || _isAnalyzing)">
+                        @_analyzeButtonLabel
+                    </button>
+                    <button type="button" class="btn btn-secondary btn-sm" @onclick="CloseAsync">Abbrechen</button>
+                </div>
+
+                @if (_result is not null)
+                {
+                    <hr />
+                    <div class="ats-score-display">
+                        <div class="ats-score-number" style="color: @_result.ScoreColor;">@_result.Score</div>
+                        <div class="ats-score-label">@_result.ScoreLabel</div>
+                        <div class="ats-progress-bar">
+                            <div class="ats-progress-fill" style="width: @_result.Score%; background: @_result.ScoreColor;"></div>
+                        </div>
+                    </div>
+
+                    <div class="ats-subscores">
+                        <div class="ats-subscore-card">
+                            <div class="ats-subscore-value">@_result.KeywordScore/40</div>
+                            <div class="ats-subscore-label">Keywords</div>
+                        </div>
+                        <div class="ats-subscore-card">
+                            <div class="ats-subscore-value">@_result.CompletenessScore/25</div>
+                            <div class="ats-subscore-label">Vollständigkeit</div>
+                        </div>
+                        <div class="ats-subscore-card">
+                            <div class="ats-subscore-value">@_result.FormattingScore/20</div>
+                            <div class="ats-subscore-label">Formatierung</div>
+                        </div>
+                        <div class="ats-subscore-card">
+                            <div class="ats-subscore-value">@_result.LanguageScore/15</div>
+                            <div class="ats-subscore-label">Sprache</div>
+                        </div>
+                    </div>
+
+                    <h4>✅ Gefundene Keywords (@_result.MatchedKeywords.Count)</h4>
+                    <div class="keyword-chips">
+                        @foreach (var keyword in _result.MatchedKeywords.Take(20))
+                        {
+                            <span class="keyword-chip keyword-chip-matched">@keyword</span>
+                        }
+                    </div>
+
+                    <h4>❌ Fehlende Keywords (@_result.MissingKeywords.Count)</h4>
+                    <div class="keyword-chips">
+                        @foreach (var keyword in _result.MissingKeywords.Take(20))
+                        {
+                            <span class="keyword-chip keyword-chip-missing">@keyword</span>
+                        }
+                    </div>
+
+                    <h4>📋 Verbesserungsvorschläge</h4>
+                    @foreach (var improvement in _result.Improvements)
+                    {
+                        <div class="ats-improvement-item">
+                            <div>@improvement.PriorityIcon</div>
+                            <div class="ats-improvement-content">
+                                <div class="issue">@improvement.Category: @improvement.Issue</div>
+                                <div class="suggestion">@improvement.Suggestion</div>
+                            </div>
+                        </div>
+                    }
+
+                    <div class="toolbar-actions">
+                        <button type="button" class="btn btn-secondary btn-sm" @onclick="CloseAsync">✏ CV anpassen</button>
+                        <button type="button" class="btn btn-primary btn-sm" @onclick="ExportAnywayAsync">📄 Trotzdem exportieren</button>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    [Parameter] public bool IsOpen { get; set; }
+    [Parameter] public EventCallback OnClose { get; set; }
+    [Parameter] public EventCallback OnExportAnyway { get; set; }
+    [Parameter] public ResumeData? CurrentResume { get; set; }
+    [Parameter] public ResumeData? LastSnapshotResume { get; set; }
+
+    private string _jobDescription = string.Empty;
+    private AtsScoreResult? _result;
+    private bool _isAnalyzing;
+    private string _analyzeError = string.Empty;
+    private string _sourceHint = "Keine Daten verfügbar";
+
+    private string _analyzeButtonLabel => _isAnalyzing ? "Analysiere..." : "🎯 Jetzt analysieren";
+
+    private bool CanAnalyze =>
+        _jobDescription.Trim().Length >= 100 && ResolveResume(out _) is not null;
+
+    protected override void OnParametersSet()
+    {
+        _ = ResolveResume(out _sourceHint);
+    }
+
+    private async Task AnalyzeAsync()
+    {
+        _analyzeError = string.Empty;
+
+        var resumeToAnalyze = ResolveResume(out _sourceHint);
+        if (resumeToAnalyze is null)
+        {
+            _analyzeError = "Keine Arbeitsversion oder gespeicherte Variante verfügbar.";
+            return;
+        }
+
+        if (_jobDescription.Trim().Length < 100)
+        {
+            _analyzeError = "Bitte mindestens 100 Zeichen der Stellenbeschreibung einfügen.";
+            return;
+        }
+
+        _isAnalyzing = true;
+        _result = null;
+        await InvokeAsync(StateHasChanged);
+        await Task.Yield();
+
+        try
+        {
+            _result = AtsService.Calculate(resumeToAnalyze, _jobDescription);
+        }
+        catch (Exception ex)
+        {
+            _analyzeError = ex.Message;
+        }
+        finally
+        {
+            _isAnalyzing = false;
+        }
+    }
+
+    private ResumeData? ResolveResume(out string source)
+    {
+        if (CurrentResume is not null)
+        {
+            source = "● Aktuelle Arbeitsversion";
+            return CurrentResume;
+        }
+
+        if (LastSnapshotResume is not null)
+        {
+            source = "● Letzte gespeicherte Variante";
+            return LastSnapshotResume;
+        }
+
+        source = "● Keine CV-Daten geladen";
+        return null;
+    }
+
+    private async Task HandleOverlayClick()
+    {
+        await CloseAsync();
+    }
+
+    private async Task HandleWindowKeyDown(KeyboardEventArgs args)
+    {
+        if (IsOpen && string.Equals(args.Key, "Escape", StringComparison.OrdinalIgnoreCase))
+        {
+            await CloseAsync();
+        }
+    }
+
+    private async Task ExportAnywayAsync()
+    {
+        if (OnExportAnyway.HasDelegate)
+        {
+            await OnExportAnyway.InvokeAsync();
+        }
+
+        await CloseAsync();
+    }
+
+    private async Task CloseAsync()
+    {
+        Reset();
+        if (OnClose.HasDelegate)
+        {
+            await OnClose.InvokeAsync();
+        }
+    }
+
+    private void Reset()
+    {
+        _result = null;
+        _jobDescription = string.Empty;
+        _analyzeError = string.Empty;
+        _isAnalyzing = false;
+    }
+}
