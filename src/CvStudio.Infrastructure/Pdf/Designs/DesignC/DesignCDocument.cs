@@ -10,11 +10,21 @@ public sealed class DesignCDocument : IDocument
 {
     private readonly ResumeData _data;
     private readonly byte[]? _profileImageBytes;
+    private readonly ProfileData _profile;
+    private readonly IReadOnlyList<WorkItemData> _workItems;
+    private readonly IReadOnlyList<EducationItemData> _educationItems;
+    private readonly IReadOnlyList<ResumeProjectItem> _projects;
+    private readonly IReadOnlyList<SkillGroupData> _skills;
 
     public DesignCDocument(ResumeData data, byte[]? profileImageBytes)
     {
-        _data = data;
+        _data = data ?? new ResumeData();
         _profileImageBytes = profileImageBytes;
+        _profile = _data.Profile ?? new ProfileData();
+        _workItems = _data.WorkItems ?? [];
+        _educationItems = _data.EducationItems ?? [];
+        _projects = _data.Projects ?? [];
+        _skills = _data.Skills ?? [];
     }
 
     public DocumentMetadata GetMetadata() => DocumentMetadata.Default;
@@ -52,25 +62,25 @@ public sealed class DesignCDocument : IDocument
         ComposeSidebarSectionLabel(col, "\u2709", "CONTACTS");
         col.Item().PaddingHorizontal(16).Column(inner =>
         {
-            if (!string.IsNullOrWhiteSpace(_data.Profile.Phone))
+            if (!string.IsNullOrWhiteSpace(_profile.Phone))
             {
-                inner.Item().Text(_data.Profile.Phone.Trim())
+                inner.Item().Text(_profile.Phone.Trim())
                     .FontSize(DesignCStyles.SidebarBody)
                     .FontColor(DesignCStyles.SidebarText);
                 inner.Item().Height(3);
             }
 
-            if (!string.IsNullOrWhiteSpace(_data.Profile.Email))
+            if (!string.IsNullOrWhiteSpace(_profile.Email))
             {
-                inner.Item().Text(_data.Profile.Email.Trim())
+                inner.Item().Text(_profile.Email.Trim())
                     .FontSize(DesignCStyles.SidebarBody)
                     .FontColor(DesignCStyles.SidebarText);
                 inner.Item().Height(3);
             }
 
-            if (!string.IsNullOrWhiteSpace(_data.Profile.Location))
+            if (!string.IsNullOrWhiteSpace(_profile.Location))
             {
-                inner.Item().Text(_data.Profile.Location.Trim())
+                inner.Item().Text(_profile.Location.Trim())
                     .FontSize(DesignCStyles.SidebarBody)
                     .FontColor(DesignCStyles.SidebarText);
             }
@@ -78,11 +88,11 @@ public sealed class DesignCDocument : IDocument
 
         col.Item().Height(14);
 
-        if (!string.IsNullOrWhiteSpace(_data.Profile.Summary))
+        if (!string.IsNullOrWhiteSpace(_profile.Summary))
         {
             ComposeSidebarSectionLabel(col, "\u2630", "SUMMARY");
             col.Item().PaddingHorizontal(16)
-                .Text(_data.Profile.Summary.Trim())
+                .Text(_profile.Summary.Trim())
                 .FontSize(DesignCStyles.SidebarBody)
                 .FontColor(DesignCStyles.SidebarMuted)
                 .LineHeight(1.4f);
@@ -116,9 +126,9 @@ public sealed class DesignCDocument : IDocument
             col.Item().Height(14);
         }
 
-        var skillGroups = _data.Skills
+        var skillGroups = _skills
             .Where(g => !g.CategoryName.Contains("sprach", StringComparison.OrdinalIgnoreCase))
-            .Where(g => g.Items.Count > 0)
+            .Where(g => (g.Items ?? []).Count > 0)
             .ToList();
 
         if (skillGroups.Count > 0)
@@ -135,7 +145,7 @@ public sealed class DesignCDocument : IDocument
                         .Bold();
                     inner.Item().Height(2);
 
-                    var items = group.Items.Where(x => !string.IsNullOrWhiteSpace(x)).Select(x => x.Trim());
+                    var items = (group.Items ?? []).Where(x => !string.IsNullOrWhiteSpace(x)).Select(x => x.Trim());
                     inner.Item()
                         .Text(string.Join(" \u00B7 ", items))
                         .FontSize(DesignCStyles.SidebarBody)
@@ -203,7 +213,7 @@ public sealed class DesignCDocument : IDocument
     {
         col.Item().Padding(24).Column(inner =>
         {
-            var fullName = $"{_data.Profile.FirstName} {_data.Profile.LastName}".Trim().ToUpperInvariant();
+            var fullName = $"{_profile.FirstName} {_profile.LastName}".Trim().ToUpperInvariant();
             inner.Item().Text(fullName)
                 .FontSize(28f)
                 .FontColor(DesignCStyles.MainText)
@@ -212,13 +222,13 @@ public sealed class DesignCDocument : IDocument
 
             inner.Item().Height(6);
 
-            if (!string.IsNullOrWhiteSpace(_data.Profile.Headline))
+            if (!string.IsNullOrWhiteSpace(_profile.Headline))
             {
                 inner.Item()
                     .Background(DesignCStyles.Cyan)
                     .PaddingHorizontal(6)
                     .PaddingVertical(4)
-                    .Text(_data.Profile.Headline.Trim().ToUpperInvariant())
+                    .Text(_profile.Headline.Trim().ToUpperInvariant())
                     .FontSize(DesignCStyles.HeadlineSize)
                     .FontColor(DesignCStyles.MainBg)
                     .Bold()
@@ -227,26 +237,26 @@ public sealed class DesignCDocument : IDocument
 
             inner.Item().Height(14);
 
-            if (_data.WorkItems.Count > 0)
+            if (_workItems.Count > 0)
             {
                 ComposeMainSection(inner, "\u2630", "EXPERIENCE");
-                foreach (var work in _data.WorkItems)
+                foreach (var work in _workItems)
                     ComposeWorkItem(inner, work);
                 inner.Item().Height(4);
             }
 
-            if (_data.EducationItems.Count > 0)
+            if (_educationItems.Count > 0)
             {
                 ComposeMainSection(inner, "\u25CE", "EDUCATION");
-                foreach (var edu in _data.EducationItems)
+                foreach (var edu in _educationItems)
                     ComposeEduItem(inner, edu);
                 inner.Item().Height(4);
             }
 
-            if (_data.Projects.Count > 0)
+            if (_projects.Count > 0)
             {
                 ComposeMainSection(inner, "\u25C8", "PROJECTS");
-                foreach (var project in _data.Projects)
+                foreach (var project in _projects)
                     ComposeProjectItem(inner, project);
             }
         });
@@ -304,9 +314,10 @@ public sealed class DesignCDocument : IDocument
 
         col.Item().Height(3);
 
-        if (work.Bullets.Count > 0)
+        var bullets = work.Bullets ?? [];
+        if (bullets.Count > 0)
         {
-            foreach (var bullet in work.Bullets.Where(x => !string.IsNullOrWhiteSpace(x)))
+            foreach (var bullet in bullets.Where(x => !string.IsNullOrWhiteSpace(x)))
             {
                 col.Item().Row(r =>
                 {
@@ -392,9 +403,10 @@ public sealed class DesignCDocument : IDocument
             });
         }
 
-        if (project.Technologies.Count > 0)
+        var technologies = project.Technologies ?? [];
+        if (technologies.Count > 0)
         {
-            var tech = project.Technologies.Where(x => !string.IsNullOrWhiteSpace(x)).Select(x => x.Trim());
+            var tech = technologies.Where(x => !string.IsNullOrWhiteSpace(x)).Select(x => x.Trim());
             col.Item().PaddingLeft(DesignCStyles.BulletIndent)
                 .Text(string.Join(" \u00B7 ", tech))
                 .FontSize(DesignCStyles.SmallText)
@@ -406,13 +418,14 @@ public sealed class DesignCDocument : IDocument
 
     private List<(string Name, string? Level)> ResolveLanguages()
     {
-        var languageGroup = _data.Skills.FirstOrDefault(s =>
+        var languageGroup = _skills.FirstOrDefault(s =>
             s.CategoryName.Contains("sprach", StringComparison.OrdinalIgnoreCase));
 
-        if (languageGroup is null || languageGroup.Items.Count == 0)
+        var languageItems = languageGroup?.Items ?? [];
+        if (languageItems.Count == 0)
             return [];
 
-        return languageGroup.Items
+        return languageItems
             .Where(x => !string.IsNullOrWhiteSpace(x))
             .Select(ParseLanguage)
             .ToList();
@@ -443,8 +456,8 @@ public sealed class DesignCDocument : IDocument
 
     private string GetInitials()
     {
-        var first = _data.Profile.FirstName.FirstOrDefault();
-        var last = _data.Profile.LastName.FirstOrDefault();
+        var first = _profile.FirstName.FirstOrDefault();
+        var last = _profile.LastName.FirstOrDefault();
         return $"{first}{last}".ToUpperInvariant();
     }
 
