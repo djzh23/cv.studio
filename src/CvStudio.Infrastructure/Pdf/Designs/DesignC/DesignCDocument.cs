@@ -169,14 +169,14 @@ public sealed class DesignCDocument : IDocument
 
             layers.PrimaryLayer().AlignCenter().Width(100).Height(100).Element(container =>
             {
-                container.Border(1).BorderColor(DesignCStyles.CyanDark).Padding(4);
+                var framed = container.Border(1).BorderColor(DesignCStyles.CyanDark).Padding(4);
                 if (_profileImageBytes is not null)
                 {
-                    container.Image(_profileImageBytes).FitArea();
+                    framed.Image(_profileImageBytes).FitArea();
                 }
                 else
                 {
-                    container.Background("#1E3A5F")
+                    framed.Background("#1E3A5F")
                         .AlignCenter()
                         .AlignMiddle()
                         .Text(GetInitials())
