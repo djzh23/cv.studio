@@ -3,6 +3,7 @@ param(
 )
 
 $repoRoot = (Resolve-Path (Join-Path $PSScriptRoot "..\..")).Path
+$dbPort = 5433
 
 if ([string]::IsNullOrWhiteSpace($Passcode)) {
     $Passcode = Read-Host "Gate Passcode (nur fuer diese lokale Session)"
@@ -16,9 +17,28 @@ Write-Host "Starting PostgreSQL (docker compose)..." -ForegroundColor Cyan
 Push-Location $repoRoot
 try {
     docker compose up -d postgres
+    if ($LASTEXITCODE -ne 0) {
+        throw "docker compose up failed. Ensure Docker Desktop is running."
+    }
 }
 finally {
     Pop-Location
+}
+
+Write-Host "Waiting for PostgreSQL on localhost:$dbPort ..." -ForegroundColor Cyan
+$maxAttempts = 30
+$attempt = 0
+while ($attempt -lt $maxAttempts) {
+    $attempt++
+    $probe = Test-NetConnection -ComputerName "localhost" -Port $dbPort -InformationLevel Quiet -WarningAction SilentlyContinue
+    if ($probe) {
+        break
+    }
+    Start-Sleep -Seconds 1
+}
+
+if (-not $probe) {
+    throw "PostgreSQL did not become ready on localhost:$dbPort. Run 'docker compose ps' and 'docker compose logs postgres'."
 }
 
 $apiCmd = @"
