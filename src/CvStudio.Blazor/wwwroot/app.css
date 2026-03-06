@@ -64,11 +64,15 @@ body::before {
     padding: 0 1.75rem;
     display: flex;
     align-items: center;
-    gap: 1.6rem;
+    justify-content: space-between;
+    gap: 1rem;
+}
+
+.nav-brand {
+    min-width: 220px;
 }
 
 .nav-logo {
-    margin-right: auto;
     color: var(--text);
     font-family: "Playfair Display", Georgia, serif;
     font-size: 2rem;
@@ -79,6 +83,12 @@ body::before {
 
 .nav-logo span {
     color: var(--accent-red);
+}
+
+.nav-center {
+    display: inline-flex;
+    align-items: center;
+    gap: 1.4rem;
 }
 
 .top-nav a {
@@ -98,6 +108,25 @@ body::before {
 .top-nav a.active {
     color: var(--text);
     border-bottom: 1.5px solid var(--text);
+}
+
+.nav-status {
+    min-width: 220px;
+    justify-content: flex-end;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    color: #16a34a;
+    font-size: 0.86rem;
+    font-family: "JetBrains Mono", ui-monospace, monospace;
+}
+
+.nav-autosave-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: #16a34a;
+    animation: pulse 1.8s ease-in-out infinite;
 }
 
 .main-layout {
@@ -724,8 +753,20 @@ body::before {
         font-size: 1.5rem;
     }
 
+    .nav-brand,
+    .nav-status {
+        min-width: auto;
+    }
+
+    .nav-status span:last-child {
+        display: none;
+    }
+
+    .nav-center {
+        gap: 0.75rem;
+    }
+
     .main-layout {
         padding: 1rem 0.75rem;
     }
 }
-
