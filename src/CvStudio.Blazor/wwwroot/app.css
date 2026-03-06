@@ -539,6 +539,12 @@ body::before {
     display: flex;
     gap: 0;
     padding: 0 0.5rem;
+    overflow-x: auto;
+    scrollbar-width: none;
+}
+
+.toolbar-tabs-row::-webkit-scrollbar {
+    display: none;
 }
 
 .save-dropdown-container {
@@ -881,14 +887,15 @@ body::before {
 
     .editor-toolbar {
         top: 48px;
-        flex-direction: column;
-        align-items: stretch;
-        padding: 0.4rem 0;
     }
 
-    .editor-toolbar-actions {
+    .toolbar-actions-row {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .toolbar-right {
         flex-wrap: wrap;
-        padding: 0 0.35rem 0.45rem;
     }
 
     .editor-scroll,
@@ -923,6 +930,14 @@ body::before {
 
     .main-layout {
         padding: 1rem 0.75rem;
+    }
+
+    .toolbar-actions-row {
+        padding: 0.45rem 0.5rem;
+    }
+
+    .toolbar-right {
+        gap: 0.35rem;
     }
 
     .variant-delete-label {
