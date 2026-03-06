@@ -735,6 +735,13 @@ body::before {
     background: #fdf8f3;
 }
 
+.variants-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.35rem;
+    align-items: center;
+}
+
 .howto-card {
     max-width: 880px;
     margin: 1.5rem auto;
@@ -878,5 +885,9 @@ body::before {
 
     .main-layout {
         padding: 1rem 0.75rem;
+    }
+
+    .variant-delete-label {
+        display: none;
     }
 }
