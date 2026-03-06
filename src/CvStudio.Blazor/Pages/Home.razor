@@ -152,8 +152,9 @@ else
                                     <div class="toolbar-right">
                                         <div class="export-group">
                                             <InputSelect class="design-select" @bind-Value="Vm.AusgewaehltesPdfDesign">
-                                                <option value="@PdfDesign.DesignA">Design A</option>
-                                                <option value="@PdfDesign.DesignB">Design B</option>
+                                                <option value="@PdfDesign.DesignA">Design A — Klassisch (ATS)</option>
+                                                <option value="@PdfDesign.DesignB">Design B — Modern</option>
+                                                <option value="@PdfDesign.DesignC">Design C — Professional</option>
                                             </InputSelect>
                                             <button class="btn btn-export-pdf btn-md" @onclick="ExportArbeitsversionPdfAsync" disabled="@Vm.IsBusy"><i class="bi bi-download"></i> PDF</button>
                                         </div>
