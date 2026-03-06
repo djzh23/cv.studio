@@ -25,16 +25,24 @@ public sealed class PdfExportService : IPdfExportService
 
     public async Task<byte[]> ExportAsync(Guid resumeId, Guid? versionId = null, PdfDesign design = PdfDesign.DesignA, CancellationToken cancellationToken = default)
     {
-        var contentJson = await ResolveContentJsonAsync(resumeId, versionId, cancellationToken);
-        var bytes = _pdfGenerator.GenerateFromResumeJson(contentJson, design);
-
-        if (bytes.Length == 0)
+        try
         {
-            throw new InvalidOperationException("PDF generation produced no content.");
-        }
+            var contentJson = await ResolveContentJsonAsync(resumeId, versionId, cancellationToken);
+            var bytes = _pdfGenerator.GenerateFromResumeJson(contentJson, design);
 
-        _logger.LogInformation("Generated PDF for resume {ResumeId}, version {VersionId}, design {Design}", resumeId, versionId, design);
-        return bytes;
+            if (bytes.Length == 0)
+            {
+                throw new InvalidOperationException("PDF generation produced no content.");
+            }
+
+            _logger.LogInformation("Generated PDF for resume {ResumeId}, version {VersionId}, design {Design}", resumeId, versionId, design);
+            return bytes;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "PDF generation failed for resume {ResumeId}, version {VersionId}, design {Design}", resumeId, versionId, design);
+            throw;
+        }
     }
 
     private async Task<string> ResolveContentJsonAsync(Guid resumeId, Guid? versionId, CancellationToken cancellationToken)
@@ -53,4 +61,3 @@ public sealed class PdfExportService : IPdfExportService
         return resume.CurrentContentJson;
     }
 }
-

@@ -127,7 +127,7 @@ public sealed class DesignCDocument : IDocument
         }
 
         var skillGroups = _skills
-            .Where(g => !g.CategoryName.Contains("sprach", StringComparison.OrdinalIgnoreCase))
+            .Where(g => !(g.CategoryName ?? string.Empty).Contains("sprach", StringComparison.OrdinalIgnoreCase))
             .Where(g => (g.Items ?? []).Count > 0)
             .ToList();
 
@@ -139,7 +139,7 @@ public sealed class DesignCDocument : IDocument
                 foreach (var group in skillGroups)
                 {
                     inner.Item()
-                        .Text(group.CategoryName.Trim())
+                        .Text((group.CategoryName ?? string.Empty).Trim())
                         .FontSize(DesignCStyles.SidebarLabel)
                         .FontColor(DesignCStyles.SidebarText)
                         .Bold();
@@ -303,7 +303,7 @@ public sealed class DesignCDocument : IDocument
         col.Item().Row(r =>
         {
             r.RelativeItem()
-                .Text(work.Role)
+                .Text(work.Role ?? string.Empty)
                 .FontSize(DesignCStyles.SmallText)
                 .FontColor(DesignCStyles.MainMuted);
             r.ConstantItem(90).AlignRight()
@@ -370,7 +370,7 @@ public sealed class DesignCDocument : IDocument
         col.Item().Row(r =>
         {
             r.RelativeItem()
-                .Text(edu.Degree)
+                .Text(edu.Degree ?? string.Empty)
                 .FontSize(DesignCStyles.SmallText)
                 .FontColor(DesignCStyles.MainMuted);
             r.ConstantItem(90).AlignRight()
@@ -384,7 +384,7 @@ public sealed class DesignCDocument : IDocument
 
     private static void ComposeProjectItem(ColumnDescriptor col, ResumeProjectItem project)
     {
-        col.Item().Text(project.Name)
+        col.Item().Text(project.Name ?? string.Empty)
             .FontSize(DesignCStyles.BodyText)
             .Bold();
 
@@ -419,7 +419,7 @@ public sealed class DesignCDocument : IDocument
     private List<(string Name, string? Level)> ResolveLanguages()
     {
         var languageGroup = _skills.FirstOrDefault(s =>
-            s.CategoryName.Contains("sprach", StringComparison.OrdinalIgnoreCase));
+            (s.CategoryName ?? string.Empty).Contains("sprach", StringComparison.OrdinalIgnoreCase));
 
         var languageItems = languageGroup?.Items ?? [];
         if (languageItems.Count == 0)
@@ -456,8 +456,8 @@ public sealed class DesignCDocument : IDocument
 
     private string GetInitials()
     {
-        var first = _profile.FirstName.FirstOrDefault();
-        var last = _profile.LastName.FirstOrDefault();
+        var first = (_profile.FirstName ?? string.Empty).FirstOrDefault();
+        var last = (_profile.LastName ?? string.Empty).FirstOrDefault();
         return $"{first}{last}".ToUpperInvariant();
     }
 
