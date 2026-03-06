@@ -62,6 +62,9 @@
                 {
                     <hr />
                     <div class="ats-score-display">
+                        <div class="ats-score-meta">
+                            <span class="ats-category-badge">@_result.CategoryLabel</span>
+                        </div>
                         <div class="ats-score-number" style="color: @_result.ScoreColor;">@_result.Score</div>
                         <div class="ats-score-label">@_result.ScoreLabel</div>
                         <div class="ats-progress-bar">
@@ -107,9 +110,12 @@
                     <h4>📋 Verbesserungsvorschläge</h4>
                     @foreach (var improvement in _result.Improvements)
                     {
-                        <div class="ats-improvement-item">
-                            <div>@improvement.PriorityIcon</div>
+                        <div class='ats-improvement-item @GetPriorityClass(improvement.Priority)'>
+                            <div class="ats-improvement-icon">@improvement.PriorityIcon</div>
                             <div class="ats-improvement-content">
+                                <div class="ats-improvement-top">
+                                    <span class='ats-priority-badge @GetPriorityClass(improvement.Priority)'>@improvement.Priority</span>
+                                </div>
                                 <div class="issue">@improvement.Category: @improvement.Issue</div>
                                 <div class="suggestion">@improvement.Suggestion</div>
                             </div>
@@ -249,4 +255,11 @@
     {
         _category = category;
     }
+
+    private static string GetPriorityClass(string priority) => priority switch
+    {
+        "Hoch" => "priority-high",
+        "Mittel" => "priority-medium",
+        _ => "priority-low"
+    };
 }
