@@ -5,7 +5,6 @@ namespace CvStudio.Blazor.Services;
 public sealed class PasscodeGateService
 {
     private const string PasscodeConfigurationKey = "Access:Passcode";
-    private const string DefaultPasscode = "1234";
 
     private readonly IConfiguration _configuration;
     private readonly IJSRuntime _jsRuntime;
@@ -40,7 +39,12 @@ public sealed class PasscodeGateService
 
     public async Task<bool> UnlockAsync(string? inputPasscode)
     {
-        var configuredPasscode = _configuration[PasscodeConfigurationKey] ?? DefaultPasscode;
+        var configuredPasscode = _configuration[PasscodeConfigurationKey];
+        if (string.IsNullOrWhiteSpace(configuredPasscode))
+        {
+            return false;
+        }
+
         var isValid = string.Equals(inputPasscode?.Trim(), configuredPasscode.Trim(), StringComparison.Ordinal);
         if (!isValid)
         {
