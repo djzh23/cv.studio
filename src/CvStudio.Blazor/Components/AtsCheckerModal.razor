@@ -12,6 +12,28 @@
             </div>
 
             <div class="ats-modal-body">
+                <div class="category-selector">
+                    <label>Bewerbungskategorie</label>
+                    <div class="category-pills">
+                        <button type="button" class='pill @(_category == JobCategory.Auto ? "pill-active" : string.Empty)' @onclick='() => SetCategory(JobCategory.Auto)'>
+                            🔍 Automatisch erkennen
+                        </button>
+                        <button type="button" class='pill @(_category == JobCategory.SoftwareEntwickler ? "pill-active" : string.Empty)' @onclick='() => SetCategory(JobCategory.SoftwareEntwickler)'>
+                            💻 Software Entwickler
+                        </button>
+                        <button type="button" class='pill @(_category == JobCategory.ItSupport ? "pill-active" : string.Empty)' @onclick='() => SetCategory(JobCategory.ItSupport)'>
+                            🖥 IT Support
+                        </button>
+                        <button type="button" class='pill @(_category == JobCategory.Allgemein ? "pill-active" : string.Empty)' @onclick='() => SetCategory(JobCategory.Allgemein)'>
+                            📦 Allgemein / Service
+                        </button>
+                    </div>
+                    @if (_category == JobCategory.Auto && _result is not null)
+                    {
+                        <small class="category-hint">Erkannte Kategorie: <strong>@_result.CategoryLabel</strong></small>
+                    }
+                </div>
+
                 <h3>Schritt 1 - Stellenbeschreibung</h3>
                 <textarea class="form-control" rows="7" placeholder="Füge hier die Stellenbeschreibung ein... (min. 100 Zeichen)" @bind="_jobDescription"></textarea>
                 <small class="muted">Zeichen: @_jobDescription.Length / empfohlen: 200+</small>
@@ -116,6 +138,7 @@
     private bool _isAnalyzing;
     private string _analyzeError = string.Empty;
     private string _sourceHint = "Keine Daten verfügbar";
+    private JobCategory _category = JobCategory.Auto;
 
     private string _analyzeButtonLabel => _isAnalyzing ? "Analysiere..." : "🎯 Jetzt analysieren";
 
@@ -151,7 +174,7 @@
 
         try
         {
-            _result = AtsService.Calculate(resumeToAnalyze, _jobDescription);
+            _result = AtsService.Calculate(resumeToAnalyze, _jobDescription, _category);
         }
         catch (Exception ex)
         {
@@ -219,5 +242,11 @@
         _jobDescription = string.Empty;
         _analyzeError = string.Empty;
         _isAnalyzing = false;
+        _category = JobCategory.Auto;
+    }
+
+    private void SetCategory(JobCategory category)
+    {
+        _category = category;
     }
 }
