@@ -11,8 +11,8 @@ public static class DependencyInjection
         services.AddScoped<ISnapshotService, SnapshotService>();
         services.AddScoped<IPdfExportService, PdfExportService>();
         services.AddScoped<IDocxExportService, DocxExportService>();
+        services.AddScoped<IAtsScoreService, AtsScoreService>();
 
         return services;
     }
 }
-
