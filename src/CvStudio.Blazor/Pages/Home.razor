@@ -33,19 +33,28 @@ else if (Vm.CurrentResume is null)
         <h1>CvStudio</h1>
         <p>1) Vorlage waehlen. 2) Arbeitsversion erstellen. 3) Varianten speichern und exportieren.</p>
 
-        <div class="template-grid">
-            @foreach (var vorlage in Vm.Vorlagen)
-            {
-                <button type="button"
-                        class='template-card @(Vm.GewaehlteVorlage == vorlage.Key ? "active" : string.Empty)'
-                        @onclick='() => Vm.GewaehlteVorlage = vorlage.Key'
-                        disabled="@Vm.IsBusy">
-                    <i class="@TemplateIconClass(vorlage.Key) template-icon"></i>
-                    <strong>@vorlage.DisplayName</strong>
-                    <span>@vorlage.Description</span>
-                </button>
-            }
-        </div>
+        @if (Vm.Vorlagen.Count == 0)
+        {
+            <div class="alert alert-warning" role="alert">
+                Vorlagen konnten aktuell nicht geladen werden. Bitte erneut versuchen.
+            </div>
+        }
+        else
+        {
+            <div class="template-grid">
+                @foreach (var vorlage in Vm.Vorlagen)
+                {
+                    <button type="button"
+                            class='template-card @(Vm.GewaehlteVorlage == vorlage.Key ? "active" : string.Empty)'
+                            @onclick='() => Vm.GewaehlteVorlage = vorlage.Key'
+                            disabled="@Vm.IsBusy">
+                        <i class="@TemplateIconClass(vorlage.Key) template-icon"></i>
+                        <strong>@vorlage.DisplayName</strong>
+                        <span>@vorlage.Description</span>
+                    </button>
+                }
+            </div>
+        }
 
         @if (!string.IsNullOrWhiteSpace(Vm.ErrorMessage))
         {
@@ -53,6 +62,7 @@ else if (Vm.CurrentResume is null)
         }
 
         <div class="toolbar-actions">
+            <button class="btn btn-secondary" @onclick="ReloadTemplatesAsync" disabled="@Vm.IsBusy"><i class="bi bi-arrow-repeat"></i> Vorlagen neu laden</button>
             <button class="btn btn-primary" @onclick="NeueArbeitsversionAsync" disabled="@Vm.IsBusy"><i class="bi bi-plus-circle"></i> Arbeitsversion erstellen</button>
             <button class="btn btn-danger" @onclick="FreshStartAsync" disabled="@Vm.IsBusy"><i class="bi bi-trash3"></i> Fresh Start</button>
         </div>
@@ -83,7 +93,7 @@ else
                 <h1>@Vm.CurrentResume.Title</h1>
                 <small class="header-meta-row">
                     <span><i class="bi bi-pencil-square"></i> Du bearbeitest: @Vm.AktivKontextText</span>
-                    <span class="meta-dot">•</span>
+                    <span class="meta-dot">&bull;</span>
                     <span class="autosave-state"><span class="autosave-dot"></span>@Vm.AutoSaveText</span>
                 </small>
                 <small class="mono-meta">Arbeitsversion-ID: @Vm.CurrentResume.Id</small>
@@ -134,38 +144,43 @@ else
                             <ValidationSummary />
 
                             <div class="editor-toolbar">
-                                <div class="editor-tabs">
+                                <div class="toolbar-actions-row">
+                                    <div class="toolbar-left">
+                                        <span class="editing-label"><i class="bi bi-pencil-square"></i> Du bearbeitest: @Vm.AktivKontextText</span>
+                                    </div>
+                                    <div class="toolbar-right">
+                                        <div class="export-group">
+                                            <InputSelect class="design-select" @bind-Value="Vm.AusgewaehltesPdfDesign">
+                                                <option value="@PdfDesign.DesignA">Design A</option>
+                                                <option value="@PdfDesign.DesignB">Design B</option>
+                                            </InputSelect>
+                                            <button class="btn btn-export-pdf btn-md" @onclick="ExportArbeitsversionPdfAsync" disabled="@Vm.IsBusy"><i class="bi bi-download"></i> PDF</button>
+                                        </div>
+                                        <button class="btn btn-export-docx btn-md" @onclick="ExportArbeitsversionDocxAsync" disabled="@Vm.IsBusy"><i class="bi bi-download"></i> DOCX</button>
+                                        <div class="save-dropdown-container">
+                                            <button class="btn btn-primary btn-md" @onclick="ToggleSaveDropdown" disabled="@Vm.IsBusy"><i class="bi bi-floppy"></i> Variante speichern</button>
+                                            @if (_showSaveDropdown)
+                                            {
+                                                <div class="save-dropdown">
+                                                    <div class="save-dropdown-title">Variante speichern</div>
+                                                    <input class="form-control" placeholder="z.B. SAP Bewerbung" @bind="Vm.VariantenNameEntwurf" />
+                                                    <div class="save-dropdown-actions">
+                                                        <button class="btn btn-secondary" @onclick="SaveWithoutExportAsync" disabled="@Vm.IsBusy">Speichern ohne Export</button>
+                                                        <button class="btn btn-primary" @onclick="SaveAndExportPdfAsync" disabled="@Vm.IsBusy">Speichern + PDF exportieren</button>
+                                                        <button class="btn btn-primary" @onclick="SaveAndExportDocxAsync" disabled="@Vm.IsBusy">Speichern + DOCX exportieren</button>
+                                                    </div>
+                                                </div>
+                                            }
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="toolbar-tabs-row">
                                     <button type="button" class='tab-btn @TabClass("profil")' @onclick='() => ActiveTab = "profil"'><i class="bi bi-person"></i> Profil</button>
                                     <button type="button" class='tab-btn @TabClass("beruf")' @onclick='() => ActiveTab = "beruf"'><i class="bi bi-building"></i> Beruf</button>
                                     <button type="button" class='tab-btn @TabClass("ausbildung")' @onclick='() => ActiveTab = "ausbildung"'><i class="bi bi-mortarboard"></i> Ausbildung</button>
                                     <button type="button" class='tab-btn @TabClass("kenntnisse")' @onclick='() => ActiveTab = "kenntnisse"'><i class="bi bi-tools"></i> Kenntnisse</button>
                                     <button type="button" class='tab-btn @TabClass("hobby")' @onclick='() => ActiveTab = "hobby"'><i class="bi bi-heart"></i> Hobbys</button>
-                                </div>
-                                <div class="editor-toolbar-actions">
-                                    <button class="btn btn-export-pdf" @onclick="ExportArbeitsversionPdfAsync" disabled="@Vm.IsBusy"><i class="bi bi-download"></i> PDF</button>
-                                    <button class="btn btn-export-docx" @onclick="ExportArbeitsversionDocxAsync" disabled="@Vm.IsBusy"><i class="bi bi-download"></i> DOCX</button>
-                                    <div class="save-dropdown-container">
-                                        <button class="btn btn-primary" @onclick="ToggleSaveDropdown" disabled="@Vm.IsBusy"><i class="bi bi-floppy"></i> Variante speichern</button>
-                                        @if (_showSaveDropdown)
-                                        {
-                                            <div class="save-dropdown">
-                                                <div class="save-dropdown-title">💾 Variante speichern</div>
-                                                <input class="form-control" placeholder="z.B. SAP Bewerbung" @bind="Vm.VariantenNameEntwurf" />
-                                                <label class="pdf-design-selector">
-                                                    PDF-Layout
-                                                    <InputSelect class="form-control" @bind-Value="Vm.AusgewaehltesPdfDesign">
-                                                        <option value="@PdfDesign.DesignA">Design A</option>
-                                                        <option value="@PdfDesign.DesignB">Design B</option>
-                                                    </InputSelect>
-                                                </label>
-                                                <div class="save-dropdown-actions">
-                                                    <button class="btn btn-secondary" @onclick="SaveWithoutExportAsync" disabled="@Vm.IsBusy">Speichern ohne Export</button>
-                                                    <button class="btn btn-primary" @onclick="SaveAndExportPdfAsync" disabled="@Vm.IsBusy">Speichern + PDF exportieren</button>
-                                                    <button class="btn btn-primary" @onclick="SaveAndExportDocxAsync" disabled="@Vm.IsBusy">Speichern + DOCX exportieren</button>
-                                                </div>
-                                            </div>
-                                        }
-                                    </div>
                                 </div>
                             </div>
 
@@ -546,6 +561,12 @@ else
         }
 
         Navigation.NavigateTo($"/arbeitsversion/{id}");
+    }
+
+    private async Task ReloadTemplatesAsync()
+    {
+        await Vm.LoadTemplatesAsync();
+        await InvokeAsync(StateHasChanged);
     }
 
     private void OeffneArbeitsversion(Guid resumeId)

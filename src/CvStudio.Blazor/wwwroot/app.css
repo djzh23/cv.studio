@@ -373,6 +373,32 @@ body::before {
     font-size: 0.9rem;
 }
 
+.export-group {
+    display: flex;
+    align-items: stretch;
+    border: 1px solid #bfdbfe;
+    border-radius: 4px;
+    overflow: hidden;
+    background: #eff6ff;
+}
+
+.export-group .design-select {
+    min-width: 85px;
+    padding: 0 0.5rem;
+    border: none;
+    border-right: 1px solid #bfdbfe;
+    background: #eff6ff;
+    color: #1d4ed8;
+    font-size: 0.75rem;
+    cursor: pointer;
+    outline: none;
+}
+
+.export-group .btn-export-pdf {
+    border: none;
+    border-radius: 0;
+}
+
 .template-grid {
     display: grid;
     grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -483,24 +509,42 @@ body::before {
     background: rgba(250, 247, 242, 0.97);
     backdrop-filter: blur(8px);
     border-bottom: 1px solid var(--border);
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 0.75rem;
     margin-bottom: 1.15rem;
 }
 
-.editor-tabs {
+.toolbar-actions-row {
     display: flex;
-    flex-wrap: wrap;
-    gap: 0;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.8rem;
+    padding: 0.5rem 0.75rem;
+    border-bottom: 1px solid #f0ebe3;
 }
 
-.editor-toolbar-actions {
+.toolbar-left .editing-label {
     display: inline-flex;
     align-items: center;
+    gap: 0.35rem;
+    font-size: 0.75rem;
+    color: var(--muted);
+}
+
+.toolbar-right {
+    display: flex;
+    align-items: center;
     gap: 0.5rem;
-    padding-right: 0.35rem;
+}
+
+.toolbar-tabs-row {
+    display: flex;
+    gap: 0;
+    padding: 0 0.5rem;
+    overflow-x: auto;
+    scrollbar-width: none;
+}
+
+.toolbar-tabs-row::-webkit-scrollbar {
+    display: none;
 }
 
 .save-dropdown-container {
@@ -559,8 +603,8 @@ body::before {
 }
 
 .tab-btn.active {
-    color: var(--text);
-    border-bottom-color: var(--text);
+    color: var(--accent-red);
+    border-bottom-color: var(--accent-red);
 }
 
 .tab-content {
@@ -843,14 +887,15 @@ body::before {
 
     .editor-toolbar {
         top: 48px;
-        flex-direction: column;
-        align-items: stretch;
-        padding: 0.4rem 0;
     }
 
-    .editor-toolbar-actions {
+    .toolbar-actions-row {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .toolbar-right {
         flex-wrap: wrap;
-        padding: 0 0.35rem 0.45rem;
     }
 
     .editor-scroll,
@@ -885,6 +930,14 @@ body::before {
 
     .main-layout {
         padding: 1rem 0.75rem;
+    }
+
+    .toolbar-actions-row {
+        padding: 0.45rem 0.5rem;
+    }
+
+    .toolbar-right {
+        gap: 0.35rem;
     }
 
     .variant-delete-label {
