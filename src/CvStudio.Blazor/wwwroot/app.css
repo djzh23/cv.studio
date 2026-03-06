@@ -373,6 +373,32 @@ body::before {
     font-size: 0.9rem;
 }
 
+.export-group {
+    display: flex;
+    align-items: stretch;
+    border: 1px solid #bfdbfe;
+    border-radius: 4px;
+    overflow: hidden;
+    background: #eff6ff;
+}
+
+.export-group .design-select {
+    min-width: 85px;
+    padding: 0 0.5rem;
+    border: none;
+    border-right: 1px solid #bfdbfe;
+    background: #eff6ff;
+    color: #1d4ed8;
+    font-size: 0.75rem;
+    cursor: pointer;
+    outline: none;
+}
+
+.export-group .btn-export-pdf {
+    border: none;
+    border-radius: 0;
+}
+
 .template-grid {
     display: grid;
     grid-template-columns: repeat(3, minmax(0, 1fr));
