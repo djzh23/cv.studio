@@ -1,6 +1,6 @@
 ﻿@using CvStudio.Application.Contracts
 @using CvStudio.Application.Services
-@inject IAtsScoreService AtsService
+@inject IResumeAtsAnalyzer AtsAnalyzer
 
 @if (IsOpen)
 {
@@ -74,22 +74,41 @@
 
                     <div class="ats-subscores">
                         <div class="ats-subscore-card">
-                            <div class="ats-subscore-value">@_result.KeywordScore/40</div>
+                            <div class="ats-subscore-value">@_result.HardRequirementsScore/30</div>
+                            <div class="ats-subscore-label">Must-Haves</div>
+                        </div>
+                        <div class="ats-subscore-card">
+                            <div class="ats-subscore-value">@_result.KeywordScore/25</div>
                             <div class="ats-subscore-label">Keywords</div>
                         </div>
                         <div class="ats-subscore-card">
-                            <div class="ats-subscore-value">@_result.CompletenessScore/25</div>
+                            <div class="ats-subscore-value">@_result.EvidenceScore/20</div>
+                            <div class="ats-subscore-label">Belege</div>
+                        </div>
+                        <div class="ats-subscore-card">
+                            <div class="ats-subscore-value">@_result.CompletenessScore/10</div>
                             <div class="ats-subscore-label">Vollständigkeit</div>
                         </div>
                         <div class="ats-subscore-card">
-                            <div class="ats-subscore-value">@_result.FormattingScore/20</div>
-                            <div class="ats-subscore-label">Formatierung</div>
+                            <div class="ats-subscore-value">@_result.FormattingScore/10</div>
+                            <div class="ats-subscore-label">Struktur</div>
                         </div>
                         <div class="ats-subscore-card">
-                            <div class="ats-subscore-value">@_result.LanguageScore/15</div>
+                            <div class="ats-subscore-value">@_result.LanguageScore/5</div>
                             <div class="ats-subscore-label">Sprache</div>
                         </div>
                     </div>
+
+                    @if (_result.MissingMustHaveKeywords.Count > 0)
+                    {
+                        <h4>🚨 Fehlende Must-Have Keywords (@_result.MissingMustHaveKeywords.Count)</h4>
+                        <div class="keyword-chips">
+                            @foreach (var keyword in _result.MissingMustHaveKeywords.Take(12))
+                            {
+                                <span class="keyword-chip keyword-chip-must">@keyword</span>
+                            }
+                        </div>
+                    }
 
                     <h4>✅ Gefundene Keywords (@_result.MatchedKeywords.Count)</h4>
                     <div class="keyword-chips">
@@ -180,7 +199,7 @@
 
         try
         {
-            _result = AtsService.Calculate(resumeToAnalyze, _jobDescription, _category);
+            _result = await AtsAnalyzer.AnalyzeAsync(resumeToAnalyze, _jobDescription, _category);
         }
         catch (Exception ex)
         {
