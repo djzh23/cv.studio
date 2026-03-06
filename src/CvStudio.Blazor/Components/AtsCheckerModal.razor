@@ -1,6 +1,6 @@
 ﻿@using CvStudio.Application.Contracts
 @using CvStudio.Application.Services
-@inject IAtsScoreService AtsService
+@inject IResumeAtsAnalyzer AtsAnalyzer
 
 @if (IsOpen)
 {
@@ -12,6 +12,28 @@
             </div>
 
             <div class="ats-modal-body">
+                <div class="category-selector">
+                    <label>Bewerbungskategorie</label>
+                    <div class="category-pills">
+                        <button type="button" class='pill @(_category == JobCategory.Auto ? "pill-active" : string.Empty)' @onclick='() => SetCategory(JobCategory.Auto)'>
+                            🔍 Automatisch erkennen
+                        </button>
+                        <button type="button" class='pill @(_category == JobCategory.SoftwareEntwickler ? "pill-active" : string.Empty)' @onclick='() => SetCategory(JobCategory.SoftwareEntwickler)'>
+                            💻 Software Entwickler
+                        </button>
+                        <button type="button" class='pill @(_category == JobCategory.ItSupport ? "pill-active" : string.Empty)' @onclick='() => SetCategory(JobCategory.ItSupport)'>
+                            🖥 IT Support
+                        </button>
+                        <button type="button" class='pill @(_category == JobCategory.Allgemein ? "pill-active" : string.Empty)' @onclick='() => SetCategory(JobCategory.Allgemein)'>
+                            📦 Allgemein / Service
+                        </button>
+                    </div>
+                    @if (_category == JobCategory.Auto && _result is not null)
+                    {
+                        <small class="category-hint">Erkannte Kategorie: <strong>@_result.CategoryLabel</strong></small>
+                    }
+                </div>
+
                 <h3>Schritt 1 - Stellenbeschreibung</h3>
                 <textarea class="form-control" rows="7" placeholder="Füge hier die Stellenbeschreibung ein... (min. 100 Zeichen)" @bind="_jobDescription"></textarea>
                 <small class="muted">Zeichen: @_jobDescription.Length / empfohlen: 200+</small>
@@ -40,6 +62,9 @@
                 {
                     <hr />
                     <div class="ats-score-display">
+                        <div class="ats-score-meta">
+                            <span class="ats-category-badge">@_result.CategoryLabel</span>
+                        </div>
                         <div class="ats-score-number" style="color: @_result.ScoreColor;">@_result.Score</div>
                         <div class="ats-score-label">@_result.ScoreLabel</div>
                         <div class="ats-progress-bar">
@@ -49,22 +74,41 @@
 
                     <div class="ats-subscores">
                         <div class="ats-subscore-card">
-                            <div class="ats-subscore-value">@_result.KeywordScore/40</div>
+                            <div class="ats-subscore-value">@_result.HardRequirementsScore/30</div>
+                            <div class="ats-subscore-label">Must-Haves</div>
+                        </div>
+                        <div class="ats-subscore-card">
+                            <div class="ats-subscore-value">@_result.KeywordScore/25</div>
                             <div class="ats-subscore-label">Keywords</div>
                         </div>
                         <div class="ats-subscore-card">
-                            <div class="ats-subscore-value">@_result.CompletenessScore/25</div>
+                            <div class="ats-subscore-value">@_result.EvidenceScore/20</div>
+                            <div class="ats-subscore-label">Belege</div>
+                        </div>
+                        <div class="ats-subscore-card">
+                            <div class="ats-subscore-value">@_result.CompletenessScore/10</div>
                             <div class="ats-subscore-label">Vollständigkeit</div>
                         </div>
                         <div class="ats-subscore-card">
-                            <div class="ats-subscore-value">@_result.FormattingScore/20</div>
-                            <div class="ats-subscore-label">Formatierung</div>
+                            <div class="ats-subscore-value">@_result.FormattingScore/10</div>
+                            <div class="ats-subscore-label">Struktur</div>
                         </div>
                         <div class="ats-subscore-card">
-                            <div class="ats-subscore-value">@_result.LanguageScore/15</div>
+                            <div class="ats-subscore-value">@_result.LanguageScore/5</div>
                             <div class="ats-subscore-label">Sprache</div>
                         </div>
                     </div>
+
+                    @if (_result.MissingMustHaveKeywords.Count > 0)
+                    {
+                        <h4>🚨 Fehlende Must-Have Keywords (@_result.MissingMustHaveKeywords.Count)</h4>
+                        <div class="keyword-chips">
+                            @foreach (var keyword in _result.MissingMustHaveKeywords.Take(12))
+                            {
+                                <span class="keyword-chip keyword-chip-must">@keyword</span>
+                            }
+                        </div>
+                    }
 
                     <h4>✅ Gefundene Keywords (@_result.MatchedKeywords.Count)</h4>
                     <div class="keyword-chips">
@@ -85,9 +129,12 @@
                     <h4>📋 Verbesserungsvorschläge</h4>
                     @foreach (var improvement in _result.Improvements)
                     {
-                        <div class="ats-improvement-item">
-                            <div>@improvement.PriorityIcon</div>
+                        <div class='ats-improvement-item @GetPriorityClass(improvement.Priority)'>
+                            <div class="ats-improvement-icon">@improvement.PriorityIcon</div>
                             <div class="ats-improvement-content">
+                                <div class="ats-improvement-top">
+                                    <span class='ats-priority-badge @GetPriorityClass(improvement.Priority)'>@improvement.Priority</span>
+                                </div>
                                 <div class="issue">@improvement.Category: @improvement.Issue</div>
                                 <div class="suggestion">@improvement.Suggestion</div>
                             </div>
@@ -116,6 +163,7 @@
     private bool _isAnalyzing;
     private string _analyzeError = string.Empty;
     private string _sourceHint = "Keine Daten verfügbar";
+    private JobCategory _category = JobCategory.Auto;
 
     private string _analyzeButtonLabel => _isAnalyzing ? "Analysiere..." : "🎯 Jetzt analysieren";
 
@@ -151,7 +199,7 @@
 
         try
         {
-            _result = AtsService.Calculate(resumeToAnalyze, _jobDescription);
+            _result = await AtsAnalyzer.AnalyzeAsync(resumeToAnalyze, _jobDescription, _category);
         }
         catch (Exception ex)
         {
@@ -219,5 +267,18 @@
         _jobDescription = string.Empty;
         _analyzeError = string.Empty;
         _isAnalyzing = false;
+        _category = JobCategory.Auto;
     }
+
+    private void SetCategory(JobCategory category)
+    {
+        _category = category;
+    }
+
+    private static string GetPriorityClass(string priority) => priority switch
+    {
+        "Hoch" => "priority-high",
+        "Mittel" => "priority-medium",
+        _ => "priority-low"
+    };
 }
