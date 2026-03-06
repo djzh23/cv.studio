@@ -46,6 +46,7 @@ public sealed class AtsScoreService : IAtsScoreService
 
         var result = new AtsScoreResult
         {
+            DetectedCategory = effectiveCategory,
             KeywordScore = CalcKeywords(resume, jobDescription),
             CompletenessScore = CalcCompleteness(resume),
             FormattingScore = CalcFormatting(resume),
