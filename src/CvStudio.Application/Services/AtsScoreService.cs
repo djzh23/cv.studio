@@ -23,6 +23,11 @@ public sealed class AtsScoreService : IAtsScoreService
 
     public AtsScoreResult Calculate(ResumeData resume, string jobDescription)
     {
+        return Calculate(resume, jobDescription, JobCategory.Auto);
+    }
+
+    public AtsScoreResult Calculate(ResumeData resume, string jobDescription, JobCategory category)
+    {
         if (resume is null)
         {
             throw new ArgumentNullException(nameof(resume));
@@ -32,6 +37,10 @@ public sealed class AtsScoreService : IAtsScoreService
         {
             throw new ArgumentException("Job description is required.", nameof(jobDescription));
         }
+
+        var effectiveCategory = category == JobCategory.Auto
+            ? DetectCategory(jobDescription)
+            : category;
 
         var result = new AtsScoreResult
         {
@@ -46,7 +55,61 @@ public sealed class AtsScoreService : IAtsScoreService
         result.MissingKeywords = GetMissingKeywords(resume, jobDescription, result.MatchedKeywords);
         result.Improvements = BuildImprovements(result, resume);
 
+        _ = effectiveCategory;
         return result;
+    }
+
+    private static JobCategory DetectCategory(string jobDesc)
+    {
+        var text = jobDesc.ToLowerInvariant();
+
+        string[] softwareSignals =
+        [
+            "entwickler", "developer", "software", "programmier",
+            "csharp", "dotnet", "java", "python", "react", "angular",
+            "blazor", "frontend", "backend", "fullstack", "devops",
+            "architektur", "clean architecture", "microservices",
+            "api", "datenbank", "repository", "deployment", "git"
+        ];
+
+        string[] itSupportSignals =
+        [
+            "it-support", "helpdesk", "first level", "second level",
+            "ticketsystem", "jira", "servicenow", "itil", "netzwerk",
+            "windows", "active directory", "troubleshooting",
+            "hardware", "infrastruktur", "support", "incident",
+            "fernwartung", "remotedesktop", "patch", "rollout"
+        ];
+
+        string[] allgemeinSignals =
+        [
+            "servicekraft", "küche", "koch", "gastronomie", "gastro",
+            "kommissionierung", "zustellung", "logistik", "lager",
+            "fahrer", "pakete", "briefe", "post", "sortierung",
+            "reinigung", "haushalt", "pflege", "einzelhandel",
+            "verkauf", "kasse", "kundendienst", "rezeption"
+        ];
+
+        var swScore = softwareSignals.Count(text.Contains);
+        var itScore = itSupportSignals.Count(text.Contains);
+        var agScore = allgemeinSignals.Count(text.Contains);
+
+        if (swScore == 0 && itScore == 0 && agScore == 0)
+        {
+            return JobCategory.Allgemein;
+        }
+
+        if (swScore >= itScore && swScore >= agScore)
+        {
+            return JobCategory.SoftwareEntwickler;
+        }
+
+        if (itScore >= swScore && itScore >= agScore)
+        {
+            return JobCategory.ItSupport;
+        }
+
+        return JobCategory.Allgemein;
     }
 
     private static int CalcKeywords(ResumeData cv, string jobDesc)
