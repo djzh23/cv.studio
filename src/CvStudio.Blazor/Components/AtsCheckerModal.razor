@@ -110,11 +110,26 @@
                         </div>
                     }
 
-                    <h4>✅ Gefundene Keywords (@_result.MatchedKeywords.Count)</h4>
+                    <h4>✅ Gefundene Tokens (allgemein) (@_result.MatchedKeywords.Count)</h4>
                     <div class="keyword-chips">
                         @foreach (var keyword in _result.MatchedKeywords.Take(20))
                         {
                             <span class="keyword-chip keyword-chip-matched">@keyword</span>
+                        }
+                    </div>
+
+                    <h4>🎯 Gefundene Skill-Keywords (score-relevant) (@_result.MatchedSkillKeywords.Count)</h4>
+                    <div class="keyword-chips">
+                        @if (_result.MatchedSkillKeywords.Count == 0)
+                        {
+                            <span class="keyword-chip keyword-chip-info">Keine score-relevanten Skill-Keywords erkannt</span>
+                        }
+                        else
+                        {
+                            @foreach (var keyword in _result.MatchedSkillKeywords.Take(20))
+                            {
+                                <span class="keyword-chip keyword-chip-skill">@keyword</span>
+                            }
                         }
                     </div>
 
