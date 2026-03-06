@@ -1,9 +1,27 @@
 @page "/hilfe"
 @page "/how-to-use"
 @rendermode InteractiveServer
+@inject CvStudio.Blazor.Services.PasscodeGateService Gate
+@inject NavigationManager Navigation
 
 <PageTitle>So funktioniert CvStudio</PageTitle>
 
+@if (!_accessChecked)
+{
+    <section class="howto-card">
+        <h1>So funktioniert die App</h1>
+        <p>Session wird geprueft...</p>
+    </section>
+}
+else if (!Gate.HasAccess)
+{
+    <section class="howto-card">
+        <h1>So funktioniert die App</h1>
+        <p>Weiterleitung zur Code-Eingabe...</p>
+    </section>
+}
+else
+{
 <section class="howto-card">
     <h1>So funktioniert die App</h1>
     <p>Einfacher 3-Schritte-Flow ohne Begriffschaos.</p>
@@ -28,4 +46,28 @@
         <p>Du kannst mehrere Bewerbungsvarianten parallel halten, spaeter vergleichen und gezielt exportieren, ohne den aktuellen Stand zu verlieren.</p>
     </div>
 </section>
+}
 
+@code {
+    private bool _accessChecked;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!firstRender)
+        {
+            return;
+        }
+
+        await Gate.EnsureInitializedAsync();
+        _accessChecked = true;
+        if (!Gate.HasAccess)
+        {
+            var relative = Navigation.ToBaseRelativePath(Navigation.Uri);
+            var returnUrl = string.IsNullOrWhiteSpace(relative) ? "/hilfe" : $"/{relative}";
+            Navigation.NavigateTo($"/access?returnUrl={Uri.EscapeDataString(returnUrl)}", replace: true);
+            return;
+        }
+
+        await InvokeAsync(StateHasChanged);
+    }
+}

@@ -1,0 +1,93 @@
+@page "/access"
+@rendermode InteractiveServer
+@inject CvStudio.Blazor.Services.PasscodeGateService Gate
+@inject NavigationManager Navigation
+
+<PageTitle>Zugang</PageTitle>
+
+<section class="empty-state" style="max-width: 560px; margin-top: 2rem;">
+    <h1>Zugangscode</h1>
+    <p>Bitte gib den Passcode ein, um CvStudio zu nutzen.</p>
+
+    @if (!_ready)
+    {
+        <p>Lade Session...</p>
+    }
+    else
+    {
+        <div style="text-align:left; margin-top: 1rem;">
+            <label for="access-passcode">Passcode</label>
+            <input id="access-passcode"
+                   class="form-control"
+                   type="password"
+                   @bind="_passcode"
+                   @bind:event="oninput"
+                   autocomplete="one-time-code" />
+        </div>
+
+        @if (!string.IsNullOrWhiteSpace(_error))
+        {
+            <div class="alert alert-danger" role="alert" style="margin-top: 1rem;">@_error</div>
+        }
+
+        <div class="toolbar-actions" style="margin-top: 1rem;">
+            <button class="btn btn-primary-action" @onclick="UnlockAsync">Freischalten</button>
+        </div>
+    }
+</section>
+
+@code {
+    [SupplyParameterFromQuery]
+    public string? ReturnUrl { get; set; }
+
+    private bool _ready;
+    private string _passcode = string.Empty;
+    private string? _error;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!firstRender)
+        {
+            return;
+        }
+
+        await Gate.EnsureInitializedAsync();
+        _ready = true;
+        if (Gate.HasAccess)
+        {
+            Navigation.NavigateTo(GetSafeReturnUrl(), replace: true);
+            return;
+        }
+
+        await InvokeAsync(StateHasChanged);
+    }
+
+    private async Task UnlockAsync()
+    {
+        _error = null;
+        var unlocked = await Gate.UnlockAsync(_passcode);
+        if (!unlocked)
+        {
+            _error = "Ungueltiger Passcode.";
+            return;
+        }
+
+        Navigation.NavigateTo(GetSafeReturnUrl(), replace: true);
+    }
+
+    private string GetSafeReturnUrl()
+    {
+        var candidate = ReturnUrl;
+        if (string.IsNullOrWhiteSpace(candidate))
+        {
+            return "/";
+        }
+
+        if (candidate.StartsWith("http", StringComparison.OrdinalIgnoreCase))
+        {
+            return "/";
+        }
+
+        return candidate.StartsWith('/') ? candidate : $"/{candidate}";
+    }
+}

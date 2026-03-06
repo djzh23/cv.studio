@@ -6,13 +6,28 @@
 @inject ResumeEditorViewModel Vm
 @inject NavigationManager Navigation
 @inject IJSRuntime Js
+@inject CvStudio.Blazor.Services.PasscodeGateService Gate
 @using Microsoft.AspNetCore.Components
 @using Microsoft.AspNetCore.Components.Forms
 @using CvStudio.Application.Services
 
 <PageTitle>CvStudio</PageTitle>
 
-@if (Vm.CurrentResume is null)
+@if (!_accessChecked)
+{
+    <section class="empty-state">
+        <h1>CvStudio</h1>
+        <p>Session wird geprueft...</p>
+    </section>
+}
+else if (!Gate.HasAccess)
+{
+    <section class="empty-state">
+        <h1>CvStudio</h1>
+        <p>Weiterleitung zur Code-Eingabe...</p>
+    </section>
+}
+else if (Vm.CurrentResume is null)
 {
     <section class="empty-state">
         <h1>CvStudio</h1>
@@ -374,17 +389,46 @@ else
     private string ActiveTab { get; set; } = "profil";
     private EditContext? _editContext;
     private ResumeDto? _editModel;
+    private bool _accessChecked;
+    private bool _bootstrapCompleted;
 
     protected override async Task OnInitializedAsync()
     {
         Vm.StateChanged += OnVmStateChanged;
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!_accessChecked)
+        {
+            await Gate.EnsureInitializedAsync();
+            _accessChecked = true;
+            if (!Gate.HasAccess)
+            {
+                RedirectToAccess();
+                return;
+            }
+        }
+
+        if (!Gate.HasAccess || _bootstrapCompleted)
+        {
+            return;
+        }
+
+        _bootstrapCompleted = true;
         await Vm.LoadTemplatesAsync();
         await TryLoadFromRouteOrLastAsync();
         EnsureEditContext();
+        await InvokeAsync(StateHasChanged);
     }
 
     protected override async Task OnParametersSetAsync()
     {
+        if (!_bootstrapCompleted || !Gate.HasAccess)
+        {
+            return;
+        }
+
         if (Id.HasValue && Vm.CurrentResume?.Id != Id.Value)
         {
             await Vm.ArbeitsversionLadenAsync(Id.Value);
@@ -399,6 +443,13 @@ else
             await Vm.VarianteInEditorLadenAsync(VersionId.Value);
             EnsureEditContext();
         }
+    }
+
+    private void RedirectToAccess()
+    {
+        var relative = Navigation.ToBaseRelativePath(Navigation.Uri);
+        var returnUrl = string.IsNullOrWhiteSpace(relative) ? "/" : $"/{relative}";
+        Navigation.NavigateTo($"/access?returnUrl={Uri.EscapeDataString(returnUrl)}", replace: true);
     }
 
     private async Task TryLoadFromRouteOrLastAsync()
@@ -693,4 +744,3 @@ else
         }
     }
 }
-

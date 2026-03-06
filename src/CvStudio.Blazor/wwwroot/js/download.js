@@ -1,4 +1,4 @@
-window.resumeVersioner = {
+window.CvStudio = {
     downloadFile: function (fileName, base64Content, contentType) {
         const link = document.createElement('a');
         link.download = fileName;
@@ -18,5 +18,21 @@ window.resumeVersioner = {
     },
     notify: function (message) {
         window.alert(message);
+    },
+    setAccessGranted: function (isGranted) {
+        if (isGranted) {
+            window.sessionStorage.setItem("cvstudio.access.granted", "1");
+            return;
+        }
+
+        window.sessionStorage.removeItem("cvstudio.access.granted");
+    },
+    getAccessGranted: function () {
+        return window.sessionStorage.getItem("cvstudio.access.granted") === "1";
+    },
+    clearAccessGranted: function () {
+        window.sessionStorage.removeItem("cvstudio.access.granted");
     }
 };
+
+window.resumeVersioner = window.CvStudio;
