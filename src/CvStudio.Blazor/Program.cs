@@ -16,6 +16,7 @@ builder.Services.AddHttpClient<ResumeApiClient>(client =>
     client.BaseAddress = new Uri(baseUrl);
 });
 builder.Services.AddScoped<ResumeEditorViewModel>();
+builder.Services.AddScoped<PasscodeGateService>();
 
 var app = builder.Build();
 
@@ -33,4 +34,3 @@ app.MapRazorComponents<App>()
     .AddInteractiveServerRenderMode();
 
 app.Run();
-

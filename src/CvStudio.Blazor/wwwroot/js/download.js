@@ -18,6 +18,20 @@ window.CvStudio = {
     },
     notify: function (message) {
         window.alert(message);
+    },
+    setAccessGranted: function (isGranted) {
+        if (isGranted) {
+            window.sessionStorage.setItem("cvstudio.access.granted", "1");
+            return;
+        }
+
+        window.sessionStorage.removeItem("cvstudio.access.granted");
+    },
+    getAccessGranted: function () {
+        return window.sessionStorage.getItem("cvstudio.access.granted") === "1";
+    },
+    clearAccessGranted: function () {
+        window.sessionStorage.removeItem("cvstudio.access.granted");
     }
 };
 

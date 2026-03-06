@@ -6,10 +6,27 @@
 @inject CvStudio.Blazor.Services.ResumeApiClient Api
 @inject NavigationManager Navigation
 @inject IJSRuntime Js
+@inject CvStudio.Blazor.Services.PasscodeGateService Gate
 @using CvStudio.Application.Services
 
 <PageTitle>Varianten verwalten</PageTitle>
 
+@if (!_accessChecked)
+{
+    <section class="empty-state">
+        <h1>Varianten</h1>
+        <p>Session wird geprueft...</p>
+    </section>
+}
+else if (!Gate.HasAccess)
+{
+    <section class="empty-state">
+        <h1>Varianten</h1>
+        <p>Weiterleitung zur Code-Eingabe...</p>
+    </section>
+}
+else
+{
 <section class="resume-shell">
     <header class="toolbar">
         <div class="toolbar-left">
@@ -100,6 +117,7 @@
         }
     </section>
 </section>
+}
 
 @code {
     [Parameter]
@@ -113,20 +131,44 @@
     private bool IsBusy { get; set; }
     private string? ErrorMessage { get; set; }
     private bool _interactiveReady;
+    private bool _accessChecked;
+    private bool _pageInitialized;
     private PdfDesign SelectedPdfDesign { get; set; } = PdfDesign.DesignA;
 
     protected override async Task OnInitializedAsync()
     {
-        Arbeitsversionen = (await Api.ListResumesAsync()).ToList();
-        if (ResumeId.HasValue)
-        {
-            await LoadArbeitsversionAsync(ResumeId.Value);
-            return;
-        }
+        await Task.CompletedTask;
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
+        if (!_accessChecked)
+        {
+            await Gate.EnsureInitializedAsync();
+            _accessChecked = true;
+            if (!Gate.HasAccess)
+            {
+                RedirectToAccess();
+                return;
+            }
+        }
+
+        if (!Gate.HasAccess)
+        {
+            return;
+        }
+
+        if (!_pageInitialized)
+        {
+            _pageInitialized = true;
+            Arbeitsversionen = (await Api.ListResumesAsync()).ToList();
+            if (ResumeId.HasValue)
+            {
+                await LoadArbeitsversionAsync(ResumeId.Value);
+            }
+            await InvokeAsync(StateHasChanged);
+        }
+
         if (!firstRender)
         {
             return;
@@ -156,10 +198,22 @@
 
     protected override async Task OnParametersSetAsync()
     {
+        if (!_pageInitialized || !Gate.HasAccess)
+        {
+            return;
+        }
+
         if (ResumeId.HasValue && ResumeId.Value != ActiveArbeitsversionId)
         {
             await LoadArbeitsversionAsync(ResumeId.Value);
         }
+    }
+
+    private void RedirectToAccess()
+    {
+        var relative = Navigation.ToBaseRelativePath(Navigation.Uri);
+        var returnUrl = string.IsNullOrWhiteSpace(relative) ? "/varianten" : $"/{relative}";
+        Navigation.NavigateTo($"/access?returnUrl={Uri.EscapeDataString(returnUrl)}", replace: true);
     }
 
     private async Task LoadSelectedAsync()
@@ -318,4 +372,3 @@
         };
     }
 }
-
