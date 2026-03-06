@@ -462,6 +462,44 @@ body::before {
     padding-right: 0.35rem;
 }
 
+.save-dropdown-container {
+    position: relative;
+}
+
+.save-dropdown {
+    position: absolute;
+    top: calc(100% + 8px);
+    right: 0;
+    width: 300px;
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+    padding: 1rem;
+    z-index: 100;
+}
+
+.save-dropdown-title {
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: var(--text);
+    margin-bottom: 0.75rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid #f0ebe3;
+}
+
+.save-dropdown .form-control {
+    width: 100%;
+    margin-bottom: 0.5rem;
+}
+
+.save-dropdown-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+    margin-top: 0.75rem;
+}
+
 .tab-btn {
     border: none;
     border-bottom: 2px solid transparent;
