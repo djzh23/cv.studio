@@ -391,7 +391,7 @@ else
                     @foreach (var variante in Vm.GespeicherteVarianten)
                     {
                         <div class="version-item">
-                            <strong><span class='version-badge @VersionBadgeClass(variante.VersionNumber)'>v@DisplayVersionNumber(variante.VersionNumber)</span> @ResumeEditorViewModel.FormatVariantenName(variante)</strong>
+                            <strong><span class='version-badge @VersionBadgeClass(variante.VersionNumber)'>v@(variante.VersionNumber)</span> @ResumeEditorViewModel.FormatVariantenName(variante)</strong>
                             <small>@variante.CreatedAtUtc.ToLocalTime().ToString("g")</small>
                             <div class="toolbar-actions">
                                 <button class="btn btn-sm btn-ghost" @onclick="() => VarianteLadenAsync(variante.Id)"><i class="bi bi-pencil-square"></i> Als Arbeitsversion laden</button>
@@ -549,8 +549,6 @@ else
             _ => "badge-v3"
         };
     }
-
-    private static int DisplayVersionNumber(int versionNumber) => Math.Max(versionNumber, 1);
 
     private async Task NeueArbeitsversionAsync()
     {

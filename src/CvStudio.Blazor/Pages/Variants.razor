@@ -96,7 +96,7 @@ else
                 @foreach (var variante in Varianten)
                 {
                     <tr>
-                        <td><span class='version-badge @VersionBadgeClass(variante.VersionNumber)'>v@DisplayVersionNumber(variante.VersionNumber)</span></td>
+                        <td><span class='version-badge @VersionBadgeClass(variante.VersionNumber)'>v@(variante.VersionNumber)</span></td>
                         <td style="min-width: 280px;">
                             <input class="form-control" @bind="variante.Label" />
                         </td>
@@ -390,5 +390,4 @@ else
         };
     }
 
-    private static int DisplayVersionNumber(int versionNumber) => Math.Max(versionNumber, 1);
 }
