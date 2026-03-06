@@ -30,7 +30,7 @@ public static class ResumeTemplateCatalog
             {
                 Key = ServiceGeneral,
                 DisplayName = "Service / Gastro / Kommissionierer / Briefzusteller",
-                Description = "Allgemeines Service-Profil fuer operative und kundennahe Taetigkeiten."
+                Description = "Allgemeines Service-Profil für operative und kundennahe Tätigkeiten."
             }
         ];
     }
@@ -69,12 +69,12 @@ public static class ResumeTemplateCatalog
                     Role = "Werkstudent Softwareentwicklung",
                     StartDate = "10/2021",
                     EndDate = "03/2022",
-                    Description = "Mitentwicklung der DIGI:BO-Plattform fuer digitale Berufsorientierung.",
+                    Description = "Mitentwicklung der DIGI:BO-Plattform für digitale Berufsorientierung.",
                     Bullets =
                     [
                         "Weiterentwicklung der WordPress/React-Plattform mit PHP, JSX und Plugin-Anpassungen.",
-                        "Formulare und Custom Post Types in bestehende Arbeitsablaeufe integriert.",
-                        "Redaktionelle Inhalte und Wiki-Dokumentation fuer das Team erstellt."
+                        "Formulare und Custom Post Types in bestehende Arbeitsabläufe integriert.",
+                        "Redaktionelle Inhalte und Wiki-Dokumentation für das Team erstellt."
                     ]
                 },
                 new WorkItemData
@@ -83,11 +83,11 @@ public static class ResumeTemplateCatalog
                     Role = "Werkstudent Softwareentwicklung",
                     StartDate = "06/2023",
                     EndDate = "07/2024",
-                    Description = "Blazor-Hybrid-App fuer Android, iOS und Web mitentwickelt.",
+                    Description = "Blazor-Hybrid-App für Android, iOS und Web mitentwickelt.",
                     Bullets =
                     [
                         "UI-Komponenten nach MVVM mit Razor Pages, Commands, Events und Services umgesetzt.",
-                        "Caching und asynchrone Verarbeitung zur Ladezeitreduktion eingefuehrt.",
+                        "Caching und asynchrone Verarbeitung zur Ladezeitreduktion eingeführt.",
                         "Datenbankanbindung mit Entity Framework und ORM-Konzepten umgesetzt.",
                         "Ladezeiten um 35 % durch Performance-Optimierung reduziert.",
                         "Stabiler mobiler Zugriff im internen Netzwerk mit hoher Nutzungsakzeptanz erreicht."
@@ -145,7 +145,7 @@ public static class ResumeTemplateCatalog
                 new EducationItemData
                 {
                     School = "Cadi Ayyad University | Essaouira",
-                    Degree = "Universitaetsdiplom, Web-Berufe",
+                    Degree = "Universitätsdiplom, Web-Berufe",
                     StartDate = "09/2012",
                     EndDate = "07/2014"
                 }
@@ -156,7 +156,7 @@ public static class ResumeTemplateCatalog
                 new SkillGroupData { CategoryName = "Web- und App-Entwicklung", Items = ["Blazor Hybrid", "MVVM", ".NET MAUI", "Razor Pages", "Laravel"] },
                 new SkillGroupData { CategoryName = "Datenbanken", Items = ["PostgreSQL", "MySQL"] },
                 new SkillGroupData { CategoryName = "Arbeitsweise und Zusammenarbeit", Items = ["Strukturierte Arbeitsweise", "Schnelle Einarbeitung", "Teamplayer", "Code Reviews", "Swagger"] },
-                new SkillGroupData { CategoryName = "Sprachkenntnisse", Items = ["Deutsch (C2)", "Franzoesisch (C1)", "Englisch (B1)"] },
+                new SkillGroupData { CategoryName = "Sprachkenntnisse", Items = ["Deutsch (C2)", "Französisch (C1)", "Englisch (B1)"] },
                 new SkillGroupData { CategoryName = "Links", Items = ["www.linkedin.com/in/zouhair-ijaad", "https://github.com/djzh23"] }
             ],
             Hobbies = ["Open-Source", "Technologie", "Kontinuierliche Weiterbildung"]
@@ -189,7 +189,7 @@ public static class ResumeTemplateCatalog
                     Bullets =
                     [
                         "Mitarbeit an einer internen Business-App inkl. Grundfunktionen, Datenanbindung und Dokumentation.",
-                        "Unterstuetzung digitaler Prozesse, Testing und strukturierte Teamarbeit.",
+                        "Unterstützung digitaler Prozesse, Testing und strukturierte Teamarbeit.",
                         "Sicherer Umgang mit modernen Tools und IT-Systemen im Tagesbetrieb."
                     ]
                 },
@@ -201,14 +201,14 @@ public static class ResumeTemplateCatalog
                     EndDate = "09/2024",
                     Bullets =
                     [
-                        "Unterstuetzung eines mobilen Teams bei Spiel- und Lernangeboten.",
-                        "Organisation sicherer Ablaeufe, Teamkoordination und Kommunikation im Verein.",
-                        "Parallele Entwicklung einer digitalen Vereinsloesung zur Prozessoptimierung."
+                        "Unterstützung eines mobilen Teams bei Spiel- und Lernangeboten.",
+                        "Organisation sicherer Abläufe, Teamkoordination und Kommunikation im Verein.",
+                        "Parallele Entwicklung einer digitalen Vereinslösung zur Prozessoptimierung."
                     ]
                 },
                 new WorkItemData
                 {
-                    Company = "BalticBootCenter GmbH | Luebeck",
+                    Company = "BalticBootCenter GmbH | Lübeck",
                     Role = "Saisonarbeitskraft Kundenservice und Vermietung",
                     StartDate = "05/2025",
                     EndDate = "09/2025",
@@ -216,7 +216,7 @@ public static class ResumeTemplateCatalog
                     [
                         "Betreuung und Einweisung von Kunden sowie Sicherstellung von Sicherheitsvorgaben.",
                         "Pflege, Reinigung und Instandhaltung der Boote.",
-                        "Zuverlaessige, serviceorientierte Kommunikation in Deutsch und Englisch."
+                        "Zuverlässige, serviceorientierte Kommunikation in Deutsch und Englisch."
                     ]
                 },
                 new WorkItemData
@@ -228,8 +228,8 @@ public static class ResumeTemplateCatalog
                     Bullets =
                     [
                         "Sortierung und Zustellung von Briefsendungen, Paketen und Einschreiben.",
-                        "Eigenstaendige Tourplanung sowie Bargeldabwicklung.",
-                        "Zuverlaessige und genaue Arbeitsweise unter Zeitdruck."
+                        "Eigenständige Tourplanung sowie Bargeldabwicklung.",
+                        "Zuverlässige und genaue Arbeitsweise unter Zeitdruck."
                     ]
                 }
             ],
@@ -245,7 +245,7 @@ public static class ResumeTemplateCatalog
                 new EducationItemData
                 {
                     School = "Cadi Ayyad University",
-                    Degree = "Universitaetsdiplom, Web-Berufe",
+                    Degree = "Universitätsdiplom, Web-Berufe",
                     StartDate = "09/2012",
                     EndDate = "07/2014"
                 }
@@ -254,9 +254,9 @@ public static class ResumeTemplateCatalog
             [
                 new SkillGroupData { CategoryName = "IT-Support", Items = ["Windows", "Office 365", "IT-Ticketsysteme", "Troubleshooting", "Serviceorientierte Kommunikation"] },
                 new SkillGroupData { CategoryName = "Digitale Prozesse", Items = ["Testing", "Dokumentation", "Strukturierte Teamarbeit"] },
-                new SkillGroupData { CategoryName = "Sprachkenntnisse", Items = ["Deutsch (C1)", "Franzoesisch (C1)", "Englisch (B1-B2)"] }
+                new SkillGroupData { CategoryName = "Sprachkenntnisse", Items = ["Deutsch (C1)", "Französisch (C1)", "Englisch (B1-B2)"] }
             ],
-            Hobbies = ["Kultur und Sprachen", "Musik", "Fussball", "Wandern", "Technik und digitale Tools"]
+            Hobbies = ["Kultur und Sprachen", "Musik", "Fußball", "Wandern", "Technik und digitale Tools"]
         };
     }
 
@@ -273,7 +273,7 @@ public static class ResumeTemplateCatalog
                 Phone = "+49 170 0000000",
                 Location = "Hamburg, Deutschland",
                 ProfileImageUrl = "https://i.ibb.co/CpTGqYTz/bewerbungsfoto.png",
-                Summary = "Belastbarer und zuverlaessiger Mitarbeiter mit Erfahrung in Service, Logistik und kundennahem Arbeiten."
+                Summary = "Belastbarer und zuverlässiger Mitarbeiter mit Erfahrung in Service, Logistik und kundennahem Arbeiten."
             },
             WorkItems =
             [
@@ -285,9 +285,9 @@ public static class ResumeTemplateCatalog
                     EndDate = "Heute",
                     Bullets =
                     [
-                        "Freundliche Betreuung von Gaesten und effiziente Auftragsabwicklung.",
-                        "Sicherstellung von Qualitaets- und Hygienestandards im Tagesbetrieb.",
-                        "Verlaessliche Zusammenarbeit in Schicht- und Sto�zeiten."
+                        "Freundliche Betreuung von Gästen und effiziente Auftragsabwicklung.",
+                        "Sicherstellung von Qualitäts- und Hygienestandards im Tagesbetrieb.",
+                        "Verlässliche Zusammenarbeit in Schicht- und Stoßzeiten."
                     ]
                 },
                 new WorkItemData
@@ -299,8 +299,8 @@ public static class ResumeTemplateCatalog
                     Bullets =
                     [
                         "Kommissionierung und termingerechte Bereitstellung von Sendungen.",
-                        "Sorgfaeltige Erfassung und Kontrolle von Warenbewegungen.",
-                        "Zuverlaessige Auslieferung und kundenorientierte Uebergabe."
+                        "Sorgfältige Erfassung und Kontrolle von Warenbewegungen.",
+                        "Zuverlässige Auslieferung und kundenorientierte Übergabe."
                     ]
                 }
             ],
@@ -318,10 +318,9 @@ public static class ResumeTemplateCatalog
             [
                 new SkillGroupData { CategoryName = "Service", Items = ["Kundenbetreuung", "Kassensysteme", "Teamarbeit"] },
                 new SkillGroupData { CategoryName = "Logistik", Items = ["Kommissionierung", "Warenkontrolle", "Tourenvorbereitung"] },
-                new SkillGroupData { CategoryName = "Arbeitsweise", Items = ["Zuverlaessigkeit", "Belastbarkeit", "Puenktlichkeit"] }
+                new SkillGroupData { CategoryName = "Arbeitsweise", Items = ["Zuverlässigkeit", "Belastbarkeit", "Pünktlichkeit"] }
             ],
             Hobbies = ["Kochen", "Sport"]
         };
     }
 }
-
