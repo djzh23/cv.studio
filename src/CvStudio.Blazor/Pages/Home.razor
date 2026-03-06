@@ -10,6 +10,7 @@
 @using Microsoft.AspNetCore.Components
 @using Microsoft.AspNetCore.Components.Forms
 @using CvStudio.Application.Services
+@using CvStudio.Application.Contracts
 
 <PageTitle>CvStudio</PageTitle>
 
@@ -157,6 +158,7 @@ else
                                             <button class="btn btn-export-pdf btn-md" @onclick="ExportArbeitsversionPdfAsync" disabled="@Vm.IsBusy"><i class="bi bi-download"></i> PDF</button>
                                         </div>
                                         <button class="btn btn-export-docx btn-md" @onclick="ExportArbeitsversionDocxAsync" disabled="@Vm.IsBusy"><i class="bi bi-download"></i> DOCX</button>
+                                        <button class="btn btn-secondary btn-md" @onclick="OpenAtsModal" disabled="@Vm.IsBusy"><i class="bi bi-bullseye"></i> ATS prüfen</button>
                                         <div class="save-dropdown-container">
                                             <button class="btn btn-primary btn-md" @onclick="ToggleSaveDropdown" disabled="@Vm.IsBusy"><i class="bi bi-floppy"></i> Variante speichern</button>
                                             @if (_showSaveDropdown)
@@ -404,6 +406,12 @@ else
             }
         </section>
     </section>
+
+    <AtsCheckerModal IsOpen="_atsModalOpen"
+                     OnClose="CloseAtsModal"
+                     OnExportAnyway="ExportFromAtsModalAsync"
+                     CurrentResume="GetCurrentResumeForAts()"
+                     LastSnapshotResume="GetLastSnapshotForAts()" />
 }
 
 @code {
@@ -419,6 +427,7 @@ else
     private bool _accessChecked;
     private bool _bootstrapCompleted;
     private bool _showSaveDropdown;
+    private bool _atsModalOpen;
 
     protected override async Task OnInitializedAsync()
     {
@@ -587,6 +596,31 @@ else
     {
         _showSaveDropdown = !_showSaveDropdown;
     }
+
+    private void OpenAtsModal()
+    {
+        _atsModalOpen = true;
+    }
+
+    private Task CloseAtsModal()
+    {
+        _atsModalOpen = false;
+        return Task.CompletedTask;
+    }
+
+    private async Task ExportFromAtsModalAsync()
+    {
+        await ExportArbeitsversionPdfAsync();
+        _atsModalOpen = false;
+    }
+
+    private ResumeData? GetCurrentResumeForAts() => Vm.CurrentResume?.ResumeData;
+
+    private ResumeData? GetLastSnapshotForAts() =>
+        Vm.GespeicherteVarianten
+            .OrderByDescending(v => v.VersionNumber)
+            .Select(v => v.ResumeData)
+            .FirstOrDefault();
 
     private async Task SaveWithoutExportAsync()
     {
