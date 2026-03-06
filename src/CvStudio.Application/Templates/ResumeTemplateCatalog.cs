@@ -99,7 +99,7 @@ public static class ResumeTemplateCatalog
                     Role = "Honorarkraft und Thesisprojekt Vereinsmanagement",
                     StartDate = "10/2022",
                     EndDate = "09/2024",
-                    Description = "Vereinsmanagement-Anwendung mit .NET MAUI (Frontend) und Laravel (Backend) entwickelt.",
+                    Description = "Vollständige Vereinsmanagement-App mit .NET MAUI (Frontend) und Laravel (Backend) entwickelt — Nutzerverwaltung für 50+ Mitglieder digitalisiert.",
                     Bullets =
                     [
                         "Nutzerverwaltung und Prozessautomatisierung im Vereinskontext umgesetzt.",
@@ -115,7 +115,7 @@ public static class ResumeTemplateCatalog
                     Description = "Eigenprojekte mit .NET, PostgreSQL, Docker und EF Core aufgebaut.",
                     Bullets =
                     [
-                        "GitHub-Projekte wie Monitoring Dashboard und Schichtplanung ONP weiterentwickelt.",
+                        "2 GitHub-Projekte (Monitoring Dashboard & Schichtplanung ONP) eigenständig weiterentwickelt und auf aktuellem Stand gehalten.",
                         "Weiterbildung in Clean Architecture und Backend-Strukturierung vertieft."
                     ]
                 },
@@ -125,7 +125,7 @@ public static class ResumeTemplateCatalog
                     Role = "Praktikant Softwareentwicklung",
                     StartDate = "04/2014",
                     EndDate = "07/2014",
-                    Description = "Anwendung zur Automatisierung von Schichtplanung und Urlaubsverwaltung entwickelt.",
+                    Description = "Automatisierungslösung für Schichtplanung und Urlaubsverwaltung entwickelt — manuelle Planungszeit um ca. 60% reduziert.",
                     Bullets =
                     [
                         "Reports und technische Dokumentation erstellt.",
