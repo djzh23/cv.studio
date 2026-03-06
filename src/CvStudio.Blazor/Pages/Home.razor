@@ -53,9 +53,8 @@ else if (Vm.CurrentResume is null)
         }
 
         <div class="toolbar-actions">
-            <button class="btn btn-primary-action" @onclick="NeueArbeitsversionAsync" disabled="@Vm.IsBusy"><i class="bi bi-plus-circle"></i> Arbeitsversion erstellen</button>
-            <button class="btn btn-tertiary-action" @onclick='() => Navigation.NavigateTo("/hilfe")'><i class="bi bi-book"></i> So funktioniert es</button>
-            <button class="btn btn-danger-action" @onclick="FreshStartAsync" disabled="@Vm.IsBusy"><i class="bi bi-trash3"></i> Fresh Start</button>
+            <button class="btn btn-primary" @onclick="NeueArbeitsversionAsync" disabled="@Vm.IsBusy"><i class="bi bi-plus-circle"></i> Arbeitsversion erstellen</button>
+            <button class="btn btn-danger" @onclick="FreshStartAsync" disabled="@Vm.IsBusy"><i class="bi bi-trash3"></i> Fresh Start</button>
         </div>
 
         @if (Vm.Arbeitsversionen.Count > 0)
@@ -90,9 +89,8 @@ else
                 <small class="mono-meta">Arbeitsversion-ID: @Vm.CurrentResume.Id</small>
             </div>
             <div class="toolbar-actions">
-                <button class="btn btn-primary-action" @onclick="NeueArbeitsversionAsync" disabled="@Vm.IsBusy"><i class="bi bi-plus-circle"></i> Neue Arbeitsversion</button>
-                <button class="btn btn-secondary-action" @onclick='() => Navigation.NavigateTo($"/varianten/{Vm.CurrentResume.Id}")'><i class="bi bi-git"></i> Varianten verwalten</button>
-                <button class="btn btn-tertiary-action" @onclick='() => Navigation.NavigateTo("/hilfe")'><i class="bi bi-book"></i> So funktioniert es</button>
+                <button class="btn btn-primary" @onclick="NeueArbeitsversionAsync" disabled="@Vm.IsBusy"><i class="bi bi-plus-circle"></i> Neue Arbeitsversion</button>
+                <button class="btn btn-secondary" @onclick='() => Navigation.NavigateTo($"/varianten/{Vm.CurrentResume.Id}")'><i class="bi bi-git"></i> Varianten verwalten</button>
             </div>
         </header>
 
@@ -112,7 +110,7 @@ else
                 }
             </div>
             <div class="toolbar-actions">
-                <button class="btn btn-primary-action" @onclick="NeueArbeitsversionAsync" disabled="@Vm.IsBusy"><i class="bi bi-plus-circle"></i> Arbeitsversion mit gewaehlter Vorlage erstellen</button>
+                <button class="btn btn-primary" @onclick="NeueArbeitsversionAsync" disabled="@Vm.IsBusy"><i class="bi bi-plus-circle"></i> Arbeitsversion mit gewaehlter Vorlage erstellen</button>
             </div>
         </section>
 
@@ -144,10 +142,10 @@ else
                                     <button type="button" class='tab-btn @TabClass("hobby")' @onclick='() => ActiveTab = "hobby"'><i class="bi bi-heart"></i> Hobbys</button>
                                 </div>
                                 <div class="editor-toolbar-actions">
-                                    <button class="btn btn-secondary-action" @onclick="ExportArbeitsversionPdfAsync" disabled="@Vm.IsBusy"><i class="bi bi-download"></i> PDF</button>
-                                    <button class="btn btn-secondary-action" @onclick="ExportArbeitsversionDocxAsync" disabled="@Vm.IsBusy"><i class="bi bi-download"></i> DOCX</button>
+                                    <button class="btn btn-export-pdf" @onclick="ExportArbeitsversionPdfAsync" disabled="@Vm.IsBusy"><i class="bi bi-download"></i> PDF</button>
+                                    <button class="btn btn-export-docx" @onclick="ExportArbeitsversionDocxAsync" disabled="@Vm.IsBusy"><i class="bi bi-download"></i> DOCX</button>
                                     <div class="save-dropdown-container">
-                                        <button class="btn btn-primary-action" @onclick="ToggleSaveDropdown" disabled="@Vm.IsBusy"><i class="bi bi-floppy"></i> Variante speichern</button>
+                                        <button class="btn btn-primary" @onclick="ToggleSaveDropdown" disabled="@Vm.IsBusy"><i class="bi bi-floppy"></i> Variante speichern</button>
                                         @if (_showSaveDropdown)
                                         {
                                             <div class="save-dropdown">
@@ -161,9 +159,9 @@ else
                                                     </InputSelect>
                                                 </label>
                                                 <div class="save-dropdown-actions">
-                                                    <button class="btn btn-secondary-action" @onclick="SaveWithoutExportAsync" disabled="@Vm.IsBusy">Speichern ohne Export</button>
-                                                    <button class="btn btn-primary-action" @onclick="SaveAndExportPdfAsync" disabled="@Vm.IsBusy">Speichern + PDF exportieren</button>
-                                                    <button class="btn btn-primary-action" @onclick="SaveAndExportDocxAsync" disabled="@Vm.IsBusy">Speichern + DOCX exportieren</button>
+                                                    <button class="btn btn-secondary" @onclick="SaveWithoutExportAsync" disabled="@Vm.IsBusy">Speichern ohne Export</button>
+                                                    <button class="btn btn-primary" @onclick="SaveAndExportPdfAsync" disabled="@Vm.IsBusy">Speichern + PDF exportieren</button>
+                                                    <button class="btn btn-primary" @onclick="SaveAndExportDocxAsync" disabled="@Vm.IsBusy">Speichern + DOCX exportieren</button>
                                                 </div>
                                             </div>
                                         }
@@ -211,10 +209,10 @@ else
                                         <label>Stichpunkte (eine Zeile = ein Punkt)
                                             <textarea class="form-control" rows="4" value="@string.Join('\n', item.Bullets)" @onchange="e => UpdateBullets(item, e.Value?.ToString())"></textarea>
                                         </label>
-                                        <button type="button" class="btn btn-sm btn-danger-action" @onclick="() => RemoveWork(i)"><i class="bi bi-trash3"></i> Entfernen</button>
+                                        <button type="button" class="btn btn-sm btn-danger" @onclick="() => RemoveWork(i)"><i class="bi bi-trash3"></i> Entfernen</button>
                                     </div>
                                 }
-                                <button type="button" class="btn btn-sm btn-secondary-action" @onclick="AddWork"><i class="bi bi-plus-circle"></i> Eintrag hinzufuegen</button>
+                                <button type="button" class="btn btn-sm btn-secondary" @onclick="AddWork"><i class="bi bi-plus-circle"></i> Eintrag hinzufuegen</button>
                                 </div>
                             }
 
@@ -232,10 +230,10 @@ else
                                             <label>Start <InputText class="form-control" @bind-Value="item.StartDate" /></label>
                                             <label>Ende <InputText class="form-control" @bind-Value="item.EndDate" /></label>
                                         </div>
-                                        <button type="button" class="btn btn-sm btn-danger-action" @onclick="() => RemoveEducation(i)"><i class="bi bi-trash3"></i> Entfernen</button>
+                                        <button type="button" class="btn btn-sm btn-danger" @onclick="() => RemoveEducation(i)"><i class="bi bi-trash3"></i> Entfernen</button>
                                     </div>
                                 }
-                                <button type="button" class="btn btn-sm btn-secondary-action" @onclick="AddEducation"><i class="bi bi-plus-circle"></i> Eintrag hinzufuegen</button>
+                                <button type="button" class="btn btn-sm btn-secondary" @onclick="AddEducation"><i class="bi bi-plus-circle"></i> Eintrag hinzufuegen</button>
                                 </div>
                             }
 
@@ -253,10 +251,10 @@ else
                                                 <input class="form-control" value="@string.Join(", ", group.Items)" @onchange="e => UpdateSkillItems(group, e.Value?.ToString())" />
                                             </label>
                                         </div>
-                                        <button type="button" class="btn btn-sm btn-danger-action" @onclick="() => RemoveSkill(i)"><i class="bi bi-trash3"></i> Entfernen</button>
+                                        <button type="button" class="btn btn-sm btn-danger" @onclick="() => RemoveSkill(i)"><i class="bi bi-trash3"></i> Entfernen</button>
                                     </div>
                                 }
-                                <button type="button" class="btn btn-sm btn-secondary-action" @onclick="AddSkill"><i class="bi bi-plus-circle"></i> Kategorie hinzufuegen</button>
+                                <button type="button" class="btn btn-sm btn-secondary" @onclick="AddSkill"><i class="bi bi-plus-circle"></i> Kategorie hinzufuegen</button>
                                 </div>
                             }
 
@@ -381,9 +379,9 @@ else
                             <strong><span class='version-badge @VersionBadgeClass(variante.VersionNumber)'>v@variante.VersionNumber</span> @ResumeEditorViewModel.FormatVariantenName(variante)</strong>
                             <small>@variante.CreatedAtUtc.ToLocalTime().ToString("g")</small>
                             <div class="toolbar-actions">
-                                <button class="btn btn-sm btn-secondary-action" @onclick="() => VarianteLadenAsync(variante.Id)"><i class="bi bi-pencil-square"></i> Als Arbeitsversion laden</button>
-                                <button class="btn btn-sm btn-primary-action" @onclick="() => ExportVariantePdfAsync(variante)"><i class="bi bi-download"></i> PDF</button>
-                                <button class="btn btn-sm btn-primary-action" @onclick="() => ExportVarianteDocxAsync(variante)"><i class="bi bi-download"></i> DOCX</button>
+                                <button class="btn btn-sm btn-ghost" @onclick="() => VarianteLadenAsync(variante.Id)"><i class="bi bi-pencil-square"></i> Als Arbeitsversion laden</button>
+                                <button class="btn btn-sm btn-export-pdf" @onclick="() => ExportVariantePdfAsync(variante)"><i class="bi bi-download"></i> PDF</button>
+                                <button class="btn btn-sm btn-export-docx" @onclick="() => ExportVarianteDocxAsync(variante)"><i class="bi bi-download"></i> DOCX</button>
                             </div>
                         </div>
                     }
