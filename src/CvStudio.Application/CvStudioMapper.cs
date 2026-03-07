@@ -17,7 +17,16 @@ public static class CvStudioMapper
 
     public static ResumeData Deserialize(string json)
     {
-        return JsonSerializer.Deserialize<ResumeData>(json, JsonOptions) ?? new ResumeData();
+        var data = JsonSerializer.Deserialize<ResumeData>(json, JsonOptions) ?? new ResumeData();
+        data.Profile ??= new ProfileData();
+
+        // Keep newly introduced optional profile fields normalized for legacy payloads.
+        data.Profile.GitHubUrl = NormalizeOptional(data.Profile.GitHubUrl);
+        data.Profile.LinkedInUrl = NormalizeOptional(data.Profile.LinkedInUrl);
+        data.Profile.PortfolioUrl = NormalizeOptional(data.Profile.PortfolioUrl);
+        data.Profile.WorkPermit = NormalizeOptional(data.Profile.WorkPermit);
+
+        return data;
     }
 
     public static ResumeDto ToDto(Resume resume)
@@ -44,5 +53,14 @@ public static class CvStudioMapper
             CreatedAtUtc = version.CreatedAtUtc
         };
     }
-}
 
+    private static string? NormalizeOptional(string? value)
+    {
+        if (string.IsNullOrWhiteSpace(value))
+        {
+            return null;
+        }
+
+        return value.Trim();
+    }
+}
