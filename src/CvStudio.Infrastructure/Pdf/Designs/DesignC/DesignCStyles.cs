@@ -3,9 +3,9 @@ namespace CvStudio.Infrastructure.Pdf.Designs.DesignC;
 public static class DesignCStyles
 {
     // Farben Sidebar
-    public const string SidebarBg = "#0F1C2E";
-    public const string SidebarText = "#FFFFFF";
-    public const string SidebarMuted = "#8FA8B8";
+    public const string SidebarBg = "#FFFFFF";
+    public const string SidebarText = "#1F2937";
+    public const string SidebarMuted = "#6B7280";
     public const string Cyan = "#00BCD4";
     public const string CyanDark = "#0097A7";
     public const string AccentCircle = "#1565C0";
