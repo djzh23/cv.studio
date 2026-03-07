@@ -341,18 +341,67 @@ public sealed class QuestPdfGenerator : IPdfGenerator
                 });
             });
 
-            var contacts = new[]
+            column.Item().PaddingTop(2).Column(contactCol =>
             {
-                data.Profile.Email?.Trim(),
-                data.Profile.Phone?.Trim(),
-                data.Profile.Location?.Trim()
-            }.Where(static c => !string.IsNullOrWhiteSpace(c));
+                var contacts = new List<string>();
+                if (!string.IsNullOrWhiteSpace(data.Profile.Email))
+                {
+                    contacts.Add(data.Profile.Email.Trim());
+                }
 
-            var contactLine = string.Join(" | ", contacts);
-            if (!string.IsNullOrWhiteSpace(contactLine))
-            {
-                column.Item().PaddingTop(2).Text(contactLine).FontSize(10.8f).FontColor("#6B7280");
-            }
+                if (!string.IsNullOrWhiteSpace(data.Profile.Phone))
+                {
+                    contacts.Add(data.Profile.Phone.Trim());
+                }
+
+                if (!string.IsNullOrWhiteSpace(data.Profile.Location))
+                {
+                    contacts.Add(data.Profile.Location.Trim());
+                }
+
+                if (contacts.Count > 0)
+                {
+                    contactCol.Item().Text(string.Join("  |  ", contacts))
+                        .FontSize(8f)
+                        .FontColor("#6B7280");
+                }
+
+                if (HasSocialLinks(data.Profile))
+                {
+                    contactCol.Item().Height(2);
+                    var links = new List<string>();
+                    if (!string.IsNullOrWhiteSpace(data.Profile.LinkedInUrl))
+                    {
+                        links.Add($"LinkedIn: {FormatUrl(data.Profile.LinkedInUrl)}");
+                    }
+
+                    if (!string.IsNullOrWhiteSpace(data.Profile.GitHubUrl))
+                    {
+                        links.Add($"GitHub: {FormatUrl(data.Profile.GitHubUrl)}");
+                    }
+
+                    if (!string.IsNullOrWhiteSpace(data.Profile.PortfolioUrl))
+                    {
+                        links.Add($"Portfolio: {FormatUrl(data.Profile.PortfolioUrl)}");
+                    }
+
+                    contactCol.Item().Text(string.Join("   ", links))
+                        .FontSize(7.5f)
+                        .FontColor("#6B7280");
+                }
+
+                if (!string.IsNullOrWhiteSpace(data.Profile.WorkPermit))
+                {
+                    contactCol.Item().Height(4);
+                    contactCol.Item()
+                        .Background("#F0FDF4")
+                        .PaddingHorizontal(3)
+                        .PaddingVertical(2)
+                        .Text($"✓ {data.Profile.WorkPermit.Trim()}")
+                        .FontSize(7.5f)
+                        .FontColor("#15803D");
+                }
+            });
         });
     }
 
