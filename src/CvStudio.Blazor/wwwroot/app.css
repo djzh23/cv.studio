@@ -647,6 +647,29 @@ body::before {
     background: #fff;
 }
 
+.form-section-divider {
+    font-size: 0.72rem;
+    font-weight: 600;
+    color: #9ca3af;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    border-bottom: 1px solid #f3f4f6;
+    padding-bottom: 4px;
+    margin: 16px 0 10px;
+}
+
+.form-section-divider small {
+    font-weight: 400;
+    color: #d1d5db;
+    text-transform: none;
+    letter-spacing: 0;
+}
+
+.form-hint {
+    color: var(--muted-soft);
+    font-size: 0.72rem;
+}
+
 .preview-label {
     font-size: 0.82rem;
     text-transform: uppercase;
