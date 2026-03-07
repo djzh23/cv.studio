@@ -8,11 +8,16 @@ public sealed class ApiExceptionMiddleware
 {
     private readonly RequestDelegate _next;
     private readonly ILogger<ApiExceptionMiddleware> _logger;
+    private readonly IWebHostEnvironment _environment;
 
-    public ApiExceptionMiddleware(RequestDelegate next, ILogger<ApiExceptionMiddleware> logger)
+    public ApiExceptionMiddleware(
+        RequestDelegate next,
+        ILogger<ApiExceptionMiddleware> logger,
+        IWebHostEnvironment environment)
     {
         _next = next;
         _logger = logger;
+        _environment = environment;
     }
 
     public async Task InvokeAsync(HttpContext context)
@@ -41,7 +46,10 @@ public sealed class ApiExceptionMiddleware
         catch (Exception ex)
         {
             _logger.LogError(ex, "Unhandled exception for {Path}", context.Request.Path);
-            await WriteProblemAsync(context, StatusCodes.Status500InternalServerError, "Server Error", "An unexpected error occurred.");
+            var detail = _environment.IsDevelopment()
+                ? $"An unexpected error occurred. {ex.GetType().Name}: {ex.Message}"
+                : "An unexpected error occurred.";
+            await WriteProblemAsync(context, StatusCodes.Status500InternalServerError, "Server Error", detail);
         }
     }
 
@@ -61,4 +69,3 @@ public sealed class ApiExceptionMiddleware
         await context.Response.WriteAsJsonAsync(problem);
     }
 }
-
