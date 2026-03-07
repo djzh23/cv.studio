@@ -8,7 +8,8 @@ public static class DesignCStyles
     public const string SidebarMuted = "#6B7280";
     public const string Cyan = "#00BCD4";
     public const string CyanDark = "#0097A7";
-    public const string AccentCircle = "#1565C0";
+    public const string BlobColor = "#DBEAFE";
+    public const string BlobAccentDark = "#1D4ED8";
 
     // Farben Main
     public const string MainBg = "#FFFFFF";

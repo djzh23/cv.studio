@@ -159,29 +159,39 @@ public sealed class DesignCDocument : IDocument
 
     private void ComposePhotoWithAccent(ColumnDescriptor col)
     {
-        col.Item().AlignCenter().Width(110).Height(104).Layers(layers =>
+        col.Item().AlignCenter().Width(130).Height(140).Layers(layers =>
         {
-            // Kleiner cyan Kreis-Akzent unten links am Foto.
-            layers.Layer().AlignLeft().AlignBottom().PaddingLeft(2).PaddingBottom(2)
-                .Text("\u25CF")
-                .FontSize(18)
-                .FontColor(DesignCStyles.Cyan);
+            layers.Layer()
+                .PaddingLeft(20)
+                .PaddingTop(6)
+                .Width(110)
+                .Height(110)
+                .Background(DesignCStyles.BlobColor);
 
-            layers.PrimaryLayer().AlignCenter().Width(100).Height(100).Element(container =>
+            layers.Layer()
+                .AlignLeft()
+                .AlignBottom()
+                .PaddingLeft(4)
+                .PaddingBottom(6)
+                .Text("\u25CF")
+                .FontSize(24)
+                .FontColor(DesignCStyles.BlobAccentDark);
+
+            layers.PrimaryLayer().PaddingTop(10).PaddingLeft(5).Width(110).Height(110).Element(container =>
             {
-                var framed = container.Border(1).BorderColor(DesignCStyles.CyanDark).Padding(4);
+                var framed = container.Border(1).BorderColor("#E5E7EB").Padding(2);
                 if (_profileImageBytes is not null)
                 {
                     framed.Image(_profileImageBytes).FitArea();
                 }
                 else
                 {
-                    framed.Background("#1E3A5F")
+                    framed.Background(DesignCStyles.BlobColor)
                         .AlignCenter()
                         .AlignMiddle()
                         .Text(GetInitials())
                         .FontSize(28)
-                        .FontColor(DesignCStyles.Cyan)
+                        .FontColor(DesignCStyles.BlobAccentDark)
                         .Bold();
                 }
             });
