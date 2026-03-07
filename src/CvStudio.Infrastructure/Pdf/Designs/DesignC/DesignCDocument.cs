@@ -257,6 +257,86 @@ public sealed class DesignCDocument : IDocument
                     .LetterSpacing(0.05f);
             }
 
+            inner.Item().Height(8);
+
+            var contactParts = new List<string>();
+            if (!string.IsNullOrWhiteSpace(_profile.Email))
+            {
+                contactParts.Add(_profile.Email.Trim());
+            }
+
+            if (!string.IsNullOrWhiteSpace(_profile.Phone))
+            {
+                contactParts.Add(_profile.Phone.Trim());
+            }
+
+            if (!string.IsNullOrWhiteSpace(_profile.Location))
+            {
+                contactParts.Add(_profile.Location.Trim());
+            }
+
+            if (contactParts.Count > 0)
+            {
+                inner.Item().Text(string.Join("  |  ", contactParts))
+                    .FontSize(8f)
+                    .FontColor(DesignCStyles.MainMuted);
+            }
+
+            if (HasSocialLinks(_profile))
+            {
+                inner.Item().Height(3);
+                inner.Item().Row(r =>
+                {
+                    if (!string.IsNullOrWhiteSpace(_profile.LinkedInUrl))
+                    {
+                        r.AutoItem()
+                            .Background("#EFF6FF")
+                            .PaddingHorizontal(3)
+                            .PaddingVertical(2)
+                            .Text($"in  {FormatUrl(_profile.LinkedInUrl)}")
+                            .FontSize(7.5f)
+                            .FontColor("#1D4ED8");
+                        r.ConstantItem(6);
+                    }
+
+                    if (!string.IsNullOrWhiteSpace(_profile.GitHubUrl))
+                    {
+                        r.AutoItem()
+                            .Background("#F9FAFB")
+                            .PaddingHorizontal(3)
+                            .PaddingVertical(2)
+                            .Text($"gh  {FormatUrl(_profile.GitHubUrl)}")
+                            .FontSize(7.5f)
+                            .FontColor("#374151");
+                        r.ConstantItem(6);
+                    }
+
+                    if (!string.IsNullOrWhiteSpace(_profile.PortfolioUrl))
+                    {
+                        r.AutoItem()
+                            .Background("#F9FAFB")
+                            .PaddingHorizontal(3)
+                            .PaddingVertical(2)
+                            .Text($"web  {FormatUrl(_profile.PortfolioUrl)}")
+                            .FontSize(7.5f)
+                            .FontColor("#374151");
+                    }
+                });
+            }
+
+            if (!string.IsNullOrWhiteSpace(_profile.WorkPermit))
+            {
+                inner.Item().Height(5);
+                inner.Item()
+                    .Background("#F0FDF4")
+                    .Border(0.5f).BorderColor("#BBF7D0")
+                    .PaddingHorizontal(4)
+                    .PaddingVertical(3)
+                    .Text($"✓  {_profile.WorkPermit.Trim()}")
+                    .FontSize(7.5f)
+                    .FontColor("#15803D");
+            }
+
             inner.Item().Height(14);
 
             if (_workItems.Count > 0)
@@ -513,6 +593,25 @@ public sealed class DesignCDocument : IDocument
             "a2" or "a1" or "basic" => 1,
             _ => 3
         };
+    }
+
+    private static bool HasSocialLinks(ProfileData profile)
+    {
+        return !string.IsNullOrWhiteSpace(profile.LinkedInUrl)
+            || !string.IsNullOrWhiteSpace(profile.GitHubUrl)
+            || !string.IsNullOrWhiteSpace(profile.PortfolioUrl);
+    }
+
+    private static string FormatUrl(string? url)
+    {
+        if (string.IsNullOrWhiteSpace(url))
+            return string.Empty;
+
+        return url
+            .Replace("https://", string.Empty, StringComparison.OrdinalIgnoreCase)
+            .Replace("http://", string.Empty, StringComparison.OrdinalIgnoreCase)
+            .TrimEnd('/')
+            .Trim();
     }
 
     private static (string Name, string? Location) SplitByPipe(string raw)
