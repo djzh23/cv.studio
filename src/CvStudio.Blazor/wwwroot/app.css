@@ -733,6 +733,42 @@ body::before {
     margin-bottom: 0.8rem;
 }
 
+.cv-social-links {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+    margin-top: 3px;
+}
+
+.cv-social-link {
+    font-size: 0.72rem;
+    padding: 2px 5px;
+    border-radius: 2px;
+}
+
+.cv-social-li {
+    background: #eff6ff;
+    color: #1d4ed8;
+}
+
+.cv-social-gh,
+.cv-social-web {
+    background: #f9fafb;
+    color: #374151;
+    border: 1px solid #e5e7eb;
+}
+
+.cv-work-permit {
+    margin-top: 5px;
+    display: inline-block;
+    background: #f0fdf4;
+    border: 1px solid #bbf7d0;
+    color: #15803d;
+    font-size: 0.72rem;
+    padding: 2px 6px;
+    border-radius: 2px;
+}
+
 .versions-list {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
