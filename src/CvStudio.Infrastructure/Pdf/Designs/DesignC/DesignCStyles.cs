@@ -22,7 +22,7 @@ public static class DesignCStyles
     public const string MainText = "#0F1C2E";
     public const string MainMuted = "#6B7280";
     public const string SectionLine = "#E5E7EB";
-    public const string BulletColor = "#00BCD4";
+    public const string BulletColor = "#374151";
 
     // Schriftgroessen
     public const float NameSize = 26f;
