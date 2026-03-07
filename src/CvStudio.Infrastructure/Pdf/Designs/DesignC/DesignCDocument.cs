@@ -200,22 +200,24 @@ public sealed class DesignCDocument : IDocument
 
     private static void ComposeSidebarSectionLabel(ColumnDescriptor col, string icon, string label)
     {
-        col.Item().PaddingHorizontal(16)
-            .BorderBottom(1).BorderColor(DesignCStyles.Cyan)
-            .PaddingBottom(4)
-            .Row(r =>
-            {
-                r.ConstantItem(14)
-                    .Text(icon)
-                    .FontSize(8)
-                    .FontColor(DesignCStyles.Cyan);
-                r.RelativeItem()
-                    .Text(label)
-                    .FontSize(DesignCStyles.SidebarLabel)
-                    .FontColor(DesignCStyles.Cyan)
-                    .Bold()
-                    .LetterSpacing(0.08f);
-            });
+        col.Item().Row(r =>
+        {
+            r.ConstantItem(20).Height(20)
+                .Background(DesignCStyles.IconBadgeBg)
+                .AlignCenter()
+                .AlignMiddle()
+                .Text(icon)
+                .FontSize(7)
+                .FontColor(DesignCStyles.IconBadgeText)
+                .Bold();
+            r.ConstantItem(6);
+            r.RelativeItem().AlignMiddle()
+                .Text(label)
+                .FontSize(DesignCStyles.SectionTitle)
+                .FontColor(DesignCStyles.MainText)
+                .Bold()
+                .LetterSpacing(0.04f);
+        });
         col.Item().Height(7);
     }
 
@@ -276,20 +278,23 @@ public sealed class DesignCDocument : IDocument
     {
         col.Item().Row(r =>
         {
-            r.ConstantItem(16)
+            r.ConstantItem(20).Height(20)
+                .Background(DesignCStyles.IconBadgeBg)
+                .AlignCenter()
+                .AlignMiddle()
                 .Text(icon)
-                .FontSize(9)
-                .FontColor(DesignCStyles.Cyan);
+                .FontSize(8)
+                .FontColor(DesignCStyles.IconBadgeText)
+                .Bold();
+            r.ConstantItem(8);
             r.RelativeItem()
-                .BorderBottom(1.5f)
-                .BorderColor(DesignCStyles.MainText)
-                .PaddingBottom(3)
                 .Text(title)
                 .FontSize(DesignCStyles.SectionTitle)
                 .FontColor(DesignCStyles.MainText)
                 .Bold()
                 .LetterSpacing(0.06f);
         });
+        col.Item().Height(2).BorderBottom(0.5f).BorderColor(DesignCStyles.SectionLine);
         col.Item().Height(8);
     }
 
