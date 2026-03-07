@@ -11,7 +11,9 @@ public sealed class ResumesController : ControllerBase
     private const string PdfContentType = "application/pdf";
     private const string DocxContentType = "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
     private const string PdfDesignBShort = "B";
+    private const string PdfDesignCShort = "C";
     private const string PdfDesignBName = "DESIGNB";
+    private const string PdfDesignCName = "DESIGNC";
 
     private readonly IResumeService _resumeService;
     private readonly ISnapshotService _snapshotService;
@@ -174,8 +176,9 @@ public sealed class ResumesController : ControllerBase
         {
             PdfDesignBShort => PdfDesign.DesignB,
             PdfDesignBName => PdfDesign.DesignB,
+            PdfDesignCShort => PdfDesign.DesignC,
+            PdfDesignCName => PdfDesign.DesignC,
             _ => PdfDesign.DesignA
         };
     }
 }
-

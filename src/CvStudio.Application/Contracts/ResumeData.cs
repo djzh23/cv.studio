@@ -40,6 +40,18 @@ public sealed class ProfileData
     [MaxLength(500)]
     public string ProfileImageUrl { get; set; } = string.Empty;
 
+    [MaxLength(500)]
+    public string? GitHubUrl { get; set; }
+
+    [MaxLength(500)]
+    public string? LinkedInUrl { get; set; }
+
+    [MaxLength(500)]
+    public string? PortfolioUrl { get; set; }
+
+    [MaxLength(300)]
+    public string? WorkPermit { get; set; }
+
     [MaxLength(1600)]
     public string Summary { get; set; } = string.Empty;
 }
