@@ -18,6 +18,7 @@ public sealed class ResumeApiClient
     private const string DesignQueryKey = "design";
     private const string DesignA = "A";
     private const string DesignB = "B";
+    private const string DesignC = "C";
 
     private readonly HttpClient _httpClient;
 
@@ -113,7 +114,12 @@ public sealed class ResumeApiClient
             query[VersionIdQueryKey] = versionId.Value.ToString();
         }
 
-        query[DesignQueryKey] = design == PdfDesign.DesignB ? DesignB : DesignA;
+        query[DesignQueryKey] = design switch
+        {
+            PdfDesign.DesignB => DesignB,
+            PdfDesign.DesignC => DesignC,
+            _ => DesignA
+        };
         endpoint = QueryHelpers.AddQueryString(endpoint, query);
 
         var response = await _httpClient.GetAsync(endpoint, cancellationToken);
@@ -178,4 +184,3 @@ public sealed class ApiClientException : Exception
 
     public HttpStatusCode StatusCode { get; }
 }
-

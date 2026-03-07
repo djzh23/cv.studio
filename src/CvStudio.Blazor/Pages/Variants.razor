@@ -41,8 +41,9 @@ else
             <label class="pdf-design-selector">
                 PDF Design
                 <select class="form-control" @bind="SelectedPdfDesign">
-                    <option value="@PdfDesign.DesignA">Design A</option>
-                    <option value="@PdfDesign.DesignB">Design B</option>
+                    <option value="@PdfDesign.DesignA">Design A — Klassisch (ATS)</option>
+                    <option value="@PdfDesign.DesignB">Design B — Modern</option>
+                    <option value="@PdfDesign.DesignC">Design C — Professional</option>
                 </select>
             </label>
             <select class="form-control version-label" @bind="SelectedArbeitsversionId" disabled="@IsBusy">
