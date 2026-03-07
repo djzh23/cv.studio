@@ -109,24 +109,24 @@ public sealed class DesignCDocument : IDocument
                 {
                     inner.Item().Row(r =>
                     {
-                        r.ConstantItem(65)
+                        r.RelativeItem(1.4f)
                             .Text(lang.Name.ToUpperInvariant())
                             .FontSize(DesignCStyles.SmallText)
                             .FontColor(DesignCStyles.SidebarText)
                             .Bold();
 
-                        r.ConstantItem(58)
+                        r.RelativeItem(1f)
                             .Text(GetLevelLabel(lang.Level))
                             .FontSize(DesignCStyles.SmallText)
                             .FontColor(DesignCStyles.SidebarMuted);
 
-                        r.RelativeItem().AlignRight().Row(dots =>
+                        r.RelativeItem(1f).AlignRight().Row(dots =>
                         {
                             var filled = GetLanguageDotCount(lang.Level);
                             for (var i = 1; i <= 5; i++)
                             {
                                 var color = i <= filled ? DesignCStyles.DotFilled : DesignCStyles.DotEmpty;
-                                dots.ConstantItem(9).Text("\u25CF").FontSize(8).FontColor(color);
+                                dots.ConstantItem(7).Text("\u25CF").FontSize(7).FontColor(color);
                             }
                         });
                     });
