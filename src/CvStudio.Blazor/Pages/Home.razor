@@ -325,6 +325,27 @@ else
                             </div>
                         </div>
                         <p class="muted">@Vm.CurrentResume.ResumeData.Profile.Email | @Vm.CurrentResume.ResumeData.Profile.Phone | @Vm.CurrentResume.ResumeData.Profile.Location</p>
+                        @if (HasSocialLinks(Vm.CurrentResume.ResumeData.Profile))
+                        {
+                            <div class="cv-social-links">
+                                @if (!string.IsNullOrWhiteSpace(Vm.CurrentResume.ResumeData.Profile.LinkedInUrl))
+                                {
+                                    <span class="cv-social-link cv-social-li">in @FormatUrl(Vm.CurrentResume.ResumeData.Profile.LinkedInUrl)</span>
+                                }
+                                @if (!string.IsNullOrWhiteSpace(Vm.CurrentResume.ResumeData.Profile.GitHubUrl))
+                                {
+                                    <span class="cv-social-link cv-social-gh">gh @FormatUrl(Vm.CurrentResume.ResumeData.Profile.GitHubUrl)</span>
+                                }
+                                @if (!string.IsNullOrWhiteSpace(Vm.CurrentResume.ResumeData.Profile.PortfolioUrl))
+                                {
+                                    <span class="cv-social-link cv-social-web">web @FormatUrl(Vm.CurrentResume.ResumeData.Profile.PortfolioUrl)</span>
+                                }
+                            </div>
+                        }
+                        @if (!string.IsNullOrWhiteSpace(Vm.CurrentResume.ResumeData.Profile.WorkPermit))
+                        {
+                            <div class="cv-work-permit">✓ @Vm.CurrentResume.ResumeData.Profile.WorkPermit</div>
+                        }
                         <p>@Vm.CurrentResume.ResumeData.Profile.Summary</p>
 
                         <h4>Berufserfahrung</h4>
@@ -578,6 +599,27 @@ else
             1 => "badge-v2",
             _ => "badge-v3"
         };
+    }
+
+    private static bool HasSocialLinks(ProfileData profile)
+    {
+        return !string.IsNullOrWhiteSpace(profile.LinkedInUrl)
+            || !string.IsNullOrWhiteSpace(profile.GitHubUrl)
+            || !string.IsNullOrWhiteSpace(profile.PortfolioUrl);
+    }
+
+    private static string FormatUrl(string? url)
+    {
+        if (string.IsNullOrWhiteSpace(url))
+        {
+            return string.Empty;
+        }
+
+        return url
+            .Replace("https://", string.Empty, StringComparison.OrdinalIgnoreCase)
+            .Replace("http://", string.Empty, StringComparison.OrdinalIgnoreCase)
+            .TrimEnd('/')
+            .Trim();
     }
 
     private async Task NeueArbeitsversionAsync()
