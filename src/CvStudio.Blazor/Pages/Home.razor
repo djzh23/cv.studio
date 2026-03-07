@@ -152,8 +152,9 @@ else
                                     <div class="toolbar-right">
                                         <div class="export-group">
                                             <InputSelect class="design-select" @bind-Value="Vm.AusgewaehltesPdfDesign">
-                                                <option value="@PdfDesign.DesignA">Design A</option>
-                                                <option value="@PdfDesign.DesignB">Design B</option>
+                                                <option value="@PdfDesign.DesignA">Design A — Klassisch (ATS)</option>
+                                                <option value="@PdfDesign.DesignB">Design B — Modern</option>
+                                                <option value="@PdfDesign.DesignC">Design C — Professional</option>
                                             </InputSelect>
                                             <button class="btn btn-export-pdf btn-md" @onclick="ExportArbeitsversionPdfAsync" disabled="@Vm.IsBusy"><i class="bi bi-download"></i> PDF</button>
                                         </div>
@@ -200,6 +201,37 @@ else
                                     <label>Ort <InputText class="form-control" @bind-Value="Vm.CurrentResume.ResumeData.Profile.Location" /></label>
                                     <label>Profilbild URL <InputText class="form-control" @bind-Value="Vm.CurrentResume.ResumeData.Profile.ProfileImageUrl" /></label>
                                 </div>
+
+                                <div class="form-section-divider">
+                                    <span>Online-Profile <small>(optional)</small></span>
+                                </div>
+                                <div class="field-grid">
+                                    <label>LinkedIn-URL
+                                        <InputText class="form-control" @bind-Value="Vm.CurrentResume.ResumeData.Profile.LinkedInUrl" />
+                                        <small class="form-hint">Wird im PDF nur angezeigt wenn ausgefuellt.</small>
+                                    </label>
+                                    <label>GitHub-URL
+                                        <InputText class="form-control" @bind-Value="Vm.CurrentResume.ResumeData.Profile.GitHubUrl" />
+                                    </label>
+                                    <label>Portfolio / Website
+                                        <InputText class="form-control" @bind-Value="Vm.CurrentResume.ResumeData.Profile.PortfolioUrl" />
+                                    </label>
+                                    <label>Arbeitsgenehmigung
+                                        <input class="form-control"
+                                               type="text"
+                                               list="work-permit-options"
+                                               placeholder="Arbeitsgenehmigung eingeben oder auswaehlen..."
+                                               @bind="Vm.CurrentResume.ResumeData.Profile.WorkPermit"
+                                               @bind:event="oninput" />
+                                        <small class="form-hint">Erscheint als diskreter Hinweis im PDF-Header.</small>
+                                    </label>
+                                </div>
+                                <datalist id="work-permit-options">
+                                    <option value="EU-Staatsbuerger · Unbeschraenkte Arbeitserlaubnis Deutschland" />
+                                    <option value="Aufenthaltstitel § 18b AufenthG · Unbeschraenkte Arbeitserlaubnis" />
+                                    <option value="Niederlassungserlaubnis · Dauerhaft arbeitsberechtigt in Deutschland" />
+                                    <option value="EU Blue Card · Hochqualifiziert arbeitsberechtigt in Deutschland" />
+                                </datalist>
                                 <label>Zusammenfassung
                                     <InputTextArea class="form-control" @bind-Value="Vm.CurrentResume.ResumeData.Profile.Summary" rows="6" />
                                 </label>
@@ -304,6 +336,27 @@ else
                             </div>
                         </div>
                         <p class="muted">@Vm.CurrentResume.ResumeData.Profile.Email | @Vm.CurrentResume.ResumeData.Profile.Phone | @Vm.CurrentResume.ResumeData.Profile.Location</p>
+                        @if (HasSocialLinks(Vm.CurrentResume.ResumeData.Profile))
+                        {
+                            <div class="cv-social-links">
+                                @if (!string.IsNullOrWhiteSpace(Vm.CurrentResume.ResumeData.Profile.LinkedInUrl))
+                                {
+                                    <span class="cv-social-link cv-social-li">in @FormatUrl(Vm.CurrentResume.ResumeData.Profile.LinkedInUrl)</span>
+                                }
+                                @if (!string.IsNullOrWhiteSpace(Vm.CurrentResume.ResumeData.Profile.GitHubUrl))
+                                {
+                                    <span class="cv-social-link cv-social-gh">gh @FormatUrl(Vm.CurrentResume.ResumeData.Profile.GitHubUrl)</span>
+                                }
+                                @if (!string.IsNullOrWhiteSpace(Vm.CurrentResume.ResumeData.Profile.PortfolioUrl))
+                                {
+                                    <span class="cv-social-link cv-social-web">web @FormatUrl(Vm.CurrentResume.ResumeData.Profile.PortfolioUrl)</span>
+                                }
+                            </div>
+                        }
+                        @if (!string.IsNullOrWhiteSpace(Vm.CurrentResume.ResumeData.Profile.WorkPermit))
+                        {
+                            <div class="cv-work-permit">✓ @Vm.CurrentResume.ResumeData.Profile.WorkPermit</div>
+                        }
                         <p>@Vm.CurrentResume.ResumeData.Profile.Summary</p>
 
                         <h4>Berufserfahrung</h4>
@@ -557,6 +610,27 @@ else
             1 => "badge-v2",
             _ => "badge-v3"
         };
+    }
+
+    private static bool HasSocialLinks(ProfileData profile)
+    {
+        return !string.IsNullOrWhiteSpace(profile.LinkedInUrl)
+            || !string.IsNullOrWhiteSpace(profile.GitHubUrl)
+            || !string.IsNullOrWhiteSpace(profile.PortfolioUrl);
+    }
+
+    private static string FormatUrl(string? url)
+    {
+        if (string.IsNullOrWhiteSpace(url))
+        {
+            return string.Empty;
+        }
+
+        return url
+            .Replace("https://", string.Empty, StringComparison.OrdinalIgnoreCase)
+            .Replace("http://", string.Empty, StringComparison.OrdinalIgnoreCase)
+            .TrimEnd('/')
+            .Trim();
     }
 
     private async Task NeueArbeitsversionAsync()

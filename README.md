@@ -27,5 +27,25 @@ dotnet build cv.studio.sln
 dotnet test cv.studio.sln
 ```
 
+### Fast Local Dev (with gate passcode)
+```powershell
+.\tools\dev\start-local.ps1
+```
+
+Optional with explicit passcode:
+```powershell
+.\tools\dev\start-local.ps1 -Passcode "your-local-passcode"
+```
+
+Stop local services:
+```powershell
+.\tools\dev\stop-local.ps1
+```
+
+Local URLs:
+- Blazor: `http://localhost:5047`
+- API: `http://localhost:5189`
+- Health: `http://localhost:5189/health`
+
 ## Live Demo
 https://cv-studio.railway.app
