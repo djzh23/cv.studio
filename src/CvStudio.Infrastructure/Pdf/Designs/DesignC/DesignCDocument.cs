@@ -237,12 +237,12 @@ public sealed class DesignCDocument : IDocument
             if (!string.IsNullOrWhiteSpace(_profile.Headline))
             {
                 inner.Item()
-                    .Background(DesignCStyles.Cyan)
+                    .Background(DesignCStyles.CyanBadge)
                     .PaddingHorizontal(6)
                     .PaddingVertical(4)
                     .Text(_profile.Headline.Trim().ToUpperInvariant())
                     .FontSize(DesignCStyles.HeadlineSize)
-                    .FontColor(DesignCStyles.MainBg)
+                    .FontColor(DesignCStyles.CyanBadgeText)
                     .Bold()
                     .LetterSpacing(0.05f);
             }
