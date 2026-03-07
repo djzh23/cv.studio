@@ -10,6 +10,8 @@ public static class DesignCStyles
     public const string CyanDark = "#0097A7";
     public const string BlobColor = "#DBEAFE";
     public const string BlobAccentDark = "#1D4ED8";
+    public const string IconBadgeBg = "#374151";
+    public const string IconBadgeText = "#FFFFFF";
 
     // Farben Main
     public const string MainBg = "#FFFFFF";
