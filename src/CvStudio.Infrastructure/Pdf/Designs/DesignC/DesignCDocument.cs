@@ -109,16 +109,26 @@ public sealed class DesignCDocument : IDocument
                 {
                     inner.Item().Row(r =>
                     {
-                        r.RelativeItem()
+                        r.ConstantItem(65)
                             .Text(lang.Name.ToUpperInvariant())
-                            .FontSize(DesignCStyles.SidebarLabel)
+                            .FontSize(DesignCStyles.SmallText)
                             .FontColor(DesignCStyles.SidebarText)
                             .Bold();
 
-                        r.ConstantItem(52).AlignRight()
-                            .Text(GetLanguageDots(lang.Level))
-                            .FontSize(9)
-                            .FontColor(DesignCStyles.Cyan);
+                        r.ConstantItem(58)
+                            .Text(GetLevelLabel(lang.Level))
+                            .FontSize(DesignCStyles.SmallText)
+                            .FontColor(DesignCStyles.SidebarMuted);
+
+                        r.RelativeItem().AlignRight().Row(dots =>
+                        {
+                            var filled = GetLanguageDotCount(lang.Level);
+                            for (var i = 1; i <= 5; i++)
+                            {
+                                var color = i <= filled ? DesignCStyles.DotFilled : DesignCStyles.DotEmpty;
+                                dots.ConstantItem(9).Text("\u25CF").FontSize(8).FontColor(color);
+                            }
+                        });
                     });
                     inner.Item().Height(4);
                 }
@@ -476,15 +486,32 @@ public sealed class DesignCDocument : IDocument
         return $"{first}{last}".ToUpperInvariant();
     }
 
-    private static string GetLanguageDots(string? level)
+    private static string GetLevelLabel(string? level)
+    {
+        return level?.ToUpperInvariant() switch
+        {
+            "C2" or "MUTTERSPRACHE" or "NATIVE" => "Muttersprache",
+            "C1" => "Advanced",
+            "B2" => "Gut",
+            "B1" => "Mittel",
+            "A2" or "A1" => "Basic",
+            "ADVANCED" => "Advanced",
+            "INTERMEDIATE" => "Gut",
+            "BASIC" => "Basic",
+            _ => level ?? string.Empty
+        };
+    }
+
+    private static int GetLanguageDotCount(string? level)
     {
         return level?.ToLowerInvariant() switch
         {
-            "c2" or "advanced" or "muttersprache" or "native" => "\u25CF\u25CF\u25CF\u25CF",
-            "c1" or "upper-intermediate" => "\u25CF\u25CF\u25CF\u25CB",
-            "b2" or "intermediate" => "\u25CF\u25CF\u25CB\u25CB",
-            "b1" or "lower-intermediate" => "\u25CF\u25CB\u25CB\u25CB",
-            _ => "\u25CF\u25CF\u25CB\u25CB"
+            "c2" or "muttersprache" or "native" => 5,
+            "c1" or "advanced" => 4,
+            "b2" or "intermediate" => 3,
+            "b1" => 2,
+            "a2" or "a1" or "basic" => 1,
+            _ => 3
         };
     }
 
