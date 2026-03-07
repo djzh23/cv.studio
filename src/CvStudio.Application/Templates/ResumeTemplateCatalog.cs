@@ -65,21 +65,20 @@ public static class ResumeTemplateCatalog
             [
                 new WorkItemData
                 {
-                    Company = "Digi.bo GmbH | Hamburg",
-                    Role = "Werkstudent Softwareentwicklung",
-                    StartDate = "10/2021",
-                    EndDate = "03/2022",
-                    Description = "Mitentwicklung der DIGI:BO-Plattform für digitale Berufsorientierung.",
+                    Company = "Selbstständig | Hamburg",
+                    Role = "Eigenprojekte & Weiterbildung",
+                    StartDate = "07/2024",
+                    EndDate = "Heute",
+                    Description = "Eigenprojekte mit .NET, PostgreSQL, Docker und EF Core aufgebaut.",
                     Bullets =
                     [
-                        "Weiterentwicklung der WordPress/React-Plattform mit PHP, JSX und Plugin-Anpassungen.",
-                        "Formulare und Custom Post Types in bestehende Arbeitsabläufe integriert.",
-                        "Redaktionelle Inhalte und Wiki-Dokumentation für das Team erstellt."
+                        "2 GitHub-Projekte (Monitoring Dashboard & Schichtplanung ONP) eigenständig weiterentwickelt und auf aktuellem Stand gehalten.",
+                        "Weiterbildung in Clean Architecture und Backend-Strukturierung vertieft."
                     ]
                 },
                 new WorkItemData
                 {
-                    Company = "SentialNet Personal Networks GmbH | Hamburg",
+                    Company = "SentialNet Personal Networks GmbH | Versmold",
                     Role = "Werkstudent Softwareentwicklung",
                     StartDate = "06/2023",
                     EndDate = "07/2024",
@@ -96,7 +95,7 @@ public static class ResumeTemplateCatalog
                 new WorkItemData
                 {
                     Company = "Spielmobil Falkenflitzer | Hamburg",
-                    Role = "Honorarkraft und Thesisprojekt Vereinsmanagement",
+                    Role = "Softwareentwickler & Thesis",
                     StartDate = "10/2022",
                     EndDate = "09/2024",
                     Description = "Vollständige Vereinsmanagement-App mit .NET MAUI (Frontend) und Laravel (Backend) entwickelt — Nutzerverwaltung für 50+ Mitglieder digitalisiert.",
@@ -108,15 +107,16 @@ public static class ResumeTemplateCatalog
                 },
                 new WorkItemData
                 {
-                    Company = "Eigenprojekte und Weiterbildung | Hamburg",
-                    Role = ".NET Backend Entwickler",
-                    StartDate = "07/2024",
-                    EndDate = "Aktuell",
-                    Description = "Eigenprojekte mit .NET, PostgreSQL, Docker und EF Core aufgebaut.",
+                    Company = "Digi.bo GmbH | Hamburg",
+                    Role = "Werkstudent Softwareentwicklung",
+                    StartDate = "10/2021",
+                    EndDate = "03/2022",
+                    Description = "Mitentwicklung der DIGI:BO-Plattform für digitale Berufsorientierung.",
                     Bullets =
                     [
-                        "2 GitHub-Projekte (Monitoring Dashboard & Schichtplanung ONP) eigenständig weiterentwickelt und auf aktuellem Stand gehalten.",
-                        "Weiterbildung in Clean Architecture und Backend-Strukturierung vertieft."
+                        "Weiterentwicklung der WordPress/React-Plattform mit PHP, JSX und Plugin-Anpassungen.",
+                        "Formulare und Custom Post Types in bestehende Arbeitsabläufe integriert.",
+                        "Redaktionelle Inhalte und Wiki-Dokumentation für das Team erstellt."
                     ]
                 },
                 new WorkItemData
@@ -266,41 +266,68 @@ public static class ResumeTemplateCatalog
         {
             Profile = new ProfileData
             {
-                FirstName = "Max",
-                LastName = "Mustermann",
-                Headline = "Servicekraft / Kommissionierer / Briefzusteller",
-                Email = "max@example.com",
-                Phone = "+49 170 0000000",
+                FirstName = "Zouhair",
+                LastName = "Ijaad",
+                Headline = "Servicekraft | Kundenbetreuung & Logistik",
+                Email = "ijd.zouh@outlook.com",
+                Phone = "+49 177 227 15 89",
                 Location = "Hamburg, Deutschland",
                 ProfileImageUrl = "https://i.ibb.co/CpTGqYTz/bewerbungsfoto.png",
-                Summary = "Belastbarer und zuverlässiger Mitarbeiter mit Erfahrung in Service, Logistik und kundennahem Arbeiten."
+                WorkPermit = "Niederlassungserlaubnis · Dauerhaft arbeitsberechtigt in Deutschland",
+                Summary = "Zuverlässiger und serviceorientierter Mitarbeiter mit über 5 Jahren praktischer Erfahrung in Kundenbetreuung, Zustellung und operativen Abläufen. Kommunikationsstark auf Deutsch, Englisch und Französisch. Belastbar, pünktlich und motiviert — auch in körperlich anspruchsvollen oder stressigen Arbeitssituationen."
             },
             WorkItems =
             [
                 new WorkItemData
                 {
-                    Company = "City Service GmbH | Hamburg",
-                    Role = "Servicekraft",
-                    StartDate = "04/2021",
-                    EndDate = "Heute",
+                    Company = "Balticbootcenter GmbH | Lübeck",
+                    Role = "Kundenservice & Vermietung",
+                    StartDate = "05/2025",
+                    EndDate = "09/2025",
                     Bullets =
                     [
-                        "Freundliche Betreuung von Gästen und effiziente Auftragsabwicklung.",
-                        "Sicherstellung von Qualitäts- und Hygienestandards im Tagesbetrieb.",
-                        "Verlässliche Zusammenarbeit in Schicht- und Stoßzeiten."
+                        "Täglich bis zu 30 Kunden in Sicherheitsvorschriften und Bootshandhabung eingewiesen und betreut.",
+                        "Fuhrpark von 20 Wasserfahrzeugen eigenständig gewartet und instand gehalten.",
+                        "Kundenbetreuung auf Deutsch und Englisch; regelmäßiger Kontakt mit internationalen Gästen."
                     ]
                 },
                 new WorkItemData
                 {
-                    Company = "Logistik Nord | Hamburg",
-                    Role = "Kommissionierer / Zusteller",
-                    StartDate = "09/2019",
-                    EndDate = "03/2021",
+                    Company = "Spielmobil Falkenflitzer | Hamburg",
+                    Role = "Honorarkraft — Veranstaltungen & Koordination",
+                    StartDate = "10/2022",
+                    EndDate = "09/2024",
                     Bullets =
                     [
-                        "Kommissionierung und termingerechte Bereitstellung von Sendungen.",
-                        "Sorgfältige Erfassung und Kontrolle von Warenbewegungen.",
-                        "Zuverlässige Auslieferung und kundenorientierte Übergabe."
+                        "Wöchentliche Veranstaltungen für bis zu 50 Personen im mobilen Teameinsatz eigenständig koordiniert.",
+                        "Ablaufsicherheit, Materialplanung und Kommunikation im 5-köpfigen Team verantwortet.",
+                        "Lager- und Materialverwaltung strukturiert geführt."
+                    ]
+                },
+                new WorkItemData
+                {
+                    Company = "Deutsche Post AG | Hamburg",
+                    Role = "Zusteller & Werkstudent",
+                    StartDate = "10/2019",
+                    EndDate = "06/2023",
+                    Bullets =
+                    [
+                        "Täglich ca. 200 Sendungen (Briefe, Pakete, Einschreiben) auf fester Tour zuverlässig sortiert und zugestellt.",
+                        "Eigenständige Tourenplanung und Bargeldabwicklung bis zu 500 € täglich verantwortet.",
+                        "4 Jahre durchgehend ohne Fehlzeiten oder Beanstandungen."
+                    ]
+                },
+                new WorkItemData
+                {
+                    Company = "SentialNet Personal Networks GmbH | Versmold",
+                    Role = "Mitarbeiter — Büro & Kundenbetreuung",
+                    StartDate = "06/2023",
+                    EndDate = "07/2024",
+                    Bullets =
+                    [
+                        "Kundenkommunikation und Dokumentation im Tagesgeschäft strukturiert unterstützt.",
+                        "Interne Abläufe und Qualitätssicherung im Team zuverlässig mitgetragen.",
+                        "Einsatz von Office 365, Teams und IT-Ticketsystemen im Arbeitsalltag."
                     ]
                 }
             ],
@@ -308,19 +335,28 @@ public static class ResumeTemplateCatalog
             [
                 new EducationItemData
                 {
-                    School = "Berufsbildende Schule | Hamburg",
-                    Degree = "Allgemeiner Schulabschluss",
-                    StartDate = "08/2015",
-                    EndDate = "07/2018"
+                    School = "Hochschule Flensburg",
+                    Degree = "Bachelor of Applied Science — Angewandte Informatik",
+                    StartDate = "08/2018",
+                    EndDate = "03/2025"
+                },
+                new EducationItemData
+                {
+                    School = "Cadi Ayyad University",
+                    Degree = "Universitätsdiplom — Web-Berufe",
+                    StartDate = "08/2012",
+                    EndDate = "08/2014"
                 }
             ],
             Skills =
             [
-                new SkillGroupData { CategoryName = "Service", Items = ["Kundenbetreuung", "Kassensysteme", "Teamarbeit"] },
-                new SkillGroupData { CategoryName = "Logistik", Items = ["Kommissionierung", "Warenkontrolle", "Tourenvorbereitung"] },
-                new SkillGroupData { CategoryName = "Arbeitsweise", Items = ["Zuverlässigkeit", "Belastbarkeit", "Pünktlichkeit"] }
+                new SkillGroupData { CategoryName = "Kundenservice", Items = ["Kundenbetreuung", "Beratung", "Beschwerdemanagement", "Kassensysteme", "Serviceorientierung"] },
+                new SkillGroupData { CategoryName = "Logistik", Items = ["Paketzustellung", "Tourenplanung", "Kommissionierung", "Warenkontrolle", "Lagerverwaltung", "Bargeldabwicklung"] },
+                new SkillGroupData { CategoryName = "IT & Tools", Items = ["Windows 10/11", "Office 365", "Outlook", "Teams", "IT-Ticketsysteme"] },
+                new SkillGroupData { CategoryName = "Arbeitsweise", Items = ["Zuverlässigkeit", "Belastbarkeit", "Pünktlichkeit", "Eigeninitiative", "Teamfähigkeit"] },
+                new SkillGroupData { CategoryName = "Sprachen", Items = ["Deutsch (C2)", "Arabisch (Muttersprache)", "Französisch (C1)", "Englisch (B2)"] }
             ],
-            Hobbies = ["Kochen", "Sport"]
+            Hobbies = []
         };
     }
 }
