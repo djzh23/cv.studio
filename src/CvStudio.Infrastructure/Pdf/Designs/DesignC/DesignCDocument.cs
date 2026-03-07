@@ -59,7 +59,7 @@ public sealed class DesignCDocument : IDocument
         ComposePhotoWithAccent(col);
         col.Item().Height(16);
 
-        ComposeSidebarSectionLabel(col, "\u2709", "CONTACTS");
+        ComposeSidebarSectionLabel(col, "\u2709", "KONTAKTE");
         col.Item().PaddingHorizontal(16).Column(inner =>
         {
             if (!string.IsNullOrWhiteSpace(_profile.Phone))
@@ -90,7 +90,7 @@ public sealed class DesignCDocument : IDocument
 
         if (!string.IsNullOrWhiteSpace(_profile.Summary))
         {
-            ComposeSidebarSectionLabel(col, "\u2630", "SUMMARY");
+            ComposeSidebarSectionLabel(col, "\u2630", "ZUSAMMENFASSUNG");
             col.Item().PaddingHorizontal(16)
                 .Text(_profile.Summary.Trim())
                 .FontSize(DesignCStyles.SidebarBody)
@@ -102,7 +102,7 @@ public sealed class DesignCDocument : IDocument
         var languages = ResolveLanguages();
         if (languages.Count > 0)
         {
-            ComposeSidebarSectionLabel(col, "\u25C9", "LANGUAGES");
+            ComposeSidebarSectionLabel(col, "\u25C9", "SPRACHEN");
             col.Item().PaddingHorizontal(16).Column(inner =>
             {
                 foreach (var lang in languages)
@@ -133,7 +133,7 @@ public sealed class DesignCDocument : IDocument
 
         if (skillGroups.Count > 0)
         {
-            ComposeSidebarSectionLabel(col, "\u2605", "SKILLS");
+            ComposeSidebarSectionLabel(col, "\u2605", "KENNTNISSE");
             col.Item().PaddingHorizontal(16).Column(inner =>
             {
                 foreach (var group in skillGroups)
@@ -251,7 +251,7 @@ public sealed class DesignCDocument : IDocument
 
             if (_workItems.Count > 0)
             {
-                ComposeMainSection(inner, "\u2630", "EXPERIENCE");
+                ComposeMainSection(inner, "\u2630", "BERUFSERFAHRUNG");
                 foreach (var work in _workItems)
                     ComposeWorkItem(inner, work);
                 inner.Item().Height(4);
@@ -259,7 +259,7 @@ public sealed class DesignCDocument : IDocument
 
             if (_educationItems.Count > 0)
             {
-                ComposeMainSection(inner, "\u25CE", "EDUCATION");
+                ComposeMainSection(inner, "\u25CE", "AUSBILDUNG");
                 foreach (var edu in _educationItems)
                     ComposeEduItem(inner, edu);
                 inner.Item().Height(4);
@@ -267,7 +267,7 @@ public sealed class DesignCDocument : IDocument
 
             if (_projects.Count > 0)
             {
-                ComposeMainSection(inner, "\u25C8", "PROJECTS");
+                ComposeMainSection(inner, "\u25C8", "PROJEKTE");
                 foreach (var project in _projects)
                     ComposeProjectItem(inner, project);
             }
