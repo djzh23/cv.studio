@@ -14,6 +14,8 @@ public static class DesignCStyles
     public const string IconBadgeText = "#FFFFFF";
     public const string CyanBadge = "#06B6D4";
     public const string CyanBadgeText = "#FFFFFF";
+    public const string DotFilled = "#3B82F6";
+    public const string DotEmpty = "#D1D5DB";
 
     // Farben Main
     public const string MainBg = "#FFFFFF";
