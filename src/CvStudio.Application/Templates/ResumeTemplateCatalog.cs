@@ -52,13 +52,13 @@ public static class ResumeTemplateCatalog
         {
             Profile = new ProfileData
             {
-                FirstName = "Zouhair",
-                LastName = "Ijaad",
+                FirstName = "Max",
+                LastName = "Mustermann",
                 Headline = "Softwareentwickler",
-                Email = "ijd.zouh@outlook.com",
-                Phone = "+49 (0) 177 227 15 89",
-                Location = "Samlandweg 11, 22415 Hamburg",
-                ProfileImageUrl = "https://i.ibb.co/CpTGqYTz/bewerbungsfoto.png",
+                Email = "max.mustermann@example.de",
+                Phone = "+49 (0) 170 000 00 00",
+                Location = "Musterstraße 1, 20099 Hamburg",
+                ProfileImageUrl = "",
                 Summary = ".NET-Entwickler mit praktischer Erfahrung in Blazor Hybrid, MVVM und REST-API-Anbindung. Vertraut mit C#, Entity Framework Core und Clean Architecture. Schnelle Einarbeitung, strukturierte Arbeitsweise, Teamplayer."
             },
             WorkItems =
@@ -157,7 +157,7 @@ public static class ResumeTemplateCatalog
                 new SkillGroupData { CategoryName = "Datenbanken", Items = ["PostgreSQL", "MySQL"] },
                 new SkillGroupData { CategoryName = "Arbeitsweise und Zusammenarbeit", Items = ["Strukturierte Arbeitsweise", "Schnelle Einarbeitung", "Teamplayer", "Code Reviews", "Swagger"] },
                 new SkillGroupData { CategoryName = "Sprachkenntnisse", Items = ["Deutsch (C2)", "Französisch (C1)", "Englisch (B1)"] },
-                new SkillGroupData { CategoryName = "Links", Items = ["www.linkedin.com/in/zouhair-ijaad", "https://github.com/djzh23"] }
+                new SkillGroupData { CategoryName = "Links", Items = ["linkedin.com/in/max-mustermann", "github.com/max-mustermann-dev"] }
             ],
             Hobbies = ["Open-Source", "Technologie", "Kontinuierliche Weiterbildung"]
         };
@@ -169,13 +169,13 @@ public static class ResumeTemplateCatalog
         {
             Profile = new ProfileData
             {
-                FirstName = "Zouhair",
-                LastName = "Ijaad",
+                FirstName = "Max",
+                LastName = "Mustermann",
                 Headline = "IT Support / Serviceorientierter Mitarbeiter",
-                Email = "zouh.ijd@gmail.com",
-                Phone = "(+49) 0177 227 15 89",
-                Location = "Samlandweg 11, 22415 Hamburg",
-                ProfileImageUrl = "https://i.ibb.co/CpTGqYTz/bewerbungsfoto.png",
+                Email = "m.mustermann@example.de",
+                Phone = "(+49) 0170 000 00 00",
+                Location = "Musterstraße 1, 20099 Hamburg",
+                ProfileImageUrl = "",
                 Summary = "Engagierter und vielseitiger Mitarbeiter mit Erfahrung in IT-Support, administrativen Aufgaben und Kundenservice. Sicher im Umgang mit Windows, Office 365, digitalen Systemen und IT-Ticketsystemen. Schnelle Einarbeitung in neue Tools und strukturierte Arbeitsweise."
             },
             WorkItems =
@@ -266,14 +266,14 @@ public static class ResumeTemplateCatalog
         {
             Profile = new ProfileData
             {
-                FirstName = "Zouhair",
-                LastName = "Ijaad",
+                FirstName = "Max",
+                LastName = "Mustermann",
                 Headline = "Servicekraft | Kundenbetreuung & Logistik",
-                Email = "ijd.zouh@outlook.com",
-                Phone = "+49 177 227 15 89",
+                Email = "max.mustermann@example.de",
+                Phone = "+49 170 000 00 00",
                 Location = "Hamburg, Deutschland",
-                ProfileImageUrl = "https://i.ibb.co/CpTGqYTz/bewerbungsfoto.png",
-                WorkPermit = "Niederlassungserlaubnis · Dauerhaft arbeitsberechtigt in Deutschland",
+                ProfileImageUrl = "",
+                WorkPermit = "Unbefristete Arbeitserlaubnis",
                 Summary = "Zuverlässiger und serviceorientierter Mitarbeiter mit über 5 Jahren praktischer Erfahrung in Kundenbetreuung, Zustellung und operativen Abläufen. Kommunikationsstark auf Deutsch, Englisch und Französisch. Belastbar, pünktlich und motiviert — auch in körperlich anspruchsvollen oder stressigen Arbeitssituationen."
             },
             WorkItems =

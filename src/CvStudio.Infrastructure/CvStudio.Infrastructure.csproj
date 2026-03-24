@@ -23,7 +23,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Content Include="Assets\bewerbungsfoto.png">
+    <Content Include="Assets\profile-placeholder.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
   </ItemGroup>

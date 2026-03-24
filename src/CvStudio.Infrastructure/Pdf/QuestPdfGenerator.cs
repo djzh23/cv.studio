@@ -11,8 +11,7 @@ namespace CvStudio.Infrastructure.Pdf;
 
 public sealed class QuestPdfGenerator : IPdfGenerator
 {
-    private const string DefaultProfileImageUrl = "https://i.ibb.co/CpTGqYTz/bewerbungsfoto.png";
-    private const string DefaultGithubUrl = "https://github.com/djzh23";
+    private const string DefaultGithubUrl = "https://github.com/max-mustermann-dev";
     private const string DefaultPdfFontFamily = "Lato";
 
     private static readonly HttpClient ImageHttpClient = new()
@@ -654,24 +653,9 @@ public sealed class QuestPdfGenerator : IPdfGenerator
 
     private static byte[]? LoadProfileImageBytes(string? imageUrl)
     {
-        var candidates = new List<string>();
-        if (!string.IsNullOrWhiteSpace(imageUrl))
+        if (!string.IsNullOrWhiteSpace(imageUrl) &&
+            Uri.TryCreate(imageUrl.Trim(), UriKind.Absolute, out var uri))
         {
-            candidates.Add(imageUrl.Trim());
-        }
-
-        if (!string.Equals(imageUrl?.Trim(), DefaultProfileImageUrl, StringComparison.OrdinalIgnoreCase))
-        {
-            candidates.Add(DefaultProfileImageUrl);
-        }
-
-        foreach (var candidate in candidates)
-        {
-            if (!Uri.TryCreate(candidate, UriKind.Absolute, out var uri))
-            {
-                continue;
-            }
-
             try
             {
                 var bytes = ImageHttpClient.GetByteArrayAsync(uri).GetAwaiter().GetResult();
@@ -683,13 +667,12 @@ public sealed class QuestPdfGenerator : IPdfGenerator
             catch (Exception ex)
             {
                 LogSuppressedException(ex, "Remote profile image fetch failed.");
-                // Try next candidate.
             }
         }
 
         try
         {
-            var localPath = Path.Combine(AppContext.BaseDirectory, "Assets", "bewerbungsfoto.png");
+            var localPath = Path.Combine(AppContext.BaseDirectory, "Assets", "profile-placeholder.png");
             if (File.Exists(localPath))
             {
                 var bytes = File.ReadAllBytes(localPath);
