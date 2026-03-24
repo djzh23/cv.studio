@@ -14,7 +14,6 @@ namespace CvStudio.Infrastructure.Docx;
 
 public sealed class OpenXmlDocxGenerator : IDocxGenerator
 {
-    private const string DefaultProfileImageUrl = "https://ui-avatars.com/api/?name=Max+Mustermann&background=1A3A5C&color=ffffff&size=200";
     private const string DefaultGithubUrl = "https://github.com/max-mustermann-dev";
 
     private static readonly HttpClient ImageHttpClient = new()
@@ -567,24 +566,9 @@ public sealed class OpenXmlDocxGenerator : IDocxGenerator
 
     private static byte[]? LoadProfileImageBytes(string? imageUrl)
     {
-        var candidates = new List<string>();
-        if (!string.IsNullOrWhiteSpace(imageUrl))
+        if (!string.IsNullOrWhiteSpace(imageUrl) &&
+            Uri.TryCreate(imageUrl.Trim(), UriKind.Absolute, out var uri))
         {
-            candidates.Add(imageUrl.Trim());
-        }
-
-        if (!string.Equals(imageUrl?.Trim(), DefaultProfileImageUrl, StringComparison.OrdinalIgnoreCase))
-        {
-            candidates.Add(DefaultProfileImageUrl);
-        }
-
-        foreach (var candidate in candidates)
-        {
-            if (!Uri.TryCreate(candidate, UriKind.Absolute, out var uri))
-            {
-                continue;
-            }
-
             try
             {
                 var bytes = ImageHttpClient.GetByteArrayAsync(uri).GetAwaiter().GetResult();
@@ -596,7 +580,6 @@ public sealed class OpenXmlDocxGenerator : IDocxGenerator
             catch (Exception ex)
             {
                 LogSuppressedException(ex, "Remote profile image fetch failed.");
-                // Try next candidate.
             }
         }
 

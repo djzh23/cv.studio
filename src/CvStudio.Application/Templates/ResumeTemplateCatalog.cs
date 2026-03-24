@@ -58,7 +58,7 @@ public static class ResumeTemplateCatalog
                 Email = "max.mustermann@example.de",
                 Phone = "+49 (0) 170 000 00 00",
                 Location = "Musterstraße 1, 20099 Hamburg",
-                ProfileImageUrl = "https://ui-avatars.com/api/?name=Max+Mustermann&background=1A3A5C&color=ffffff&size=200",
+                ProfileImageUrl = "",
                 Summary = ".NET-Entwickler mit praktischer Erfahrung in Blazor Hybrid, MVVM und REST-API-Anbindung. Vertraut mit C#, Entity Framework Core und Clean Architecture. Schnelle Einarbeitung, strukturierte Arbeitsweise, Teamplayer."
             },
             WorkItems =
@@ -175,7 +175,7 @@ public static class ResumeTemplateCatalog
                 Email = "m.mustermann@example.de",
                 Phone = "(+49) 0170 000 00 00",
                 Location = "Musterstraße 1, 20099 Hamburg",
-                ProfileImageUrl = "https://ui-avatars.com/api/?name=Max+Mustermann&background=1A3A5C&color=ffffff&size=200",
+                ProfileImageUrl = "",
                 Summary = "Engagierter und vielseitiger Mitarbeiter mit Erfahrung in IT-Support, administrativen Aufgaben und Kundenservice. Sicher im Umgang mit Windows, Office 365, digitalen Systemen und IT-Ticketsystemen. Schnelle Einarbeitung in neue Tools und strukturierte Arbeitsweise."
             },
             WorkItems =
@@ -272,7 +272,7 @@ public static class ResumeTemplateCatalog
                 Email = "max.mustermann@example.de",
                 Phone = "+49 170 000 00 00",
                 Location = "Hamburg, Deutschland",
-                ProfileImageUrl = "https://ui-avatars.com/api/?name=Max+Mustermann&background=1A3A5C&color=ffffff&size=200",
+                ProfileImageUrl = "",
                 WorkPermit = "Unbefristete Arbeitserlaubnis",
                 Summary = "Zuverlässiger und serviceorientierter Mitarbeiter mit über 5 Jahren praktischer Erfahrung in Kundenbetreuung, Zustellung und operativen Abläufen. Kommunikationsstark auf Deutsch, Englisch und Französisch. Belastbar, pünktlich und motiviert — auch in körperlich anspruchsvollen oder stressigen Arbeitssituationen."
             },
