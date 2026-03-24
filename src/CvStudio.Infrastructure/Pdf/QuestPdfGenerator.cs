@@ -11,8 +11,8 @@ namespace CvStudio.Infrastructure.Pdf;
 
 public sealed class QuestPdfGenerator : IPdfGenerator
 {
-    private const string DefaultProfileImageUrl = "https://i.ibb.co/CpTGqYTz/bewerbungsfoto.png";
-    private const string DefaultGithubUrl = "https://github.com/djzh23";
+    private const string DefaultProfileImageUrl = "https://ui-avatars.com/api/?name=Max+Mustermann&background=1A3A5C&color=ffffff&size=200";
+    private const string DefaultGithubUrl = "https://github.com/max-mustermann-dev";
     private const string DefaultPdfFontFamily = "Lato";
 
     private static readonly HttpClient ImageHttpClient = new()
@@ -689,7 +689,7 @@ public sealed class QuestPdfGenerator : IPdfGenerator
 
         try
         {
-            var localPath = Path.Combine(AppContext.BaseDirectory, "Assets", "bewerbungsfoto.png");
+            var localPath = Path.Combine(AppContext.BaseDirectory, "Assets", "profile-placeholder.png");
             if (File.Exists(localPath))
             {
                 var bytes = File.ReadAllBytes(localPath);

@@ -14,8 +14,8 @@ namespace CvStudio.Infrastructure.Docx;
 
 public sealed class OpenXmlDocxGenerator : IDocxGenerator
 {
-    private const string DefaultProfileImageUrl = "https://i.ibb.co/CpTGqYTz/bewerbungsfoto.png";
-    private const string DefaultGithubUrl = "https://github.com/djzh23";
+    private const string DefaultProfileImageUrl = "https://ui-avatars.com/api/?name=Max+Mustermann&background=1A3A5C&color=ffffff&size=200";
+    private const string DefaultGithubUrl = "https://github.com/max-mustermann-dev";
 
     private static readonly HttpClient ImageHttpClient = new()
     {
@@ -322,7 +322,7 @@ public sealed class OpenXmlDocxGenerator : IDocxGenerator
 
             foreach (var bullet in item.Bullets.Where(static x => !string.IsNullOrWhiteSpace(x)))
             {
-                body.Append(CreateStyledParagraph($"• {bullet.Trim()}", 19, color: BodyColor, spacingAfter: 35, leftIndent: 280));
+                body.Append(CreateStyledParagraph($"ï¿½ {bullet.Trim()}", 19, color: BodyColor, spacingAfter: 35, leftIndent: 280));
             }
 
             body.Append(CreateParagraphWithSpacing(0, 80));
@@ -602,7 +602,7 @@ public sealed class OpenXmlDocxGenerator : IDocxGenerator
 
         try
         {
-            var localPath = Path.Combine(AppContext.BaseDirectory, "Assets", "bewerbungsfoto.png");
+            var localPath = Path.Combine(AppContext.BaseDirectory, "Assets", "profile-placeholder.png");
             if (File.Exists(localPath))
             {
                 var bytes = File.ReadAllBytes(localPath);
@@ -719,7 +719,7 @@ public sealed class OpenXmlDocxGenerator : IDocxGenerator
 
     private static string JoinItemsWithDot(IEnumerable<string> items)
     {
-        return string.Join(" · ", items.Where(static x => !string.IsNullOrWhiteSpace(x)).Select(static x => x.Trim()));
+        return string.Join(" ï¿½ ", items.Where(static x => !string.IsNullOrWhiteSpace(x)).Select(static x => x.Trim()));
     }
 
     private static TableCell CreateKnowledgeCell(string text, int width, bool isLabel, bool isLast)
