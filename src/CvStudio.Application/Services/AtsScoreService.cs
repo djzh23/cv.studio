@@ -1,4 +1,4 @@
-﻿using System.Text;
+using System.Text;
 using System.Text.RegularExpressions;
 using CvStudio.Application.Contracts;
 
@@ -298,8 +298,8 @@ public sealed class AtsScoreService : IAtsScoreService
         {
             improvements.Add(new AtsImprovement
             {
-                Category = "Zusammenfassung",
-                Issue = $"Zusammenfassung zu kurz ({summaryLen} Zeichen).",
+                Category = "Qualifikationsprofil",
+                Issue = $"Qualifikationsprofil zu kurz ({summaryLen} Zeichen).",
                 Suggestion = profile.SummaryHint,
                 Priority = summaryLen < 50 ? "Hoch" : "Mittel"
             });

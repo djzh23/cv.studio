@@ -1,0 +1,16 @@
+{
+  "permissions": {
+    "allow": [
+      "WebFetch(domain:cv-studio.railway.app)",
+      "Bash(find /c/Dev/projects/dotnet/_active-projects/cv.studio/cv.studio -type f \\\\\\(-name *.yml -o -name *.yaml -o -name *.xml -o -name *.config \\\\\\))",
+      "Bash(find /c/Dev/projects/dotnet/_active-projects/cv.studio/cv.studio -type d -name Templates -o -name Seed* -o -name Data -o -name Sample*)",
+      "Bash(find /c/Dev/projects/dotnet/_active-projects/cv.studio/cv.studio -type f \\\\\\(-name *.csproj -o -name .gitignore -o -name docker-compose* -o -name *.yml \\\\\\))",
+      "Bash(xargs grep:*)",
+      "Bash(git filter-repo:*)",
+      "Bash(python -m git_filter_repo --version)",
+      "Bash(pip show:*)",
+      "Bash(where bfg:*)",
+      "Bash(java -version)"
+    ]
+  }
+}

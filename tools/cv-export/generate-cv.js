@@ -1,4 +1,4 @@
-﻿#!/usr/bin/env node
+#!/usr/bin/env node
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
@@ -288,7 +288,7 @@ async function buildDocx() {
             spacing: { after: 80 },
           }),
 
-          ...sectionHeader("Zusammenfassung"),
+          ...sectionHeader("Qualifikationsprofil"),
           new Paragraph({
             spacing: { after: 80 },
             children: [new TextRun({ text: cvData.summary, size: 38, color: COLORS.BODY, font: "Calibri" })],
@@ -439,7 +439,7 @@ function buildPdf() {
     }
   };
 
-  renderSection("Zusammenfassung", () => {
+  renderSection("Qualifikationsprofil", () => {
     ensure(70);
     doc.fillColor(body).font("Helvetica").fontSize(11).text(cvData.summary, leftX, y, { width: contentW, align: "left" });
     y = doc.y;

@@ -68,7 +68,7 @@ public sealed class OpenXmlDocxGenerator : IDocxGenerator
 
             if (!string.IsNullOrWhiteSpace(data.Profile.Summary))
             {
-                body.Append(CreateSectionTitle("ZUSAMMENFASSUNG"));
+                body.Append(CreateSectionTitle("QUALIFIKATIONSPROFIL"));
                 body.Append(CreateStyledParagraph(data.Profile.Summary, 21, color: BodyColor, spacingAfter: 80));
             }
 

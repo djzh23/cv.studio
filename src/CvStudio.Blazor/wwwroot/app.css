@@ -718,6 +718,13 @@ body::before {
     border: 1px solid var(--border);
 }
 
+/* Modern (PDF Design B): größeres Foto, an QuestPDF ~92pt angelehnt */
+.preview-card.preview-design-b .profile-image {
+    width: 96px;
+    height: 96px;
+    border-radius: 2px;
+}
+
 .preview-card .muted,
 .versions-panel .muted {
     color: var(--muted);

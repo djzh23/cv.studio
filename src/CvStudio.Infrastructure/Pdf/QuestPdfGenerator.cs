@@ -1,4 +1,4 @@
-﻿using QuestPDF.Fluent;
+using QuestPDF.Fluent;
 using QuestPDF.Helpers;
 using QuestPDF.Infrastructure;
 using CvStudio.Application;
@@ -74,22 +74,22 @@ public sealed class QuestPdfGenerator : IPdfGenerator
             container.Page(page =>
             {
                 page.Size(PageSizes.A4);
-                page.Margin(24);
+                page.Margin(20);
                 page.DefaultTextStyle(x => x
                     .FontFamily(DefaultPdfFontFamily)
                     .FontSize(Style.BaseFont)
                     .FontColor(Style.Body)
-                    .LineHeight(1.22f));
+                    .LineHeight(1.2f));
 
                 page.Content().Column(column =>
                 {
-                    column.Spacing(10);
+                    column.Spacing(8);
                     column.Item().Element(c => RenderHeader(c, data, profileImageBytes));
                     column.Item().LineHorizontal(1.2f).LineColor(Style.Navy);
 
                     if (!string.IsNullOrWhiteSpace(data.Profile.Summary))
                     {
-                        column.Item().Element(c => RenderSection(c, "ZUSAMMENFASSUNG", section =>
+                        column.Item().Element(c => RenderSection(c, "QUALIFIKATIONSPROFIL", section =>
                         {
                             section.Item().Text(data.Profile.Summary.Trim());
                         }));
@@ -104,7 +104,7 @@ public sealed class QuestPdfGenerator : IPdfGenerator
                             foreach (var work in data.WorkItems)
                             {
                                 section.Item().Element(x => RenderWorkEntry(x, work));
-                                section.Item().PaddingBottom(3);
+                                section.Item().PaddingBottom(2);
                             }
                         }));
                     }
@@ -116,7 +116,7 @@ public sealed class QuestPdfGenerator : IPdfGenerator
                             foreach (var education in data.EducationItems)
                             {
                                 section.Item().Element(x => RenderEducationEntry(x, education));
-                                section.Item().PaddingBottom(3);
+                                section.Item().PaddingBottom(2);
                             }
                         }));
                     }
@@ -134,16 +134,16 @@ public sealed class QuestPdfGenerator : IPdfGenerator
             container.Page(page =>
             {
                 page.Size(PageSizes.A4);
-                page.Margin(24);
+                page.Margin(20);
                 page.DefaultTextStyle(x => x
                     .FontFamily(DefaultPdfFontFamily)
                     .FontSize(10.8f)
                     .FontColor("#222222")
-                    .LineHeight(1.26f));
+                    .LineHeight(1.22f));
 
                 page.Content().Column(column =>
                 {
-                    column.Spacing(9);
+                    column.Spacing(7);
                     column.Item().Element(c => RenderDesignBHeader(c, data, profileImageBytes));
 
                     if (!string.IsNullOrWhiteSpace(data.Profile.Summary))
@@ -158,7 +158,7 @@ public sealed class QuestPdfGenerator : IPdfGenerator
                             foreach (var work in data.WorkItems)
                             {
                                 section.Item().Element(x => RenderDesignBWorkEntry(x, work));
-                                section.Item().PaddingBottom(5);
+                                section.Item().PaddingBottom(3);
                             }
                         }));
                     }
@@ -170,31 +170,40 @@ public sealed class QuestPdfGenerator : IPdfGenerator
                             foreach (var education in data.EducationItems)
                             {
                                 section.Item().Element(x => RenderDesignBEducationEntry(x, education));
-                                section.Item().PaddingBottom(4);
+                                section.Item().PaddingBottom(3);
                             }
                         }));
                     }
 
-                    if (data.Skills.Count > 0)
+                    var designBKnowledgeGroups = (data.Skills ?? [])
+                        .Where(s =>
+                            !string.IsNullOrWhiteSpace(s.CategoryName) &&
+                            !IsLanguageCategory(s.CategoryName) &&
+                            !IsLinkCategory(s.CategoryName))
+                        .Select(s => new
+                        {
+                            s.CategoryName,
+                            Line = string.Join(" · ", (s.Items ?? []).Where(static x => !string.IsNullOrWhiteSpace(x)))
+                        })
+                        .Where(x => !string.IsNullOrWhiteSpace(x.Line))
+                        .ToList();
+
+                    if (designBKnowledgeGroups.Count > 0)
                     {
                         column.Item().Element(c => RenderDesignBSection(c, "KENNTNISSE", section =>
                         {
-                            foreach (var skill in data.Skills.Where(s => !string.IsNullOrWhiteSpace(s.CategoryName)))
+                            foreach (var row in designBKnowledgeGroups)
                             {
-                                var skills = string.Join(" · ", skill.Items.Where(static x => !string.IsNullOrWhiteSpace(x)));
-                                if (string.IsNullOrWhiteSpace(skills))
-                                {
-                                    continue;
-                                }
-
                                 section.Item().Text(text =>
                                 {
-                                    text.Span($"{skill.CategoryName.Trim()}: ").Bold().FontSize(10.5f);
-                                    text.Span(skills).FontSize(10.5f);
+                                    text.Span($"{row.CategoryName.Trim()}: ").Bold().FontSize(10.5f);
+                                    text.Span(row.Line).FontSize(10.5f);
                                 });
                             }
                         }));
                     }
+
+                    column.Item().Element(c => RenderDesignBLanguagesAndInterests(c, data));
                 });
             });
         }).GeneratePdf();
@@ -315,7 +324,8 @@ public sealed class QuestPdfGenerator : IPdfGenerator
             column.Spacing(4);
             column.Item().Row(row =>
             {
-                row.ConstantItem(58).Height(58).Element(img =>
+                const float photoSize = 92f;
+                row.ConstantItem(photoSize).Height(photoSize).Element(img =>
                 {
                     if (profileImageBytes is null)
                     {
@@ -327,7 +337,7 @@ public sealed class QuestPdfGenerator : IPdfGenerator
                     }
                 });
 
-                row.ConstantItem(12);
+                row.ConstantItem(14);
                 row.RelativeItem().AlignMiddle().Column(right =>
                 {
                     right.Spacing(1);
@@ -408,7 +418,7 @@ public sealed class QuestPdfGenerator : IPdfGenerator
     {
         container.Column(column =>
         {
-            column.Spacing(4);
+            column.Spacing(3);
             column.Item().PaddingTop(2).Text(title).FontSize(14f).Bold();
             column.Item().LineHorizontal(0.8f).LineColor("#2C2F34");
             renderContent(column);
@@ -488,7 +498,7 @@ public sealed class QuestPdfGenerator : IPdfGenerator
     {
         container.Column(column =>
         {
-            column.Spacing(5);
+            column.Spacing(4);
             column.Item().Background(Style.SectionBg).BorderLeft(2f).BorderColor(Style.Navy).PaddingLeft(6).PaddingVertical(2)
                 .Text(title)
                 .FontColor(Style.Navy)
@@ -615,40 +625,90 @@ public sealed class QuestPdfGenerator : IPdfGenerator
 
     private static void RenderLanguagesAndInterests(IContainer container, ResumeData data)
     {
-        var languageLine = string.Join(" - ", data.Skills
-            .Where(g => IsLanguageCategory(g.CategoryName))
-            .SelectMany(g => g.Items)
-            .Where(static x => !string.IsNullOrWhiteSpace(x)));
-
-        var hobbies = string.Join(" - ", data.Hobbies.Where(static x => !string.IsNullOrWhiteSpace(x)));
-
-        if (string.IsNullOrWhiteSpace(languageLine) && string.IsNullOrWhiteSpace(hobbies))
+        if (!TryBuildLanguagesInterestsLines(data, out var languageLine, out var hobbies))
         {
             return;
         }
 
         RenderSection(container, "SPRACHEN & INTERESSEN", section =>
         {
-            section.Item().Text(text =>
-            {
-                if (!string.IsNullOrWhiteSpace(languageLine))
-                {
-                    text.Span("Sprachen: ").Bold().FontColor(Style.Navy);
-                    text.Span(languageLine);
-                }
-
-                if (!string.IsNullOrWhiteSpace(languageLine) && !string.IsNullOrWhiteSpace(hobbies))
-                {
-                    text.Span("    |    ").FontColor(Style.Muted);
-                }
-
-                if (!string.IsNullOrWhiteSpace(hobbies))
-                {
-                    text.Span("Interessen: ").Bold().FontColor(Style.Navy);
-                    text.Span(hobbies);
-                }
-            });
+            section.Item().Text(text => AppendLanguagesInterestsSpans(text, languageLine, hobbies));
         });
+    }
+
+    private static void RenderDesignBLanguagesAndInterests(IContainer container, ResumeData data)
+    {
+        var languageItems = (data.Skills ?? [])
+            .Where(g => IsLanguageCategory(g.CategoryName))
+            .SelectMany(g => g.Items ?? [])
+            .Where(static x => !string.IsNullOrWhiteSpace(x))
+            .Select(static x => x.Trim())
+            .ToList();
+
+        var hobbyItems = (data.Hobbies ?? [])
+            .Where(static x => !string.IsNullOrWhiteSpace(x))
+            .Select(static x => x.Trim())
+            .ToList();
+
+        if (languageItems.Count == 0 && hobbyItems.Count == 0)
+        {
+            return;
+        }
+
+        RenderDesignBSection(container, "SPRACHEN & INTERESSEN", section =>
+        {
+            if (languageItems.Count > 0)
+            {
+                section.Item()
+                    .PaddingBottom(hobbyItems.Count > 0 ? 4 : 0)
+                    .Text(text =>
+                    {
+                        text.Span("Sprachen: ").Bold().FontSize(10.5f);
+                        text.Span(string.Join(" · ", languageItems)).FontSize(10.5f);
+                    });
+            }
+
+            if (hobbyItems.Count > 0)
+            {
+                section.Item().Text(text =>
+                {
+                    text.Span("Interessen: ").Bold().FontSize(10.5f);
+                    text.Span(string.Join(" · ", hobbyItems)).FontSize(10.5f);
+                });
+            }
+        });
+    }
+
+    private static bool TryBuildLanguagesInterestsLines(ResumeData data, out string languageLine, out string hobbies)
+    {
+        languageLine = string.Join(" - ", (data.Skills ?? [])
+            .Where(g => IsLanguageCategory(g.CategoryName))
+            .SelectMany(g => g.Items ?? [])
+            .Where(static x => !string.IsNullOrWhiteSpace(x)));
+
+        hobbies = string.Join(" - ", (data.Hobbies ?? []).Where(static x => !string.IsNullOrWhiteSpace(x)));
+
+        return !string.IsNullOrWhiteSpace(languageLine) || !string.IsNullOrWhiteSpace(hobbies);
+    }
+
+    private static void AppendLanguagesInterestsSpans(TextDescriptor text, string languageLine, string hobbies)
+    {
+        if (!string.IsNullOrWhiteSpace(languageLine))
+        {
+            text.Span("Sprachen: ").Bold().FontColor(Style.Navy);
+            text.Span(languageLine);
+        }
+
+        if (!string.IsNullOrWhiteSpace(languageLine) && !string.IsNullOrWhiteSpace(hobbies))
+        {
+            text.Span("    |    ").FontColor(Style.Muted);
+        }
+
+        if (!string.IsNullOrWhiteSpace(hobbies))
+        {
+            text.Span("Interessen: ").Bold().FontColor(Style.Navy);
+            text.Span(hobbies);
+        }
     }
 
     private static byte[]? LoadProfileImageBytes(string? imageUrl)

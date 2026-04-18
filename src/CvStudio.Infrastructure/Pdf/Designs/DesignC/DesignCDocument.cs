@@ -38,7 +38,8 @@ public sealed class DesignCDocument : IDocument
             page.DefaultTextStyle(x =>
                 x.FontFamily("Arial")
                  .FontSize(DesignCStyles.BodyText)
-                 .FontColor(DesignCStyles.MainText));
+                 .FontColor(DesignCStyles.MainText)
+                 .LineHeight(1.24f));
 
             page.Content().Row(row =>
             {
@@ -55,9 +56,9 @@ public sealed class DesignCDocument : IDocument
 
     private void ComposeSidebar(ColumnDescriptor col)
     {
-        col.Item().Height(20);
+        col.Item().Height(12);
         ComposePhotoWithAccent(col);
-        col.Item().Height(16);
+        col.Item().Height(10);
 
         ComposeSidebarSectionLabel(col, "\u2709", "KONTAKTE");
         col.Item().PaddingHorizontal(16).Column(inner =>
@@ -86,18 +87,7 @@ public sealed class DesignCDocument : IDocument
             }
         });
 
-        col.Item().Height(14);
-
-        if (!string.IsNullOrWhiteSpace(_profile.Summary))
-        {
-            ComposeSidebarSectionLabel(col, "\u2630", "ZUSAMMENFASSUNG");
-            col.Item().PaddingHorizontal(16)
-                .Text(_profile.Summary.Trim())
-                .FontSize(DesignCStyles.SidebarBody)
-                .FontColor(DesignCStyles.SidebarMuted)
-                .LineHeight(1.4f);
-            col.Item().Height(14);
-        }
+        col.Item().Height(8);
 
         var languages = ResolveLanguages();
         if (languages.Count > 0)
@@ -107,75 +97,68 @@ public sealed class DesignCDocument : IDocument
             {
                 foreach (var lang in languages)
                 {
-                    inner.Item().Row(r =>
+                    inner.Item().Column(langBlock =>
                     {
-                        r.RelativeItem(1.4f)
-                            .Text(lang.Name.ToUpperInvariant())
-                            .FontSize(DesignCStyles.SmallText)
-                            .FontColor(DesignCStyles.SidebarText)
-                            .Bold();
-
-                        r.RelativeItem(1f)
-                            .Text(GetLevelLabel(lang.Level))
-                            .FontSize(DesignCStyles.SmallText)
-                            .FontColor(DesignCStyles.SidebarMuted);
-
-                        r.RelativeItem(1f).AlignRight().Row(dots =>
+                        langBlock.Spacing(2);
+                        langBlock.Item().Row(r =>
                         {
-                            var filled = GetLanguageDotCount(lang.Level);
-                            for (var i = 1; i <= 5; i++)
+                            r.RelativeItem()
+                                .Text(lang.Name.ToUpperInvariant())
+                                .FontSize(DesignCStyles.SmallText)
+                                .FontColor(DesignCStyles.SidebarText)
+                                .Bold();
+
+                            r.ConstantItem(DesignCStyles.LanguageDotsColumnWidth).AlignRight().Row(dots =>
                             {
-                                var color = i <= filled ? DesignCStyles.DotFilled : DesignCStyles.DotEmpty;
-                                dots.ConstantItem(7).Text("\u25CF").FontSize(7).FontColor(color);
-                            }
+                                var filled = GetLanguageDotCount(lang.Level);
+                                for (var i = 1; i <= 5; i++)
+                                {
+                                    var color = i <= filled ? DesignCStyles.DotFilled : DesignCStyles.DotEmpty;
+                                    dots.ConstantItem(8).Text("\u25CF").FontSize(8).FontColor(color);
+                                }
+                            });
                         });
+
+                        var levelLine = GetLevelLabel(lang.Level);
+                        if (!string.IsNullOrWhiteSpace(levelLine))
+                        {
+                            langBlock.Item()
+                                .Text(levelLine)
+                                .FontSize(DesignCStyles.SmallText)
+                                .FontColor(DesignCStyles.SidebarMuted)
+                                .LineHeight(1.28f);
+                        }
                     });
-                    inner.Item().Height(4);
+                    inner.Item().Height(5);
                 }
             });
-            col.Item().Height(14);
+            col.Item().Height(8);
         }
 
-        var skillGroups = _skills
-            .Where(g => !(g.CategoryName ?? string.Empty).Contains("sprach", StringComparison.OrdinalIgnoreCase))
-            .Where(g => (g.Items ?? []).Count > 0)
-            .ToList();
-
-        if (skillGroups.Count > 0)
+        var hobbyLine = string.Join(" · ", (_data.Hobbies ?? [])
+            .Where(x => !string.IsNullOrWhiteSpace(x))
+            .Select(x => x.Trim()));
+        if (!string.IsNullOrWhiteSpace(hobbyLine))
         {
-            ComposeSidebarSectionLabel(col, "\u2605", "KENNTNISSE");
-            col.Item().PaddingHorizontal(16).Column(inner =>
-            {
-                foreach (var group in skillGroups)
-                {
-                    inner.Item()
-                        .Text((group.CategoryName ?? string.Empty).Trim())
-                        .FontSize(DesignCStyles.SidebarLabel)
-                        .FontColor(DesignCStyles.SidebarText)
-                        .Bold();
-                    inner.Item().Height(2);
-
-                    var items = (group.Items ?? []).Where(x => !string.IsNullOrWhiteSpace(x)).Select(x => x.Trim());
-                    inner.Item()
-                        .Text(string.Join(" \u00B7 ", items))
-                        .FontSize(DesignCStyles.SidebarBody)
-                        .FontColor(DesignCStyles.SidebarMuted)
-                        .LineHeight(1.35f);
-                    inner.Item().Height(7);
-                }
-            });
+            ComposeSidebarSectionLabel(col, "\u2665", "INTERESSEN");
+            col.Item().PaddingHorizontal(16)
+                .Text(hobbyLine)
+                .FontSize(DesignCStyles.SidebarBody)
+                .FontColor(DesignCStyles.SidebarMuted)
+                .LineHeight(1.35f);
+            col.Item().Height(8);
         }
     }
 
     private void ComposePhotoWithAccent(ColumnDescriptor col)
     {
-        col.Item().AlignCenter().Width(130).Height(140).Layers(layers =>
+        col.Item().AlignCenter().Width(136).Height(150).Layers(layers =>
         {
             layers.Layer()
                 .PaddingLeft(20)
                 .PaddingTop(6)
-                .Width(110)
-                .Height(110)
+                .Width(118)
+                .Height(118)
                 .Background(DesignCStyles.BlobColor);
 
             layers.Layer()
@@ -187,7 +170,7 @@ public sealed class DesignCDocument : IDocument
                 .FontSize(24)
                 .FontColor(DesignCStyles.BlobAccentDark);
 
-            layers.PrimaryLayer().PaddingTop(10).PaddingLeft(5).Width(110).Height(110).Element(container =>
+            layers.PrimaryLayer().PaddingTop(10).PaddingLeft(5).Width(118).Height(118).Element(container =>
             {
                 var framed = container.Border(1).BorderColor("#E5E7EB").Padding(2);
                 if (_profileImageBytes is not null)
@@ -200,7 +183,7 @@ public sealed class DesignCDocument : IDocument
                         .AlignCenter()
                         .AlignMiddle()
                         .Text(GetInitials())
-                        .FontSize(28)
+                        .FontSize(30)
                         .FontColor(DesignCStyles.BlobAccentDark)
                         .Bold();
                 }
@@ -217,7 +200,7 @@ public sealed class DesignCDocument : IDocument
                 .AlignCenter()
                 .AlignMiddle()
                 .Text(icon)
-                .FontSize(7)
+                .FontSize(DesignCStyles.SidebarIconBadge)
                 .FontColor(DesignCStyles.IconBadgeText)
                 .Bold();
             r.ConstantItem(6);
@@ -228,21 +211,21 @@ public sealed class DesignCDocument : IDocument
                 .Bold()
                 .LetterSpacing(0.04f);
         });
-        col.Item().Height(7);
+        col.Item().Height(5);
     }
 
     private void ComposeMain(ColumnDescriptor col)
     {
-        col.Item().Padding(24).Column(inner =>
+        col.Item().PaddingVertical(16).PaddingHorizontal(16).Column(inner =>
         {
             var fullName = $"{_profile.FirstName} {_profile.LastName}".Trim().ToUpperInvariant();
             inner.Item().Text(fullName)
-                .FontSize(28f)
+                .FontSize(DesignCStyles.NameSize)
                 .FontColor(DesignCStyles.MainText)
                 .Bold()
                 .LetterSpacing(0.02f);
 
-            inner.Item().Height(6);
+            inner.Item().Height(4);
 
             if (!string.IsNullOrWhiteSpace(_profile.Headline))
             {
@@ -257,7 +240,7 @@ public sealed class DesignCDocument : IDocument
                     .LetterSpacing(0.05f);
             }
 
-            inner.Item().Height(8);
+            inner.Item().Height(5);
 
             var contactParts = new List<string>();
             if (!string.IsNullOrWhiteSpace(_profile.Email))
@@ -278,7 +261,7 @@ public sealed class DesignCDocument : IDocument
             if (contactParts.Count > 0)
             {
                 inner.Item().Text(string.Join("  |  ", contactParts))
-                    .FontSize(8f)
+                    .FontSize(DesignCStyles.HeaderContactSize)
                     .FontColor(DesignCStyles.MainMuted);
             }
 
@@ -294,7 +277,7 @@ public sealed class DesignCDocument : IDocument
                             .PaddingHorizontal(3)
                             .PaddingVertical(2)
                             .Text($"in  {FormatUrl(_profile.LinkedInUrl)}")
-                            .FontSize(7.5f)
+                            .FontSize(DesignCStyles.SmallText)
                             .FontColor("#1D4ED8");
                         r.ConstantItem(6);
                     }
@@ -306,7 +289,7 @@ public sealed class DesignCDocument : IDocument
                             .PaddingHorizontal(3)
                             .PaddingVertical(2)
                             .Text($"gh  {FormatUrl(_profile.GitHubUrl)}")
-                            .FontSize(7.5f)
+                            .FontSize(DesignCStyles.SmallText)
                             .FontColor("#374151");
                         r.ConstantItem(6);
                     }
@@ -318,7 +301,7 @@ public sealed class DesignCDocument : IDocument
                             .PaddingHorizontal(3)
                             .PaddingVertical(2)
                             .Text($"web  {FormatUrl(_profile.PortfolioUrl)}")
-                            .FontSize(7.5f)
+                            .FontSize(DesignCStyles.SmallText)
                             .FontColor("#374151");
                     }
                 });
@@ -326,25 +309,36 @@ public sealed class DesignCDocument : IDocument
 
             if (!string.IsNullOrWhiteSpace(_profile.WorkPermit))
             {
-                inner.Item().Height(5);
+                inner.Item().Height(4);
                 inner.Item()
                     .Background("#F0FDF4")
                     .Border(0.5f).BorderColor("#BBF7D0")
                     .PaddingHorizontal(4)
                     .PaddingVertical(3)
                     .Text($"✓  {_profile.WorkPermit.Trim()}")
-                    .FontSize(7.5f)
+                    .FontSize(DesignCStyles.SmallText)
                     .FontColor("#15803D");
             }
 
-            inner.Item().Height(14);
+            inner.Item().Height(8);
+
+            if (!string.IsNullOrWhiteSpace(_profile.Summary))
+            {
+                ComposeMainSection(inner, "\u2712", "QUALIFIKATIONSPROFIL");
+                inner.Item()
+                    .Text(_profile.Summary.Trim())
+                    .FontSize(DesignCStyles.BodyText)
+                    .FontColor(DesignCStyles.MainMuted)
+                    .LineHeight(1.38f);
+                inner.Item().Height(5);
+            }
 
             if (_workItems.Count > 0)
             {
                 ComposeMainSection(inner, "\u2630", "BERUFSERFAHRUNG");
                 foreach (var work in _workItems)
                     ComposeWorkItem(inner, work);
-                inner.Item().Height(4);
+                inner.Item().Height(3);
             }
 
             if (_educationItems.Count > 0)
@@ -352,7 +346,15 @@ public sealed class DesignCDocument : IDocument
                 ComposeMainSection(inner, "\u25CE", "AUSBILDUNG");
                 foreach (var edu in _educationItems)
                     ComposeEduItem(inner, edu);
-                inner.Item().Height(4);
+                inner.Item().Height(3);
+            }
+
+            var knowledgeGroups = GetKnowledgeGroupsForMainColumn();
+            if (knowledgeGroups.Count > 0)
+            {
+                ComposeMainSection(inner, "\u2605", "KENNTNISSE");
+                ComposeKnowledgeGroupsMain(inner, knowledgeGroups);
+                inner.Item().Height(3);
             }
 
             if (_projects.Count > 0)
@@ -364,6 +366,43 @@ public sealed class DesignCDocument : IDocument
         });
     }
 
+    private static bool IsLanguageSkillCategory(string? categoryName) =>
+        (categoryName ?? string.Empty).Contains("sprach", StringComparison.OrdinalIgnoreCase);
+
+    private static bool IsLinkSkillCategory(string? categoryName) =>
+        (categoryName ?? string.Empty).Contains("link", StringComparison.OrdinalIgnoreCase);
+
+    private List<SkillGroupData> GetKnowledgeGroupsForMainColumn()
+    {
+        return _skills
+            .Where(g => !string.IsNullOrWhiteSpace(g.CategoryName))
+            .Where(g => !IsLanguageSkillCategory(g.CategoryName))
+            .Where(g => !IsLinkSkillCategory(g.CategoryName))
+            .Where(g => (g.Items ?? []).Any(x => !string.IsNullOrWhiteSpace(x)))
+            .ToList();
+    }
+
+    private static void ComposeKnowledgeGroupsMain(ColumnDescriptor col, List<SkillGroupData> groups)
+    {
+        foreach (var group in groups)
+        {
+            var items = string.Join(" · ", (group.Items ?? [])
+                .Where(x => !string.IsNullOrWhiteSpace(x))
+                .Select(x => x.Trim()));
+            if (string.IsNullOrWhiteSpace(items))
+            {
+                continue;
+            }
+
+            col.Item().Text(text =>
+            {
+                text.Span($"{group.CategoryName!.Trim()}: ").Bold().FontSize(DesignCStyles.BodyText);
+                text.Span(items).FontSize(DesignCStyles.BodyText).FontColor(DesignCStyles.MainMuted);
+            });
+            col.Item().Height(DesignCStyles.ItemGap);
+        }
+    }
+
     private static void ComposeMainSection(ColumnDescriptor col, string icon, string title)
     {
         col.Item().Row(r =>
@@ -373,7 +412,7 @@ public sealed class DesignCDocument : IDocument
                 .AlignCenter()
                 .AlignMiddle()
                 .Text(icon)
-                .FontSize(8)
+                .FontSize(DesignCStyles.SectionIconSize)
                 .FontColor(DesignCStyles.IconBadgeText)
                 .Bold();
             r.ConstantItem(8);
@@ -385,7 +424,7 @@ public sealed class DesignCDocument : IDocument
                 .LetterSpacing(0.06f);
         });
         col.Item().Height(2).BorderBottom(0.5f).BorderColor(DesignCStyles.SectionLine);
-        col.Item().Height(8);
+        col.Item().Height(4);
     }
 
     private static void ComposeWorkItem(ColumnDescriptor col, WorkItemData work)
@@ -417,7 +456,7 @@ public sealed class DesignCDocument : IDocument
                 .FontColor(DesignCStyles.MainMuted);
         });
 
-        col.Item().Height(3);
+        col.Item().Height(2);
 
         var bullets = work.Bullets ?? [];
         if (bullets.Count > 0)
@@ -434,9 +473,9 @@ public sealed class DesignCDocument : IDocument
                         .Text(bullet.Trim())
                         .FontSize(DesignCStyles.BodyText)
                         .FontColor(DesignCStyles.MainText)
-                        .LineHeight(1.35f);
+                        .LineHeight(1.34f);
                 });
-                col.Item().Height(2);
+                col.Item().Height(1);
             }
         }
         else if (!string.IsNullOrWhiteSpace(work.Description))
