@@ -60,7 +60,7 @@ public sealed class DesignCDocument : IDocument
         ComposePhotoWithAccent(col);
         col.Item().Height(10);
 
-        ComposeSidebarSectionLabel(col, "\u2709", "KONTAKTE");
+        ComposeSidebarSectionLabel(col, "\u25A0", CvSectionTitleResolver.Contacts(_data));
         col.Item().PaddingHorizontal(16).Column(inner =>
         {
             if (!string.IsNullOrWhiteSpace(_profile.Phone))
@@ -92,7 +92,7 @@ public sealed class DesignCDocument : IDocument
         var languages = ResolveLanguages();
         if (languages.Count > 0)
         {
-            ComposeSidebarSectionLabel(col, "\u25C9", "SPRACHEN");
+            ComposeSidebarSectionLabel(col, "\u25CF", CvSectionTitleResolver.Languages(_data));
             col.Item().PaddingHorizontal(16).Column(inner =>
             {
                 foreach (var lang in languages)
@@ -140,7 +140,7 @@ public sealed class DesignCDocument : IDocument
             .Select(x => x.Trim()));
         if (!string.IsNullOrWhiteSpace(hobbyLine))
         {
-            ComposeSidebarSectionLabel(col, "\u2665", "INTERESSEN");
+            ComposeSidebarSectionLabel(col, "\u2665", CvSectionTitleResolver.Interests(_data));
             col.Item().PaddingHorizontal(16)
                 .Text(hobbyLine)
                 .FontSize(DesignCStyles.SidebarBody)
@@ -324,7 +324,7 @@ public sealed class DesignCDocument : IDocument
 
             if (!string.IsNullOrWhiteSpace(_profile.Summary))
             {
-                ComposeMainSection(inner, "\u2712", "QUALIFIKATIONSPROFIL");
+                ComposeMainSection(inner, "\u25A0", CvSectionTitleResolver.QualificationsProfile(_data));
                 inner.Item()
                     .Text(_profile.Summary.Trim())
                     .FontSize(DesignCStyles.BodyText)
@@ -335,7 +335,7 @@ public sealed class DesignCDocument : IDocument
 
             if (_workItems.Count > 0)
             {
-                ComposeMainSection(inner, "\u2630", "BERUFSERFAHRUNG");
+                ComposeMainSection(inner, "\u25A0", CvSectionTitleResolver.WorkExperience(_data));
                 foreach (var work in _workItems)
                     ComposeWorkItem(inner, work);
                 inner.Item().Height(3);
@@ -343,7 +343,7 @@ public sealed class DesignCDocument : IDocument
 
             if (_educationItems.Count > 0)
             {
-                ComposeMainSection(inner, "\u25CE", "AUSBILDUNG");
+                ComposeMainSection(inner, "\u25CF", CvSectionTitleResolver.Education(_data));
                 foreach (var edu in _educationItems)
                     ComposeEduItem(inner, edu);
                 inner.Item().Height(3);
@@ -352,14 +352,14 @@ public sealed class DesignCDocument : IDocument
             var knowledgeGroups = GetKnowledgeGroupsForMainColumn();
             if (knowledgeGroups.Count > 0)
             {
-                ComposeMainSection(inner, "\u2605", "KENNTNISSE");
+                ComposeMainSection(inner, "\u2605", CvSectionTitleResolver.Skills(_data));
                 ComposeKnowledgeGroupsMain(inner, knowledgeGroups);
                 inner.Item().Height(3);
             }
 
             if (_projects.Count > 0)
             {
-                ComposeMainSection(inner, "\u25C8", "PROJEKTE");
+                ComposeMainSection(inner, "\u25A0", CvSectionTitleResolver.Projects(_data));
                 foreach (var project in _projects)
                     ComposeProjectItem(inner, project);
             }
