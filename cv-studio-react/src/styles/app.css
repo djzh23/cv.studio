@@ -1558,21 +1558,42 @@ body::before {
     to { transform: rotate(360deg); }
 }
 
-/* Wizard mobile — full screen */
+/* Wizard mobile — true full screen */
 @media (max-width: 600px) {
     .wizard-overlay {
-        align-items: flex-end;
+        align-items: stretch;
+        padding: 0;
     }
 
     .wizard-modal {
         width: 100%;
         max-width: none;
-        max-height: 96vh;
-        border-radius: 12px 12px 0 0;
+        height: 100dvh;
+        max-height: 100dvh;
+        border-radius: 0;
+        box-shadow: none;
+    }
+
+    .wizard-body {
+        flex: 1;
+        overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
     }
 
     .wizard-footer {
         padding-bottom: calc(1rem + env(safe-area-inset-bottom, 0px));
+        position: sticky;
+        bottom: 0;
+        border-top: 1px solid var(--border);
+        background: #faf7f2;
+    }
+
+    .wizard-card {
+        min-height: 64px;
+    }
+
+    .wizard-source-item {
+        min-height: 56px;
     }
 }
 
@@ -1716,4 +1737,40 @@ body::before {
     .variant-delete-label {
         display: none;
     }
+}
+
+/* ── Export error bar ───────────────────────────────────── */
+
+.export-error-bar {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.55rem 1rem;
+    background: #fef2f2;
+    border-top: 1px solid #fecaca;
+    color: var(--accent-red);
+    font-size: 0.82rem;
+    animation: slide-down 0.18s ease;
+}
+
+.export-error-bar .export-error-message {
+    flex: 1;
+}
+
+.export-error-dismiss {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: var(--accent-red);
+    padding: 0.2rem 0.4rem;
+    border-radius: 4px;
+    font-size: 1rem;
+    line-height: 1;
+    display: flex;
+    align-items: center;
+    flex-shrink: 0;
+}
+
+.export-error-dismiss:hover {
+    background: #fecaca;
 }

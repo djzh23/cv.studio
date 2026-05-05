@@ -61,6 +61,8 @@ export function HomePage() {
   const [showSaveDropdown, setShowSaveDropdown] = useState(false);
   const [atsOpen, setAtsOpen] = useState(false);
   const [wizardOpen, setWizardOpen] = useState(false);
+  const [exportError, setExportError] = useState<string | null>(null);
+  const [exportBusy, setExportBusy] = useState(false);
 
   const designParam = searchParams.get("design");
 
@@ -130,47 +132,63 @@ export function HomePage() {
     return v !== null;
   };
 
-  const exportArbeitsversionPdf = async () => {
-    if (!(await confirmVariantBeforeExport())) {
-      return;
+  const runExport = async (fn: () => Promise<void>): Promise<void> => {
+    setExportError(null);
+    setExportBusy(true);
+    try {
+      await fn();
+    } catch (err) {
+      setExportError(err instanceof Error ? err.message : "Export fehlgeschlagen. Bitte erneut versuchen.");
+    } finally {
+      setExportBusy(false);
     }
-    if (!resume) {
-      return;
-    }
-    await flushAutoSave();
-    const blob = await api.downloadPdf(resume.id, { design: pdfDesign });
-    downloadBlob(`arbeitsversion-${resume.id}.pdf`, blob);
   };
 
-  const exportArbeitsversionDocx = async () => {
-    if (!(await confirmVariantBeforeExport())) {
-      return;
-    }
-    if (!resume) {
-      return;
-    }
-    await flushAutoSave();
-    const blob = await api.downloadDocx(resume.id);
-    downloadBlob(`arbeitsversion-${resume.id}.docx`, blob);
-  };
+  const exportArbeitsversionPdf = () =>
+    void runExport(async () => {
+      if (!(await confirmVariantBeforeExport())) {
+        return;
+      }
+      if (!resume) {
+        return;
+      }
+      await flushAutoSave();
+      const blob = await api.downloadPdf(resume.id, { design: pdfDesign });
+      downloadBlob(`arbeitsversion-${resume.id}.pdf`, blob);
+    });
 
-  const exportVariantePdf = async (variante: ResumeVersionDto) => {
-    if (!resume) {
-      return;
-    }
-    const blob = await api.downloadPdf(resume.id, { versionId: variante.id, design: pdfDesign });
-    const name = formatVariantenName(variante).replace(/\s+/g, "-");
-    downloadBlob(`variante-${name}.pdf`, blob);
-  };
+  const exportArbeitsversionDocx = () =>
+    void runExport(async () => {
+      if (!(await confirmVariantBeforeExport())) {
+        return;
+      }
+      if (!resume) {
+        return;
+      }
+      await flushAutoSave();
+      const blob = await api.downloadDocx(resume.id);
+      downloadBlob(`arbeitsversion-${resume.id}.docx`, blob);
+    });
 
-  const exportVarianteDocx = async (variante: ResumeVersionDto) => {
-    if (!resume) {
-      return;
-    }
-    const blob = await api.downloadDocx(resume.id, variante.id);
-    const name = formatVariantenName(variante).replace(/\s+/g, "-");
-    downloadBlob(`variante-${name}.docx`, blob);
-  };
+  const exportVariantePdf = (variante: ResumeVersionDto) =>
+    void runExport(async () => {
+      if (!resume) {
+        return;
+      }
+      const blob = await api.downloadPdf(resume.id, { versionId: variante.id, design: pdfDesign });
+      const name = formatVariantenName(variante).replace(/\s+/g, "-");
+      downloadBlob(`variante-${name}.pdf`, blob);
+    });
+
+  const exportVarianteDocx = (variante: ResumeVersionDto) =>
+    void runExport(async () => {
+      if (!resume) {
+        return;
+      }
+      const blob = await api.downloadDocx(resume.id, variante.id);
+      const name = formatVariantenName(variante).replace(/\s+/g, "-");
+      downloadBlob(`variante-${name}.docx`, blob);
+    });
 
   const varianteLaden = async (variantenId: string) => {
     await loadVariantIntoEditor(variantenId);
@@ -182,26 +200,30 @@ export function HomePage() {
     setShowSaveDropdown(false);
   };
 
-  const saveAndExportPdf = async () => {
-    const variante = await saveVariant();
-    if (!variante || !resume) {
-      return;
-    }
-    const blob = await api.downloadPdf(resume.id, { versionId: variante.id, design: pdfDesign });
-    const name = formatVariantenName(variante).replace(/\s+/g, "-");
-    downloadBlob(`variante-${name}.pdf`, blob);
+  const saveAndExportPdf = () => {
     setShowSaveDropdown(false);
+    void runExport(async () => {
+      const variante = await saveVariant();
+      if (!variante || !resume) {
+        return;
+      }
+      const blob = await api.downloadPdf(resume.id, { versionId: variante.id, design: pdfDesign });
+      const name = formatVariantenName(variante).replace(/\s+/g, "-");
+      downloadBlob(`variante-${name}.pdf`, blob);
+    });
   };
 
-  const saveAndExportDocx = async () => {
-    const variante = await saveVariant();
-    if (!variante || !resume) {
-      return;
-    }
-    const blob = await api.downloadDocx(resume.id, variante.id);
-    const name = formatVariantenName(variante).replace(/\s+/g, "-");
-    downloadBlob(`variante-${name}.docx`, blob);
+  const saveAndExportDocx = () => {
     setShowSaveDropdown(false);
+    void runExport(async () => {
+      const variante = await saveVariant();
+      if (!variante || !resume) {
+        return;
+      }
+      const blob = await api.downloadDocx(resume.id, variante.id);
+      const name = formatVariantenName(variante).replace(/\s+/g, "-");
+      downloadBlob(`variante-${name}.docx`, blob);
+    });
   };
 
   const freshStart = async () => {
@@ -353,8 +375,8 @@ export function HomePage() {
                     <button
                       type="button"
                       className="btn btn-export-pdf btn-md"
-                      onClick={() => void exportArbeitsversionPdf()}
-                      disabled={busy}
+                      onClick={exportArbeitsversionPdf}
+                      disabled={busy || exportBusy}
                     >
                       <i className="bi bi-download" /> PDF
                     </button>
@@ -362,9 +384,10 @@ export function HomePage() {
                   <button
                     type="button"
                     className="btn btn-export-docx btn-md"
-                    onClick={() => void exportArbeitsversionDocx()}
-                    disabled={busy}
+                    onClick={exportArbeitsversionDocx}
+                    disabled={busy || exportBusy}
                   >
+
                     <i className="bi bi-download" /> DOCX
                   </button>
                   <button type="button" className="btn btn-secondary btn-md" onClick={() => setAtsOpen(true)} disabled={busy}>
@@ -392,10 +415,10 @@ export function HomePage() {
                           <button type="button" className="btn btn-secondary" onClick={() => void saveWithoutExport()} disabled={busy}>
                             Speichern ohne Export
                           </button>
-                          <button type="button" className="btn btn-primary" onClick={() => void saveAndExportPdf()} disabled={busy}>
+                          <button type="button" className="btn btn-primary" onClick={saveAndExportPdf} disabled={busy || exportBusy}>
                             Speichern + PDF exportieren
                           </button>
-                          <button type="button" className="btn btn-primary" onClick={() => void saveAndExportDocx()} disabled={busy}>
+                          <button type="button" className="btn btn-primary" onClick={saveAndExportDocx} disabled={busy || exportBusy}>
                             Speichern + DOCX exportieren
                           </button>
                         </div>
@@ -404,6 +427,16 @@ export function HomePage() {
                   </div>
                 </div>
               </div>
+
+              {exportError ? (
+                <div className="export-error-bar" role="alert">
+                  <i className="bi bi-exclamation-triangle-fill" />
+                  <span className="export-error-message">{exportError}</span>
+                  <button type="button" className="export-error-dismiss" onClick={() => setExportError(null)} aria-label="Schließen">
+                    <i className="bi bi-x-lg" />
+                  </button>
+                </div>
+              ) : null}
 
               <div className="toolbar-tabs-row">
                 <button type="button" className={`tab-btn ${tabClass("profil")}`} onClick={() => setActiveTab("profil")}>
@@ -1079,10 +1112,10 @@ export function HomePage() {
                   <button type="button" className="btn btn-sm btn-ghost" onClick={() => void varianteLaden(variante.id)}>
                     <i className="bi bi-pencil-square" /> Als Arbeitsversion laden
                   </button>
-                  <button type="button" className="btn btn-sm btn-export-pdf" onClick={() => void exportVariantePdf(variante)}>
+                  <button type="button" className="btn btn-sm btn-export-pdf" onClick={() => exportVariantePdf(variante)} disabled={exportBusy}>
                     <i className="bi bi-download" /> PDF
                   </button>
-                  <button type="button" className="btn btn-sm btn-export-docx" onClick={() => void exportVarianteDocx(variante)}>
+                  <button type="button" className="btn btn-sm btn-export-docx" onClick={() => exportVarianteDocx(variante)} disabled={exportBusy}>
                     <i className="bi bi-download" /> DOCX
                   </button>
                 </div>
