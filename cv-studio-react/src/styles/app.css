@@ -1184,6 +1184,24 @@ body::before {
     color: var(--muted);
 }
 
+/* ── Demo Data Badge ────────────────────────────────────── */
+
+.demo-data-badge {
+    display: inline-block;
+    margin-left: 0.65rem;
+    padding: 0.1rem 0.5rem;
+    background: #f3f4f6;
+    color: #6b7280;
+    border: 1px solid #e5e7eb;
+    border-radius: 20px;
+    font-size: 0.65rem;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    vertical-align: middle;
+    font-family: "JetBrains Mono", ui-monospace, monospace;
+    cursor: default;
+}
+
 /* ── New Resume Wizard ──────────────────────────────────── */
 
 .wizard-overlay {

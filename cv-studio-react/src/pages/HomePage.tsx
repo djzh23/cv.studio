@@ -271,12 +271,24 @@ export function HomePage() {
 
   const d = resume.resumeData;
   const st = d.sectionTitles ?? {};
+  const hasDemoData =
+    d.profile.firstName === "Max" && d.profile.lastName === "Mustermann" ||
+    d.profile.email === "max.mustermann@example.de" ||
+    d.profile.location.includes("Musterstraße") ||
+    d.profile.phone === "+49 (0) 170 000 00 00";
 
   return (
     <section className="resume-shell">
       <header className="toolbar">
         <div className="toolbar-left">
-          <h1>{resume.title}</h1>
+          <h1>
+            {resume.title}
+            {hasDemoData && (
+              <span className="demo-data-badge" title="Dieser Lebenslauf enthält noch Platzhalter-Daten. Ersetze sie durch deine echten Daten.">
+                Demo-Daten
+              </span>
+            )}
+          </h1>
           <small className="header-meta-row">
             <span>
               <i className="bi bi-pencil-square" /> Du bearbeitest: {aktivKontextText}
