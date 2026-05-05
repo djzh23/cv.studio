@@ -14,19 +14,20 @@ public sealed class ResumeRepository : IResumeRepository
         _dbContext = dbContext;
     }
 
-    public async Task<IReadOnlyList<Resume>> ListAsync(CancellationToken cancellationToken = default)
+    public async Task<IReadOnlyList<Resume>> ListAsync(string clerkUserId, CancellationToken cancellationToken = default)
     {
         return await _dbContext.Resumes
             .AsNoTracking()
+            .Where(x => x.ClerkUserId == clerkUserId)
             .OrderByDescending(x => x.UpdatedAtUtc)
             .ToListAsync(cancellationToken);
     }
 
-    public Task<Resume?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
+    public Task<Resume?> GetByIdAsync(Guid id, string clerkUserId, CancellationToken cancellationToken = default)
     {
         return _dbContext.Resumes
             .AsNoTracking()
-            .FirstOrDefaultAsync(x => x.Id == id, cancellationToken);
+            .FirstOrDefaultAsync(x => x.Id == id && x.ClerkUserId == clerkUserId, cancellationToken);
     }
 
     public async Task AddAsync(Resume resume, CancellationToken cancellationToken = default)
@@ -40,9 +41,9 @@ public sealed class ResumeRepository : IResumeRepository
         return Task.CompletedTask;
     }
 
-    public Task<int> DeleteAllAsync(CancellationToken cancellationToken = default)
+    public Task<int> DeleteAllAsync(string clerkUserId, CancellationToken cancellationToken = default)
     {
-        return _dbContext.Resumes.ExecuteDeleteAsync(cancellationToken);
+        return _dbContext.Resumes.Where(x => x.ClerkUserId == clerkUserId).ExecuteDeleteAsync(cancellationToken);
     }
 }
 

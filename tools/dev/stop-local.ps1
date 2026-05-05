@@ -8,6 +8,13 @@ Get-CimInstance Win32_Process -Filter "Name = 'dotnet.exe'" |
         Stop-Process -Id $_.ProcessId -Force -ErrorAction SilentlyContinue
     }
 
+Write-Host "Stopping Vite / React (cv-studio-react) node processes..." -ForegroundColor Cyan
+Get-CimInstance Win32_Process -Filter "Name = 'node.exe'" -ErrorAction SilentlyContinue |
+    Where-Object { $_.CommandLine -like "*cv-studio-react*" } |
+    ForEach-Object {
+        Stop-Process -Id $_.ProcessId -Force -ErrorAction SilentlyContinue
+    }
+
 Write-Host "Stopping PostgreSQL container..." -ForegroundColor Cyan
 $repoRoot = (Resolve-Path (Join-Path $PSScriptRoot "..\..")).Path
 Push-Location $repoRoot

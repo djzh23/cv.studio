@@ -14,8 +14,6 @@ namespace CvStudio.Infrastructure.Docx;
 
 public sealed class OpenXmlDocxGenerator : IDocxGenerator
 {
-    private const string DefaultGithubUrl = "https://github.com/max-mustermann-dev";
-
     private static readonly HttpClient ImageHttpClient = new()
     {
         Timeout = TimeSpan.FromSeconds(8)
@@ -68,13 +66,13 @@ public sealed class OpenXmlDocxGenerator : IDocxGenerator
 
             if (!string.IsNullOrWhiteSpace(data.Profile.Summary))
             {
-                body.Append(CreateSectionTitle("ZUSAMMENFASSUNG"));
+                body.Append(CreateSectionTitle(CvSectionTitleResolver.QualificationsProfile(data)));
                 body.Append(CreateStyledParagraph(data.Profile.Summary, 21, color: BodyColor, spacingAfter: 80));
             }
 
             AppendKnowledge(body, data);
-            AppendWork(body, data.WorkItems);
-            AppendEducation(body, data.EducationItems);
+            AppendWork(body, data);
+            AppendEducation(body, data);
             AppendLanguagesAndInterests(body, data);
 
             mainPart.Document.Save();
@@ -247,7 +245,7 @@ public sealed class OpenXmlDocxGenerator : IDocxGenerator
             return;
         }
 
-        body.Append(CreateSectionTitle("KENNTNISSE"));
+        body.Append(CreateSectionTitle(CvSectionTitleResolver.Skills(data)));
         var table = new Table(
             new TableProperties(
                 new TableWidth { Width = "5000", Type = TableWidthUnitValues.Pct },
@@ -273,14 +271,15 @@ public sealed class OpenXmlDocxGenerator : IDocxGenerator
         body.Append(table);
     }
 
-    private static void AppendWork(Body body, IReadOnlyList<WorkItemData> items)
+    private static void AppendWork(Body body, ResumeData data)
     {
+        var items = data.WorkItems;
         if (items.Count == 0)
         {
             return;
         }
 
-        body.Append(CreateSectionTitle("BERUFSERFAHRUNG"));
+        body.Append(CreateSectionTitle(CvSectionTitleResolver.WorkExperience(data)));
 
         foreach (var item in items)
         {
@@ -321,21 +320,22 @@ public sealed class OpenXmlDocxGenerator : IDocxGenerator
 
             foreach (var bullet in item.Bullets.Where(static x => !string.IsNullOrWhiteSpace(x)))
             {
-                body.Append(CreateStyledParagraph($"� {bullet.Trim()}", 19, color: BodyColor, spacingAfter: 35, leftIndent: 280));
+                body.Append(CreateStyledParagraph($"- {bullet.Trim()}", 19, color: BodyColor, spacingAfter: 35, leftIndent: 280));
             }
 
             body.Append(CreateParagraphWithSpacing(0, 80));
         }
     }
 
-    private static void AppendEducation(Body body, IReadOnlyList<EducationItemData> items)
+    private static void AppendEducation(Body body, ResumeData data)
     {
+        var items = data.EducationItems;
         if (items.Count == 0)
         {
             return;
         }
 
-        body.Append(CreateSectionTitle("AUSBILDUNG"));
+        body.Append(CreateSectionTitle(CvSectionTitleResolver.Education(data)));
 
         foreach (var item in items)
         {
@@ -373,12 +373,12 @@ public sealed class OpenXmlDocxGenerator : IDocxGenerator
             return;
         }
 
-        body.Append(CreateSectionTitle("SPRACHEN & INTERESSEN"));
+        body.Append(CreateSectionTitle(CvSectionTitleResolver.LanguagesAndInterests(data)));
         var paragraph = CreateParagraphWithSpacing(0, 20);
 
         if (!string.IsNullOrWhiteSpace(languageLine))
         {
-            paragraph.Append(new Run(CreateRunProperties(19, Navy, bold: true), new Text("Sprachen: ")));
+            paragraph.Append(new Run(CreateRunProperties(19, Navy, bold: true), new Text(CvSectionTitleResolver.LanguagesInlineLabel(data))));
             paragraph.Append(new Run(CreateRunProperties(19, BodyColor), new Text(languageLine)));
         }
 
@@ -389,7 +389,7 @@ public sealed class OpenXmlDocxGenerator : IDocxGenerator
 
         if (!string.IsNullOrWhiteSpace(interestsLine))
         {
-            paragraph.Append(new Run(CreateRunProperties(19, Navy, bold: true), new Text("Interessen: ")));
+            paragraph.Append(new Run(CreateRunProperties(19, Navy, bold: true), new Text(CvSectionTitleResolver.InterestsInlineLabel(data))));
             paragraph.Append(new Run(CreateRunProperties(19, BodyColor), new Text(interestsLine)));
         }
 
@@ -635,8 +635,10 @@ public sealed class OpenXmlDocxGenerator : IDocxGenerator
         var github = data.Skills
             .SelectMany(g => g.Items)
             .FirstOrDefault(i => i.Contains("github.com", StringComparison.OrdinalIgnoreCase));
-        github ??= DefaultGithubUrl;
-        contacts.Add(new ContactEntry(ContactIconKind.Github, github.Trim()));
+        if (!string.IsNullOrWhiteSpace(github))
+        {
+            contacts.Add(new ContactEntry(ContactIconKind.Github, github.Trim()));
+        }
 
         return contacts;
     }
@@ -702,7 +704,7 @@ public sealed class OpenXmlDocxGenerator : IDocxGenerator
 
     private static string JoinItemsWithDot(IEnumerable<string> items)
     {
-        return string.Join(" � ", items.Where(static x => !string.IsNullOrWhiteSpace(x)).Select(static x => x.Trim()));
+        return string.Join(" · ", items.Where(static x => !string.IsNullOrWhiteSpace(x)).Select(static x => x.Trim()));
     }
 
     private static TableCell CreateKnowledgeCell(string text, int width, bool isLabel, bool isLast)

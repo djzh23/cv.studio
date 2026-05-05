@@ -1,16 +1,26 @@
 param(
-    [string]$Passcode = ""
+    [string]$Passcode = "",
+    [ValidateSet("Blazor", "React")]
+    [string]$Frontend = "Blazor"
 )
 
 $repoRoot = (Resolve-Path (Join-Path $PSScriptRoot "..\..")).Path
+$reactRoot = Join-Path $repoRoot "cv-studio-react"
 $dbPort = 5433
- 
+
 # Ensure no stale local instances keep DLLs locked.
 Get-CimInstance Win32_Process -Filter "Name = 'dotnet.exe'" |
     Where-Object {
         $_.CommandLine -like "*CvStudio.Api.csproj*" -or
         $_.CommandLine -like "*CvStudio.Blazor.csproj*"
     } |
+    ForEach-Object {
+        Stop-Process -Id $_.ProcessId -Force -ErrorAction SilentlyContinue
+    }
+
+# Stale Vite dev server (cv-studio-react)
+Get-CimInstance Win32_Process -Filter "Name = 'node.exe'" -ErrorAction SilentlyContinue |
+    Where-Object { $_.CommandLine -like "*cv-studio-react*" } |
     ForEach-Object {
         Stop-Process -Id $_.ProcessId -Force -ErrorAction SilentlyContinue
     }
@@ -51,11 +61,13 @@ if (-not $probe) {
     throw "PostgreSQL did not become ready on localhost:$dbPort. Run 'docker compose ps' and 'docker compose logs postgres'."
 }
 
+# API: Access__Passcode fuer React (POST /api/access/verify) und konsistente Konfiguration
 $apiCmd = @"
 Set-Location '$repoRoot'
 `$env:ASPNETCORE_ENVIRONMENT = 'Development'
 `$env:ASPNETCORE_URLS = 'http://localhost:5189'
 `$env:ConnectionStrings__Postgres = 'Host=localhost;Port=5433;Database=cvstudio;Username=postgres;Password=postgres'
+`$env:Access__Passcode = '$Passcode'
 dotnet run --no-launch-profile --project src/CvStudio.Api/CvStudio.Api.csproj
 "@
 
@@ -66,6 +78,12 @@ Set-Location '$repoRoot'
 `$env:ApiBaseUrl = 'http://localhost:5189/'
 `$env:Access__Passcode = '$Passcode'
 dotnet run --no-launch-profile --project src/CvStudio.Blazor/CvStudio.Blazor.csproj
+"@
+
+$reactCmd = @"
+Set-Location '$reactRoot'
+`$env:VITE_API_PROXY_TARGET = 'http://localhost:5189'
+npm run dev
 "@
 
 Write-Host "Starting API on http://localhost:5189 ..." -ForegroundColor Green
@@ -90,7 +108,19 @@ if (-not $apiReady) {
     throw "API did not become healthy on http://localhost:5189/health. Check API window logs."
 }
 
-Write-Host "Starting Blazor on http://localhost:5047 ..." -ForegroundColor Green
-Start-Process powershell -ArgumentList @("-NoExit", "-Command", $blazorCmd)
-
-Write-Host "Ready. Open http://localhost:5047 and use your passcode." -ForegroundColor Yellow
+if ($Frontend -eq "React") {
+    if (-not (Test-Path $reactRoot)) {
+        throw "React-Frontend nicht gefunden: $reactRoot"
+    }
+    if (-not (Test-Path (Join-Path $reactRoot "node_modules"))) {
+        Write-Host "Hinweis: Einmalig 'npm install' in cv-studio-react ausfuehren." -ForegroundColor Yellow
+    }
+    Write-Host "Starting Vite (React) in cv-studio-react ..." -ForegroundColor Green
+    Start-Process powershell -ArgumentList @("-NoExit", "-Command", $reactCmd)
+    Write-Host "Ready. Open http://localhost:5273 and use your passcode (same as API/Blazor)." -ForegroundColor Yellow
+}
+else {
+    Write-Host "Starting Blazor on http://localhost:5047 ..." -ForegroundColor Green
+    Start-Process powershell -ArgumentList @("-NoExit", "-Command", $blazorCmd)
+    Write-Host "Ready. Open http://localhost:5047 and use your passcode." -ForegroundColor Yellow
+}

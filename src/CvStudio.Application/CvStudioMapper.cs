@@ -19,6 +19,7 @@ public static class CvStudioMapper
     {
         var data = JsonSerializer.Deserialize<ResumeData>(json, JsonOptions) ?? new ResumeData();
         data.Profile ??= new ProfileData();
+        data.Hobbies ??= [];
 
         // Keep newly introduced optional profile fields normalized for legacy payloads.
         data.Profile.GitHubUrl = NormalizeOptional(data.Profile.GitHubUrl);

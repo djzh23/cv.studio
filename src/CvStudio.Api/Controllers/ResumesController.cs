@@ -20,27 +20,34 @@ public sealed class ResumesController : ControllerBase
     private readonly IPdfExportService _pdfExportService;
     private readonly IDocxExportService _docxExportService;
     private readonly ILogger<ResumesController> _logger;
+    private readonly IConfiguration _configuration;
 
     public ResumesController(
         IResumeService resumeService,
         ISnapshotService snapshotService,
         IPdfExportService pdfExportService,
         IDocxExportService docxExportService,
-        ILogger<ResumesController> logger)
+        ILogger<ResumesController> logger,
+        IConfiguration configuration)
     {
         _resumeService = resumeService;
         _snapshotService = snapshotService;
         _pdfExportService = pdfExportService;
         _docxExportService = docxExportService;
         _logger = logger;
+        _configuration = configuration;
     }
+
+    /// <summary>Single-tenant owner when running the standalone CvStudio.Api (SmartAssist passes per-user Clerk ids).</summary>
+    private string OwnerId =>
+        _configuration["CvStudio:StandaloneOwnerId"] ?? "cv-studio-standalone";
 
     [HttpPost]
     [ProducesResponseType(typeof(ResumeDto), StatusCodes.Status201Created)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status422UnprocessableEntity)]
     public async Task<IActionResult> Create([FromBody] CreateResumeRequest request, CancellationToken cancellationToken)
     {
-        var resume = await _resumeService.CreateAsync(request, cancellationToken);
+        var resume = await _resumeService.CreateAsync(OwnerId, request, cancellationToken);
         return CreatedAtAction(nameof(GetCurrent), new { id = resume.Id }, resume);
     }
 
@@ -49,7 +56,7 @@ public sealed class ResumesController : ControllerBase
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
     public async Task<IActionResult> CreateFromTemplate(string templateKey, CancellationToken cancellationToken)
     {
-        var resume = await _resumeService.CreateFromTemplateAsync(templateKey, cancellationToken);
+        var resume = await _resumeService.CreateFromTemplateAsync(OwnerId, templateKey, cancellationToken);
         return CreatedAtAction(nameof(GetCurrent), new { id = resume.Id }, resume);
     }
 
@@ -57,7 +64,7 @@ public sealed class ResumesController : ControllerBase
     [ProducesResponseType(typeof(IReadOnlyList<ResumeSummaryDto>), StatusCodes.Status200OK)]
     public async Task<ActionResult<IReadOnlyList<ResumeSummaryDto>>> List(CancellationToken cancellationToken)
     {
-        var resumes = await _resumeService.ListAsync(cancellationToken);
+        var resumes = await _resumeService.ListAsync(OwnerId, cancellationToken);
         return Ok(resumes);
     }
 
@@ -65,7 +72,7 @@ public sealed class ResumesController : ControllerBase
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     public async Task<IActionResult> DeleteAll(CancellationToken cancellationToken)
     {
-        await _resumeService.DeleteAllAsync(cancellationToken);
+        await _resumeService.DeleteAllAsync(OwnerId, cancellationToken);
         return NoContent();
     }
 
@@ -74,7 +81,7 @@ public sealed class ResumesController : ControllerBase
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
     public async Task<ActionResult<ResumeDto>> GetCurrent(Guid id, CancellationToken cancellationToken)
     {
-        var resume = await _resumeService.GetCurrentAsync(id, cancellationToken);
+        var resume = await _resumeService.GetCurrentAsync(OwnerId, id, cancellationToken);
         return Ok(resume);
     }
 
@@ -84,7 +91,7 @@ public sealed class ResumesController : ControllerBase
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status422UnprocessableEntity)]
     public async Task<ActionResult<ResumeDto>> Update(Guid id, [FromBody] UpdateResumeRequest request, CancellationToken cancellationToken)
     {
-        var resume = await _resumeService.UpdateAsync(id, request, cancellationToken);
+        var resume = await _resumeService.UpdateAsync(OwnerId, id, request, cancellationToken);
         return Ok(resume);
     }
 
@@ -95,7 +102,7 @@ public sealed class ResumesController : ControllerBase
     public async Task<ActionResult<ResumeVersionDto>> CreateVersion(Guid id, [FromBody] CreateVersionRequest? request, CancellationToken cancellationToken)
     {
         var normalized = request ?? new CreateVersionRequest();
-        var version = await _snapshotService.CreateSnapshotAsync(id, normalized, cancellationToken);
+        var version = await _snapshotService.CreateSnapshotAsync(OwnerId, id, normalized, cancellationToken);
         return CreatedAtAction(nameof(GetVersion), new { id, versionId = version.Id }, version);
     }
 
@@ -104,7 +111,7 @@ public sealed class ResumesController : ControllerBase
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
     public async Task<ActionResult<IReadOnlyList<ResumeVersionDto>>> ListVersions(Guid id, CancellationToken cancellationToken)
     {
-        var versions = await _snapshotService.ListSnapshotsAsync(id, cancellationToken);
+        var versions = await _snapshotService.ListSnapshotsAsync(OwnerId, id, cancellationToken);
         return Ok(versions);
     }
 
@@ -113,7 +120,7 @@ public sealed class ResumesController : ControllerBase
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
     public async Task<ActionResult<ResumeVersionDto>> GetVersion(Guid id, Guid versionId, CancellationToken cancellationToken)
     {
-        var version = await _snapshotService.GetSnapshotAsync(id, versionId, cancellationToken);
+        var version = await _snapshotService.GetSnapshotAsync(OwnerId, id, versionId, cancellationToken);
         return Ok(version);
     }
 
@@ -123,7 +130,7 @@ public sealed class ResumesController : ControllerBase
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status422UnprocessableEntity)]
     public async Task<ActionResult<ResumeVersionDto>> UpdateVersion(Guid id, Guid versionId, [FromBody] UpdateVersionRequest request, CancellationToken cancellationToken)
     {
-        var version = await _snapshotService.UpdateSnapshotAsync(id, versionId, request, cancellationToken);
+        var version = await _snapshotService.UpdateSnapshotAsync(OwnerId, id, versionId, request, cancellationToken);
         return Ok(version);
     }
 
@@ -132,7 +139,7 @@ public sealed class ResumesController : ControllerBase
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
     public async Task<IActionResult> DeleteVersion(Guid id, Guid versionId, CancellationToken cancellationToken)
     {
-        await _snapshotService.DeleteSnapshotAsync(id, versionId, cancellationToken);
+        await _snapshotService.DeleteSnapshotAsync(OwnerId, id, versionId, cancellationToken);
         return NoContent();
     }
 
@@ -143,7 +150,7 @@ public sealed class ResumesController : ControllerBase
     public async Task<IActionResult> DownloadPdf(Guid id, [FromQuery] Guid? versionId, [FromQuery] string? design, CancellationToken cancellationToken)
     {
         var parsedDesign = ParsePdfDesign(design);
-        var pdf = await _pdfExportService.ExportAsync(id, versionId, parsedDesign, cancellationToken);
+        var pdf = await _pdfExportService.ExportAsync(OwnerId, id, versionId, parsedDesign, cancellationToken);
         var fileName = versionId.HasValue ? $"resume-{id}-v{versionId}.pdf" : $"resume-{id}.pdf";
 
         _logger.LogInformation("Returning PDF for resume {ResumeId}, version {VersionId}, design {Design}", id, versionId, parsedDesign);
@@ -157,7 +164,7 @@ public sealed class ResumesController : ControllerBase
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
     public async Task<IActionResult> DownloadDocx(Guid id, [FromQuery] Guid? versionId, CancellationToken cancellationToken)
     {
-        var docx = await _docxExportService.ExportAsync(id, versionId, cancellationToken);
+        var docx = await _docxExportService.ExportAsync(OwnerId, id, versionId, cancellationToken);
         var fileName = versionId.HasValue ? $"resume-{id}-v{versionId}.docx" : $"resume-{id}.docx";
 
         _logger.LogInformation("Returning DOCX for resume {ResumeId}, version {VersionId}", id, versionId);

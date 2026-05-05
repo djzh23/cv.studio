@@ -23,11 +23,11 @@ public sealed class PdfExportService : IPdfExportService
         _logger = logger;
     }
 
-    public async Task<byte[]> ExportAsync(Guid resumeId, Guid? versionId = null, PdfDesign design = PdfDesign.DesignA, CancellationToken cancellationToken = default)
+    public async Task<byte[]> ExportAsync(string clerkUserId, Guid resumeId, Guid? versionId = null, PdfDesign design = PdfDesign.DesignA, CancellationToken cancellationToken = default)
     {
         try
         {
-            var contentJson = await ResolveContentJsonAsync(resumeId, versionId, cancellationToken);
+            var contentJson = await ResolveContentJsonAsync(clerkUserId, resumeId, versionId, cancellationToken);
             var bytes = _pdfGenerator.GenerateFromResumeJson(contentJson, design);
 
             if (bytes.Length == 0)
@@ -45,17 +45,20 @@ public sealed class PdfExportService : IPdfExportService
         }
     }
 
-    private async Task<string> ResolveContentJsonAsync(Guid resumeId, Guid? versionId, CancellationToken cancellationToken)
+    private async Task<string> ResolveContentJsonAsync(string clerkUserId, Guid resumeId, Guid? versionId, CancellationToken cancellationToken)
     {
         if (versionId.HasValue)
         {
+            _ = await _resumeRepository.GetByIdAsync(resumeId, clerkUserId, cancellationToken)
+                ?? throw new NotFoundException($"Resume '{resumeId}' was not found.");
+
             var version = await _versionRepository.GetByResumeAndVersionIdAsync(resumeId, versionId.Value, cancellationToken)
                 ?? throw new NotFoundException($"Version '{versionId}' for resume '{resumeId}' was not found.");
 
             return version.ContentJson;
         }
 
-        var resume = await _resumeRepository.GetByIdAsync(resumeId, cancellationToken)
+        var resume = await _resumeRepository.GetByIdAsync(resumeId, clerkUserId, cancellationToken)
             ?? throw new NotFoundException($"Resume '{resumeId}' was not found.");
 
         return resume.CurrentContentJson;

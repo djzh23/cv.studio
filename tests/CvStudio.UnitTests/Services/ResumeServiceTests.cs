@@ -13,6 +13,8 @@ namespace CvStudio.UnitTests.Services;
 
 public sealed class ResumeServiceTests
 {
+    private const string ClerkUserId = "test-user";
+
     [Fact]
     public async Task CreateAsync_ValidRequest_PersistsResumeAndReturnsDto()
     {
@@ -37,10 +39,11 @@ public sealed class ResumeServiceTests
         };
 
         // Act
-        var result = await sut.CreateAsync(request);
+        var result = await sut.CreateAsync(ClerkUserId, request);
 
         // Assert
         addedResume.Should().NotBeNull();
+        addedResume!.ClerkUserId.Should().Be(ClerkUserId);
         addedResume!.Title.Should().Be("Senior Developer CV");
         addedResume.TemplateKey.Should().Be("softwareentwickler");
 
@@ -67,6 +70,7 @@ public sealed class ResumeServiceTests
         var entity = new Resume
         {
             Id = expectedId,
+            ClerkUserId = ClerkUserId,
             Title = "Backend CV",
             TemplateKey = "it-support",
             CurrentContentJson = CvStudioMapper.Serialize(CreateResumeData()),
@@ -74,11 +78,11 @@ public sealed class ResumeServiceTests
         };
 
         repository
-            .Setup(x => x.GetByIdAsync(expectedId, It.IsAny<CancellationToken>()))
+            .Setup(x => x.GetByIdAsync(expectedId, ClerkUserId, It.IsAny<CancellationToken>()))
             .ReturnsAsync(entity);
 
         // Act
-        var result = await sut.GetCurrentAsync(expectedId);
+        var result = await sut.GetCurrentAsync(ClerkUserId, expectedId);
 
         // Assert
         result.Id.Should().Be(expectedId);
@@ -100,13 +104,14 @@ public sealed class ResumeServiceTests
         var entity = new Resume
         {
             Id = resumeId,
+            ClerkUserId = ClerkUserId,
             Title = "Old Title",
             TemplateKey = "softwareentwickler",
             CurrentContentJson = CvStudioMapper.Serialize(CreateResumeData()),
             UpdatedAtUtc = DateTime.UtcNow.AddDays(-2)
         };
 
-        repository.Setup(x => x.GetByIdAsync(resumeId, It.IsAny<CancellationToken>())).ReturnsAsync(entity);
+        repository.Setup(x => x.GetByIdAsync(resumeId, ClerkUserId, It.IsAny<CancellationToken>())).ReturnsAsync(entity);
         repository.Setup(x => x.UpdateAsync(entity, It.IsAny<CancellationToken>())).Returns(Task.CompletedTask);
         dbContext.Setup(x => x.SaveChangesAsync(It.IsAny<CancellationToken>())).ReturnsAsync(1);
 
@@ -118,7 +123,7 @@ public sealed class ResumeServiceTests
         };
 
         // Act
-        var result = await sut.UpdateAsync(resumeId, request);
+        var result = await sut.UpdateAsync(ClerkUserId, resumeId, request);
 
         // Assert
         entity.Title.Should().Be("Updated Title");
@@ -142,11 +147,11 @@ public sealed class ResumeServiceTests
         var missingId = Guid.NewGuid();
 
         repository
-            .Setup(x => x.GetByIdAsync(missingId, It.IsAny<CancellationToken>()))
+            .Setup(x => x.GetByIdAsync(missingId, ClerkUserId, It.IsAny<CancellationToken>()))
             .ReturnsAsync((Resume?)null);
 
         // Act
-        Func<Task> act = async () => await sut.GetCurrentAsync(missingId);
+        Func<Task> act = async () => await sut.GetCurrentAsync(ClerkUserId, missingId);
 
         // Assert
         await act.Should().ThrowAsync<NotFoundException>();

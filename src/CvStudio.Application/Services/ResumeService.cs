@@ -30,17 +30,17 @@ public sealed class ResumeService : IResumeService
         return Task.FromResult<IReadOnlyList<ResumeTemplateDto>>(ResumeTemplateCatalog.List());
     }
 
-    public async Task<int> DeleteAllAsync(CancellationToken cancellationToken = default)
+    public async Task<int> DeleteAllAsync(string clerkUserId, CancellationToken cancellationToken = default)
     {
-        var deleted = await _resumeRepository.DeleteAllAsync(cancellationToken);
+        var deleted = await _resumeRepository.DeleteAllAsync(clerkUserId, cancellationToken);
         await _dbContext.SaveChangesAsync(cancellationToken);
         _logger.LogWarning("Deleted all resumes and snapshots for fresh start. Rows: {DeletedCount}", deleted);
         return deleted;
     }
 
-    public async Task<IReadOnlyList<ResumeSummaryDto>> ListAsync(CancellationToken cancellationToken = default)
+    public async Task<IReadOnlyList<ResumeSummaryDto>> ListAsync(string clerkUserId, CancellationToken cancellationToken = default)
     {
-        var resumes = await _resumeRepository.ListAsync(cancellationToken);
+        var resumes = await _resumeRepository.ListAsync(clerkUserId, cancellationToken);
         return resumes
             .Select(x => new ResumeSummaryDto
             {
@@ -52,7 +52,7 @@ public sealed class ResumeService : IResumeService
             .ToList();
     }
 
-    public async Task<ResumeDto> CreateFromTemplateAsync(string templateKey, CancellationToken cancellationToken = default)
+    public async Task<ResumeDto> CreateFromTemplateAsync(string clerkUserId, string templateKey, CancellationToken cancellationToken = default)
     {
         var normalizedKey = NormalizeTemplateKeyRequired(templateKey);
         var template = ResumeTemplateCatalog.GetDefaultResume(normalizedKey);
@@ -61,6 +61,7 @@ public sealed class ResumeService : IResumeService
         var resume = new Resume
         {
             Id = Guid.NewGuid(),
+            ClerkUserId = clerkUserId,
             Title = template.Title,
             TemplateKey = normalizedKey,
             CurrentContentJson = CvStudioMapper.Serialize(template.Data),
@@ -75,7 +76,7 @@ public sealed class ResumeService : IResumeService
         return CvStudioMapper.ToDto(resume);
     }
 
-    public async Task<ResumeDto> CreateAsync(CreateResumeRequest request, CancellationToken cancellationToken = default)
+    public async Task<ResumeDto> CreateAsync(string clerkUserId, CreateResumeRequest request, CancellationToken cancellationToken = default)
     {
         ValidateOrThrow(request, request.ResumeData);
 
@@ -83,6 +84,7 @@ public sealed class ResumeService : IResumeService
         var resume = new Resume
         {
             Id = Guid.NewGuid(),
+            ClerkUserId = clerkUserId,
             Title = request.Title.Trim(),
             TemplateKey = NormalizeTemplateKey(request.TemplateKey),
             CurrentContentJson = CvStudioMapper.Serialize(request.ResumeData),
@@ -97,19 +99,19 @@ public sealed class ResumeService : IResumeService
         return CvStudioMapper.ToDto(resume);
     }
 
-    public async Task<ResumeDto> GetCurrentAsync(Guid id, CancellationToken cancellationToken = default)
+    public async Task<ResumeDto> GetCurrentAsync(string clerkUserId, Guid id, CancellationToken cancellationToken = default)
     {
-        var resume = await _resumeRepository.GetByIdAsync(id, cancellationToken)
+        var resume = await _resumeRepository.GetByIdAsync(id, clerkUserId, cancellationToken)
             ?? throw new NotFoundException($"Resume '{id}' was not found.");
 
         return CvStudioMapper.ToDto(resume);
     }
 
-    public async Task<ResumeDto> UpdateAsync(Guid id, UpdateResumeRequest request, CancellationToken cancellationToken = default)
+    public async Task<ResumeDto> UpdateAsync(string clerkUserId, Guid id, UpdateResumeRequest request, CancellationToken cancellationToken = default)
     {
         ValidateOrThrow(request, request.ResumeData);
 
-        var resume = await _resumeRepository.GetByIdAsync(id, cancellationToken)
+        var resume = await _resumeRepository.GetByIdAsync(id, clerkUserId, cancellationToken)
             ?? throw new NotFoundException($"Resume '{id}' was not found.");
 
         resume.Title = request.Title.Trim();

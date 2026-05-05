@@ -184,6 +184,7 @@ else
                                     <button type="button" class='tab-btn @TabClass("ausbildung")' @onclick='() => ActiveTab = "ausbildung"'><i class="bi bi-mortarboard"></i> Ausbildung</button>
                                     <button type="button" class='tab-btn @TabClass("kenntnisse")' @onclick='() => ActiveTab = "kenntnisse"'><i class="bi bi-tools"></i> Kenntnisse</button>
                                     <button type="button" class='tab-btn @TabClass("hobby")' @onclick='() => ActiveTab = "hobby"'><i class="bi bi-heart"></i> Hobbys</button>
+                                    <button type="button" class='tab-btn @TabClass("cvTitel")' @onclick='() => ActiveTab = "cvTitel"'><i class="bi bi-globe2"></i> CV-Titel</button>
                                 </div>
                             </div>
 
@@ -232,7 +233,7 @@ else
                                     <option value="Niederlassungserlaubnis · Dauerhaft arbeitsberechtigt in Deutschland" />
                                     <option value="EU Blue Card · Hochqualifiziert arbeitsberechtigt in Deutschland" />
                                 </datalist>
-                                <label>Zusammenfassung
+                                <label>Qualifikationsprofil
                                     <InputTextArea class="form-control" @bind-Value="Vm.CurrentResume.ResumeData.Profile.Summary" rows="6" />
                                 </label>
                                 </div>
@@ -244,6 +245,7 @@ else
                                 <h2>Berufserfahrung</h2>
                                 @for (var i = 0; i < Vm.CurrentResume.ResumeData.WorkItems.Count; i++)
                                 {
+                                    var index = i;
                                     var item = Vm.CurrentResume.ResumeData.WorkItems[i];
                                     <div class="list-card">
                                         <div class="field-grid">
@@ -258,7 +260,7 @@ else
                                         <label>Stichpunkte (eine Zeile = ein Punkt)
                                             <textarea class="form-control" rows="4" value="@string.Join('\n', item.Bullets)" @onchange="e => UpdateBullets(item, e.Value?.ToString())"></textarea>
                                         </label>
-                                        <button type="button" class="btn btn-sm btn-danger" @onclick="() => RemoveWork(i)"><i class="bi bi-trash3"></i> Entfernen</button>
+                                        <button type="button" class="btn btn-sm btn-danger" @onclick="() => RemoveWork(index)"><i class="bi bi-trash3"></i> Entfernen</button>
                                     </div>
                                 }
                                 <button type="button" class="btn btn-sm btn-secondary" @onclick="AddWork"><i class="bi bi-plus-circle"></i> Eintrag hinzufuegen</button>
@@ -271,6 +273,7 @@ else
                                 <h2>Ausbildung</h2>
                                 @for (var i = 0; i < Vm.CurrentResume.ResumeData.EducationItems.Count; i++)
                                 {
+                                    var index = i;
                                     var item = Vm.CurrentResume.ResumeData.EducationItems[i];
                                     <div class="list-card">
                                         <div class="field-grid">
@@ -279,7 +282,7 @@ else
                                             <label>Start <InputText class="form-control" @bind-Value="item.StartDate" /></label>
                                             <label>Ende <InputText class="form-control" @bind-Value="item.EndDate" /></label>
                                         </div>
-                                        <button type="button" class="btn btn-sm btn-danger" @onclick="() => RemoveEducation(i)"><i class="bi bi-trash3"></i> Entfernen</button>
+                                        <button type="button" class="btn btn-sm btn-danger" @onclick="() => RemoveEducation(index)"><i class="bi bi-trash3"></i> Entfernen</button>
                                     </div>
                                 }
                                 <button type="button" class="btn btn-sm btn-secondary" @onclick="AddEducation"><i class="bi bi-plus-circle"></i> Eintrag hinzufuegen</button>
@@ -292,6 +295,7 @@ else
                                 <h2>Kenntnisse</h2>
                                 @for (var i = 0; i < Vm.CurrentResume.ResumeData.Skills.Count; i++)
                                 {
+                                    var index = i;
                                     var group = Vm.CurrentResume.ResumeData.Skills[i];
                                     <div class="list-card">
                                         <div class="field-grid">
@@ -300,10 +304,38 @@ else
                                                 <input class="form-control" value="@string.Join(", ", group.Items)" @onchange="e => UpdateSkillItems(group, e.Value?.ToString())" />
                                             </label>
                                         </div>
-                                        <button type="button" class="btn btn-sm btn-danger" @onclick="() => RemoveSkill(i)"><i class="bi bi-trash3"></i> Entfernen</button>
+                                        <button type="button" class="btn btn-sm btn-danger" @onclick="() => RemoveSkill(index)"><i class="bi bi-trash3"></i> Entfernen</button>
                                     </div>
                                 }
                                 <button type="button" class="btn btn-sm btn-secondary" @onclick="AddSkill"><i class="bi bi-plus-circle"></i> Kategorie hinzufuegen</button>
+                                </div>
+                            }
+
+                            @if (ActiveTab == "cvTitel")
+                            {
+                                <div class="tab-content">
+                                <h2>CV-Sektionstitel</h2>
+                                <p class="muted">Optional: Ueberschriften fuer PDF, DOCX und Live-Vorschau (z.B. Franzoesisch). Leer lassen = deutscher Standard.</p>
+                                <div class="field-grid">
+                                    <label>Qualifikationsprofil <InputText class="form-control" maxlength="120" @bind-Value="Vm.CurrentResume.ResumeData.SectionTitles!.QualificationsProfile" placeholder="Profil de qualifications" /></label>
+                                    <label>Berufserfahrung <InputText class="form-control" maxlength="120" @bind-Value="Vm.CurrentResume.ResumeData.SectionTitles!.WorkExperience" placeholder="Expérience professionnelle" /></label>
+                                    <label>Ausbildung <InputText class="form-control" maxlength="120" @bind-Value="Vm.CurrentResume.ResumeData.SectionTitles!.Education" placeholder="Formation" /></label>
+                                    <label>Kenntnisse <InputText class="form-control" maxlength="120" @bind-Value="Vm.CurrentResume.ResumeData.SectionTitles!.Skills" placeholder="Compétences" /></label>
+                                    <label>Projekte <InputText class="form-control" maxlength="120" @bind-Value="Vm.CurrentResume.ResumeData.SectionTitles!.Projects" placeholder="Projets" /></label>
+                                    <label>Sprachen &amp; Interessen (Block) <InputText class="form-control" maxlength="140" @bind-Value="Vm.CurrentResume.ResumeData.SectionTitles!.LanguagesAndInterests" placeholder="Langues et centres d'intérêt" /></label>
+                                    <label>Kontakte (PDF C) <InputText class="form-control" maxlength="120" @bind-Value="Vm.CurrentResume.ResumeData.SectionTitles!.Contacts" placeholder="Coordonnées" /></label>
+                                    <label>Sprachen (PDF C) <InputText class="form-control" maxlength="120" @bind-Value="Vm.CurrentResume.ResumeData.SectionTitles!.Languages" placeholder="Langues" /></label>
+                                    <label>Interessen / Hobbys (PDF C) <InputText class="form-control" maxlength="120" @bind-Value="Vm.CurrentResume.ResumeData.SectionTitles!.Interests" placeholder="Centres d'intérêt" /></label>
+                                </div>
+                                <div class="form-section-divider">
+                                    <span>Zeilen-Labels (PDF A/B, DOCX)</span>
+                                </div>
+                                <div class="field-grid">
+                                    <label>Prefix Sprachenliste <InputText class="form-control" maxlength="80" @bind-Value="Vm.CurrentResume.ResumeData.SectionTitles!.LanguagesInlineLabel" placeholder="Langues : " /></label>
+                                    <label>Prefix Hobbys <InputText class="form-control" maxlength="80" @bind-Value="Vm.CurrentResume.ResumeData.SectionTitles!.InterestsInlineLabel" placeholder="Centres d'intérêt : " /></label>
+                                    <label>PDF Modern: Zeile Sprachen <InputText class="form-control" maxlength="80" @bind-Value="Vm.CurrentResume.ResumeData.SectionTitles!.DesignBLanguagesRowLabel" placeholder="Langues : " /></label>
+                                    <label>PDF Modern: Zeile Hobbys <InputText class="form-control" maxlength="80" @bind-Value="Vm.CurrentResume.ResumeData.SectionTitles!.DesignBInterestsRowLabel" placeholder="Centres d'intérêt : " /></label>
+                                </div>
                                 </div>
                             }
 
@@ -324,7 +356,7 @@ else
             <section class="preview-panel">
                 <h2 class="preview-label"><i class="bi bi-eye"></i> Live-Vorschau</h2>
                 <div class="preview-scroll">
-                    <div class="preview-card">
+                    <div class="preview-card @(Vm.AusgewaehltesPdfDesign == PdfDesign.DesignB ? "preview-design-b" : "")">
                         <div class="preview-header">
                             @if (!string.IsNullOrWhiteSpace(Vm.CurrentResume.ResumeData.Profile.ProfileImageUrl))
                             {
@@ -357,9 +389,13 @@ else
                         {
                             <div class="cv-work-permit">✓ @Vm.CurrentResume.ResumeData.Profile.WorkPermit</div>
                         }
-                        <p>@Vm.CurrentResume.ResumeData.Profile.Summary</p>
+                        @if (!string.IsNullOrWhiteSpace(Vm.CurrentResume.ResumeData.Profile.Summary))
+                        {
+                            <h4>@CvSectionTitleResolver.QualificationsProfile(Vm.CurrentResume.ResumeData)</h4>
+                            <p>@Vm.CurrentResume.ResumeData.Profile.Summary</p>
+                        }
 
-                        <h4>Berufserfahrung</h4>
+                        <h4>@CvSectionTitleResolver.WorkExperience(Vm.CurrentResume.ResumeData)</h4>
                         @if (Vm.CurrentResume.ResumeData.WorkItems.Count == 0)
                         {
                             <p class="muted">Keine Eintraege</p>
@@ -388,7 +424,7 @@ else
                             }
                         }
 
-                        <h4>Ausbildung</h4>
+                        <h4>@CvSectionTitleResolver.Education(Vm.CurrentResume.ResumeData)</h4>
                         @if (Vm.CurrentResume.ResumeData.EducationItems.Count == 0)
                         {
                             <p class="muted">Keine Eintraege</p>
@@ -405,7 +441,7 @@ else
                             }
                         }
 
-                        <h4>Kenntnisse</h4>
+                        <h4>@CvSectionTitleResolver.Skills(Vm.CurrentResume.ResumeData)</h4>
                         @if (Vm.CurrentResume.ResumeData.Skills.Count == 0)
                         {
                             <p class="muted">Keine Eintraege</p>
@@ -418,7 +454,7 @@ else
                             }
                         }
 
-                        <h4>Hobbys</h4>
+                        <h4>@CvSectionTitleResolver.Interests(Vm.CurrentResume.ResumeData)</h4>
                         @if (Vm.CurrentResume.ResumeData.Hobbies.Count == 0)
                         {
                             <p class="muted">Keine Eintraege</p>

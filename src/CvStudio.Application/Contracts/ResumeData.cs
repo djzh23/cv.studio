@@ -12,6 +12,9 @@ public sealed class ResumeData
     public List<ResumeProjectItem> Projects { get; set; } = [];
     public List<SkillGroupData> Skills { get; set; } = [];
     public List<string> Hobbies { get; set; } = [];
+
+    /// <summary> Optionale Sektions-Ueberschriften fuer Exporte (Sprache / Wunschtext). </summary>
+    public CvSectionTitleOverrides? SectionTitles { get; set; }
 }
 
 public sealed class ProfileData

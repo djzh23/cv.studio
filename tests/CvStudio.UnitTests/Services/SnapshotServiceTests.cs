@@ -13,6 +13,8 @@ namespace CvStudio.UnitTests.Services;
 
 public sealed class SnapshotServiceTests
 {
+    private const string ClerkUserId = "test-user";
+
     [Fact]
     public async Task CreateSnapshotAsync_ValidRequest_PersistsSnapshotAndReturnsDto()
     {
@@ -27,6 +29,7 @@ public sealed class SnapshotServiceTests
         var resume = new Resume
         {
             Id = resumeId,
+            ClerkUserId = ClerkUserId,
             Title = "Resume",
             CurrentContentJson = CvStudioMapper.Serialize(CreateResumeData()),
             UpdatedAtUtc = DateTime.UtcNow
@@ -34,7 +37,7 @@ public sealed class SnapshotServiceTests
 
         Snapshot? createdSnapshot = null;
 
-        resumeRepository.Setup(x => x.GetByIdAsync(resumeId, It.IsAny<CancellationToken>())).ReturnsAsync(resume);
+        resumeRepository.Setup(x => x.GetByIdAsync(resumeId, ClerkUserId, It.IsAny<CancellationToken>())).ReturnsAsync(resume);
         snapshotRepository.Setup(x => x.GetNextVersionNumberAsync(resumeId, It.IsAny<CancellationToken>())).ReturnsAsync(3);
         snapshotRepository
             .Setup(x => x.AddAsync(It.IsAny<Snapshot>(), It.IsAny<CancellationToken>()))
@@ -48,7 +51,7 @@ public sealed class SnapshotServiceTests
         };
 
         // Act
-        var result = await sut.CreateSnapshotAsync(resumeId, request);
+        var result = await sut.CreateSnapshotAsync(ClerkUserId, resumeId, request);
 
         // Assert
         createdSnapshot.Should().NotBeNull();
@@ -77,8 +80,8 @@ public sealed class SnapshotServiceTests
         var sut = new SnapshotService(resumeRepository.Object, snapshotRepository.Object, dbContext.Object, logger);
 
         var resumeId = Guid.NewGuid();
-        resumeRepository.Setup(x => x.GetByIdAsync(resumeId, It.IsAny<CancellationToken>()))
-            .ReturnsAsync(new Resume { Id = resumeId, CurrentContentJson = "{}" });
+        resumeRepository.Setup(x => x.GetByIdAsync(resumeId, ClerkUserId, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new Resume { Id = resumeId, ClerkUserId = ClerkUserId, CurrentContentJson = "{}" });
 
         var snapshots = new List<Snapshot>
         {
@@ -106,7 +109,7 @@ public sealed class SnapshotServiceTests
             .ReturnsAsync(snapshots);
 
         // Act
-        var result = await sut.ListSnapshotsAsync(resumeId);
+        var result = await sut.ListSnapshotsAsync(ClerkUserId, resumeId);
 
         // Assert
         result.Should().HaveCount(2);
@@ -138,13 +141,16 @@ public sealed class SnapshotServiceTests
             CreatedAtUtc = DateTime.UtcNow
         };
 
+        resumeRepository
+            .Setup(x => x.GetByIdAsync(resumeId, ClerkUserId, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new Resume { Id = resumeId, ClerkUserId = ClerkUserId, CurrentContentJson = "{}" });
         snapshotRepository
             .Setup(x => x.GetTrackedByResumeAndVersionIdAsync(resumeId, snapshotId, It.IsAny<CancellationToken>()))
             .ReturnsAsync(snapshot);
         dbContext.Setup(x => x.SaveChangesAsync(It.IsAny<CancellationToken>())).ReturnsAsync(1);
 
         // Act
-        var result = await sut.UpdateSnapshotAsync(resumeId, snapshotId, new UpdateVersionRequest { Label = "  New Label  " });
+        var result = await sut.UpdateSnapshotAsync(ClerkUserId, resumeId, snapshotId, new UpdateVersionRequest { Label = "  New Label  " });
 
         // Assert
         snapshot.Label.Should().Be("New Label");
@@ -169,7 +175,10 @@ public sealed class SnapshotServiceTests
             .ReturnsAsync((Snapshot?)null);
 
         // Act
-        Func<Task> act = async () => await sut.GetSnapshotAsync(resumeId, snapshotId);
+        resumeRepository
+            .Setup(x => x.GetByIdAsync(resumeId, ClerkUserId, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new Resume { Id = resumeId, ClerkUserId = ClerkUserId, CurrentContentJson = "{}" });
+        Func<Task> act = async () => await sut.GetSnapshotAsync(ClerkUserId, resumeId, snapshotId);
 
         // Assert
         await act.Should().ThrowAsync<NotFoundException>();

@@ -96,6 +96,7 @@ public sealed class ResumeEditorViewModel : IDisposable
             }
 
             CurrentResume = erstellt;
+            EnsureSectionTitlesForUi(CurrentResume);
             AktiveVariante = null;
             HasUnsavedChanges = false;
             await RefreshVariantenAsync(cancellationToken);
@@ -110,6 +111,7 @@ public sealed class ResumeEditorViewModel : IDisposable
         await RunBusyAsync(async () =>
         {
             CurrentResume = await _apiClient.GetResumeAsync(id, cancellationToken);
+            EnsureSectionTitlesForUi(CurrentResume);
             if (!string.IsNullOrWhiteSpace(CurrentResume.TemplateKey))
             {
                 GewaehlteVorlage = CurrentResume.TemplateKey;
@@ -192,6 +194,7 @@ public sealed class ResumeEditorViewModel : IDisposable
         {
             var variante = await _apiClient.GetVersionAsync(CurrentResume.Id, variantenId, cancellationToken);
             CurrentResume.ResumeData = variante.ResumeData;
+            EnsureSectionTitlesForUi(CurrentResume);
             CurrentResume.UpdatedAtUtc = DateTime.UtcNow;
             AktiveVariante = variante;
             HasUnsavedChanges = true;
@@ -356,6 +359,7 @@ public sealed class ResumeEditorViewModel : IDisposable
                 ResumeData = CurrentResume.ResumeData
             }, cancellationToken);
 
+            EnsureSectionTitlesForUi(CurrentResume);
             LastAutoSavedAtUtc = DateTime.UtcNow;
             HasUnsavedChanges = false;
             await RefreshArbeitsversionenAsync(cancellationToken);
@@ -438,6 +442,9 @@ public sealed class ResumeEditorViewModel : IDisposable
             NotifyStateChanged();
         }
     }
+
+    private static void EnsureSectionTitlesForUi(ResumeDto? resume) =>
+        resume?.ResumeData.EnsureSectionTitles();
 
     private static ResumeData CreateFallbackData()
     {
