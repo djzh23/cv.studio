@@ -67,7 +67,7 @@ public sealed class OpenXmlDocxGenerator : IDocxGenerator
             if (!string.IsNullOrWhiteSpace(data.Profile.Summary))
             {
                 body.Append(CreateSectionTitle(CvSectionTitleResolver.QualificationsProfile(data)));
-                body.Append(CreateStyledParagraph(data.Profile.Summary, 21, color: BodyColor, spacingAfter: 80));
+                body.Append(CreateStyledParagraph(SanitizeText(data.Profile.Summary), 21, color: BodyColor, spacingAfter: 80));
             }
 
             AppendKnowledge(body, data);
@@ -162,20 +162,32 @@ public sealed class OpenXmlDocxGenerator : IDocxGenerator
         var cell = new TableCell(cellProps);
 
         cell.Append(CreateStyledParagraph(
-            $"{data.Profile.FirstName} {data.Profile.LastName}".Trim(),
+            SanitizeText($"{data.Profile.FirstName} {data.Profile.LastName}".Trim()),
             fontSize: 52,
             bold: true,
             color: Navy,
             spacingAfter: 40));
 
-        var headline = string.IsNullOrWhiteSpace(data.Profile.Headline) ? "Softwareentwickler" : data.Profile.Headline.Trim();
-        cell.Append(CreateStyledParagraph(
-            headline,
-            fontSize: 24,
-            bold: true,
-            italic: true,
-            color: Teal,
-            spacingAfter: 20));
+        var headline = string.IsNullOrWhiteSpace(data.Profile.Headline) ? string.Empty : SanitizeText(data.Profile.Headline);
+        if (!string.IsNullOrWhiteSpace(headline))
+        {
+            cell.Append(CreateStyledParagraph(
+                headline,
+                fontSize: 24,
+                bold: true,
+                italic: true,
+                color: Teal,
+                spacingAfter: 20));
+        }
+
+        if (!string.IsNullOrWhiteSpace(data.Profile.WorkPermit))
+        {
+            cell.Append(CreateStyledParagraph(
+                $"\u2714  {SanitizeText(data.Profile.WorkPermit)}",
+                fontSize: 18,
+                color: Teal,
+                spacingAfter: 20));
+        }
 
         return cell;
     }
@@ -287,7 +299,7 @@ public sealed class OpenXmlDocxGenerator : IDocxGenerator
             var period = BuildDateRange(item.StartDate, item.EndDate);
 
             var companyParagraph = CreateParagraphWithTabStop(0, 40, 10466 * 20);
-            companyParagraph.Append(new Run(CreateRunProperties(21, Navy, bold: true), new Text(company)));
+            companyParagraph.Append(new Run(CreateRunProperties(21, Navy, bold: true), new Text(SanitizeText(company))));
             companyParagraph.Append(new Run(new TabChar()));
             companyParagraph.Append(new Run(CreateRunProperties(19, Muted, italic: true), new Text(period)));
             body.Append(companyParagraph);
@@ -297,7 +309,7 @@ public sealed class OpenXmlDocxGenerator : IDocxGenerator
                 var secondLine = CreateParagraphWithSpacing(0, 35);
                 if (!string.IsNullOrWhiteSpace(location))
                 {
-                    secondLine.Append(new Run(CreateRunProperties(18, Muted), new Text(location.Trim())));
+                    secondLine.Append(new Run(CreateRunProperties(18, Muted), new Text(SanitizeText(location))));
                 }
 
                 if (!string.IsNullOrWhiteSpace(item.Role))
@@ -307,7 +319,7 @@ public sealed class OpenXmlDocxGenerator : IDocxGenerator
                         secondLine.Append(new Run(CreateRunProperties(18, Muted), new Text("   ")));
                     }
 
-                    secondLine.Append(new Run(CreateRunProperties(19, Teal, bold: true, italic: true), new Text(item.Role.Trim())));
+                    secondLine.Append(new Run(CreateRunProperties(19, Teal, bold: true, italic: true), new Text(SanitizeText(item.Role))));
                 }
 
                 body.Append(secondLine);
@@ -315,12 +327,12 @@ public sealed class OpenXmlDocxGenerator : IDocxGenerator
 
             if (!string.IsNullOrWhiteSpace(item.Description))
             {
-                body.Append(CreateStyledParagraph(item.Description.Trim(), 18, italic: true, color: Muted, spacingAfter: 45));
+                body.Append(CreateStyledParagraph(SanitizeText(item.Description), 18, italic: true, color: Muted, spacingAfter: 45));
             }
 
             foreach (var bullet in item.Bullets.Where(static x => !string.IsNullOrWhiteSpace(x)))
             {
-                body.Append(CreateStyledParagraph($"- {bullet.Trim()}", 19, color: BodyColor, spacingAfter: 35, leftIndent: 280));
+                body.Append(CreateStyledParagraph($"\u2022  {SanitizeText(bullet)}", 19, color: BodyColor, spacingAfter: 35, leftIndent: 280));
             }
 
             body.Append(CreateParagraphWithSpacing(0, 80));
@@ -343,10 +355,10 @@ public sealed class OpenXmlDocxGenerator : IDocxGenerator
             var period = BuildDateRange(item.StartDate, item.EndDate);
 
             var schoolParagraph = CreateParagraphWithTabStop(0, 20, 10466 * 20);
-            schoolParagraph.Append(new Run(CreateRunProperties(21, BodyColor, bold: true), new Text(school)));
+            schoolParagraph.Append(new Run(CreateRunProperties(21, BodyColor, bold: true), new Text(SanitizeText(school))));
             if (!string.IsNullOrWhiteSpace(location))
             {
-                schoolParagraph.Append(new Run(CreateRunProperties(19, Muted), new Text($"  |  {location}")));
+                schoolParagraph.Append(new Run(CreateRunProperties(19, Muted), new Text($"  |  {SanitizeText(location)}")));
             }
 
             schoolParagraph.Append(new Run(new TabChar()));
@@ -355,7 +367,7 @@ public sealed class OpenXmlDocxGenerator : IDocxGenerator
 
             if (!string.IsNullOrWhiteSpace(item.Degree))
             {
-                body.Append(CreateStyledParagraph(item.Degree, 20, bold: true, italic: true, color: Teal, spacingAfter: 80));
+                body.Append(CreateStyledParagraph(SanitizeText(item.Degree), 20, bold: true, italic: true, color: Teal, spacingAfter: 80));
             }
         }
     }
@@ -725,6 +737,29 @@ public sealed class OpenXmlDocxGenerator : IDocxGenerator
                     new BottomBorder { Val = border, Size = 8U, Color = Rule },
                     new RightBorder { Val = BorderValues.None })),
             paragraph);
+    }
+
+    /// <summary>
+    /// Replaces Unicode characters that are outside Calibri's standard glyph coverage
+    /// with ASCII-safe equivalents so Word doesn't show replacement boxes.
+    /// </summary>
+    private static string SanitizeText(string? text)
+    {
+        if (string.IsNullOrEmpty(text))
+        {
+            return string.Empty;
+        }
+
+        return text
+            .Replace('\u2014', '-')   // em dash → hyphen
+            .Replace('\u2013', '-')   // en dash → hyphen
+            .Replace('\u2018', '\'')  // left single quotation mark
+            .Replace('\u2019', '\'')  // right single quotation mark
+            .Replace('\u201C', '"')   // left double quotation mark
+            .Replace('\u201D', '"')   // right double quotation mark
+            .Replace('\u2026', "...") // ellipsis
+            .Replace('\u00A0', ' ')   // non-breaking space
+            .Trim();
     }
 
     private static string BuildDateRange(string startDate, string endDate)

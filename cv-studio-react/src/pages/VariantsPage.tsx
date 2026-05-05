@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import * as api from "../api/resumeApi";
 import { downloadBlob, getLastResumeId, notify, setLastResumeId } from "../lib/cvStudio";
 import { versionBadgeClass } from "../lib/formatting";
@@ -7,6 +7,7 @@ import type { PdfDesign, ResumeSummaryDto, ResumeVersionDto } from "../types/cv"
 
 export function VariantsPage() {
   const { resumeId: resumeIdParam } = useParams();
+  const [searchParams] = useSearchParams();
   const navigate = useNavigate();
 
   const [summaries, setSummaries] = useState<ResumeSummaryDto[]>([]);
@@ -14,7 +15,10 @@ export function VariantsPage() {
   const [currentTitle, setCurrentTitle] = useState<string | null>(null);
   const [versions, setVersions] = useState<ResumeVersionDto[]>([]);
   const [selectedResumeId, setSelectedResumeId] = useState("");
-  const [pdfDesign, setPdfDesign] = useState<PdfDesign>("A");
+  const designParam = searchParams.get("design");
+  const [pdfDesign, setPdfDesign] = useState<PdfDesign>(
+    designParam === "B" || designParam === "C" ? designParam : "A"
+  );
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -141,7 +145,7 @@ export function VariantsPage() {
       return;
     }
     notify("Zurueck zur Arbeitsversion.");
-    navigate(`/arbeitsversion/${activeId}`);
+    navigate(`/arbeitsversion/${activeId}${pdfDesign !== "A" ? `?design=${pdfDesign}` : ""}`);
   };
 
   const updateVersionLabel = (id: string, label: string) => {

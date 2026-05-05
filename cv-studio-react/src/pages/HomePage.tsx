@@ -327,7 +327,7 @@ export function HomePage() {
           <button type="button" className="btn btn-primary" onClick={() => setWizardOpen(true)} disabled={busy}>
             <i className="bi bi-plus-circle" /> Neuer Lebenslauf
           </button>
-          <button type="button" className="btn btn-secondary" onClick={() => navigate(`/varianten/${resume.id}`)}>
+          <button type="button" className="btn btn-secondary" onClick={() => navigate(`/varianten/${resume.id}${pdfDesign !== "A" ? `?design=${pdfDesign}` : ""}`)}>
             <i className="bi bi-git" /> Varianten verwalten
           </button>
         </div>
