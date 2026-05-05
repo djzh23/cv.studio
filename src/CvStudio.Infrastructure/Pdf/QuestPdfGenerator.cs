@@ -11,7 +11,6 @@ namespace CvStudio.Infrastructure.Pdf;
 
 public sealed class QuestPdfGenerator : IPdfGenerator
 {
-    private const string DefaultGithubUrl = "https://github.com/max-mustermann-dev";
     private const string DefaultPdfFontFamily = "Lato";
 
     private static readonly HttpClient ImageHttpClient = new()
@@ -89,7 +88,7 @@ public sealed class QuestPdfGenerator : IPdfGenerator
 
                     if (!string.IsNullOrWhiteSpace(data.Profile.Summary))
                     {
-                        column.Item().Element(c => RenderSection(c, "QUALIFIKATIONSPROFIL", section =>
+                        column.Item().Element(c => RenderSection(c, CvSectionTitleResolver.QualificationsProfile(data), section =>
                         {
                             section.Item().Text(data.Profile.Summary.Trim());
                         }));
@@ -99,7 +98,7 @@ public sealed class QuestPdfGenerator : IPdfGenerator
 
                     if (data.WorkItems.Count > 0)
                     {
-                        column.Item().Element(c => RenderSection(c, "BERUFSERFAHRUNG", section =>
+                        column.Item().Element(c => RenderSection(c, CvSectionTitleResolver.WorkExperience(data), section =>
                         {
                             foreach (var work in data.WorkItems)
                             {
@@ -111,7 +110,7 @@ public sealed class QuestPdfGenerator : IPdfGenerator
 
                     if (data.EducationItems.Count > 0)
                     {
-                        column.Item().Element(c => RenderSection(c, "AUSBILDUNG", section =>
+                        column.Item().Element(c => RenderSection(c, CvSectionTitleResolver.Education(data), section =>
                         {
                             foreach (var education in data.EducationItems)
                             {
@@ -153,7 +152,7 @@ public sealed class QuestPdfGenerator : IPdfGenerator
 
                     if (data.WorkItems.Count > 0)
                     {
-                        column.Item().Element(c => RenderDesignBSection(c, "BERUFSERFAHRUNG", section =>
+                        column.Item().Element(c => RenderDesignBSection(c, CvSectionTitleResolver.WorkExperience(data), section =>
                         {
                             foreach (var work in data.WorkItems)
                             {
@@ -165,7 +164,7 @@ public sealed class QuestPdfGenerator : IPdfGenerator
 
                     if (data.EducationItems.Count > 0)
                     {
-                        column.Item().Element(c => RenderDesignBSection(c, "AUSBILDUNG", section =>
+                        column.Item().Element(c => RenderDesignBSection(c, CvSectionTitleResolver.Education(data), section =>
                         {
                             foreach (var education in data.EducationItems)
                             {
@@ -190,7 +189,7 @@ public sealed class QuestPdfGenerator : IPdfGenerator
 
                     if (designBKnowledgeGroups.Count > 0)
                     {
-                        column.Item().Element(c => RenderDesignBSection(c, "KENNTNISSE", section =>
+                        column.Item().Element(c => RenderDesignBSection(c, CvSectionTitleResolver.Skills(data), section =>
                         {
                             foreach (var row in designBKnowledgeGroups)
                             {
@@ -521,7 +520,7 @@ public sealed class QuestPdfGenerator : IPdfGenerator
             return;
         }
 
-        RenderSection(container, "KENNTNISSE", section =>
+        RenderSection(container, CvSectionTitleResolver.Skills(data), section =>
         {
             section.Item().Table(table =>
             {
@@ -630,9 +629,9 @@ public sealed class QuestPdfGenerator : IPdfGenerator
             return;
         }
 
-        RenderSection(container, "SPRACHEN & INTERESSEN", section =>
+        RenderSection(container, CvSectionTitleResolver.LanguagesAndInterests(data), section =>
         {
-            section.Item().Text(text => AppendLanguagesInterestsSpans(text, languageLine, hobbies));
+            section.Item().Text(text => AppendLanguagesInterestsSpans(text, languageLine, hobbies, data));
         });
     }
 
@@ -655,7 +654,7 @@ public sealed class QuestPdfGenerator : IPdfGenerator
             return;
         }
 
-        RenderDesignBSection(container, "SPRACHEN & INTERESSEN", section =>
+        RenderDesignBSection(container, CvSectionTitleResolver.LanguagesAndInterests(data), section =>
         {
             if (languageItems.Count > 0)
             {
@@ -663,7 +662,7 @@ public sealed class QuestPdfGenerator : IPdfGenerator
                     .PaddingBottom(hobbyItems.Count > 0 ? 4 : 0)
                     .Text(text =>
                     {
-                        text.Span("Sprachen: ").Bold().FontSize(10.5f);
+                        text.Span(CvSectionTitleResolver.DesignBLanguagesRowLabel(data)).Bold().FontSize(10.5f);
                         text.Span(string.Join(" · ", languageItems)).FontSize(10.5f);
                     });
             }
@@ -672,7 +671,7 @@ public sealed class QuestPdfGenerator : IPdfGenerator
             {
                 section.Item().Text(text =>
                 {
-                    text.Span("Interessen: ").Bold().FontSize(10.5f);
+                    text.Span(CvSectionTitleResolver.DesignBInterestsRowLabel(data)).Bold().FontSize(10.5f);
                     text.Span(string.Join(" · ", hobbyItems)).FontSize(10.5f);
                 });
             }
@@ -691,11 +690,11 @@ public sealed class QuestPdfGenerator : IPdfGenerator
         return !string.IsNullOrWhiteSpace(languageLine) || !string.IsNullOrWhiteSpace(hobbies);
     }
 
-    private static void AppendLanguagesInterestsSpans(TextDescriptor text, string languageLine, string hobbies)
+    private static void AppendLanguagesInterestsSpans(TextDescriptor text, string languageLine, string hobbies, ResumeData data)
     {
         if (!string.IsNullOrWhiteSpace(languageLine))
         {
-            text.Span("Sprachen: ").Bold().FontColor(Style.Navy);
+            text.Span(CvSectionTitleResolver.LanguagesInlineLabel(data)).Bold().FontColor(Style.Navy);
             text.Span(languageLine);
         }
 
@@ -706,7 +705,7 @@ public sealed class QuestPdfGenerator : IPdfGenerator
 
         if (!string.IsNullOrWhiteSpace(hobbies))
         {
-            text.Span("Interessen: ").Bold().FontColor(Style.Navy);
+            text.Span(CvSectionTitleResolver.InterestsInlineLabel(data)).Bold().FontColor(Style.Navy);
             text.Span(hobbies);
         }
     }
@@ -782,8 +781,10 @@ public sealed class QuestPdfGenerator : IPdfGenerator
         var github = data.Skills
             .SelectMany(g => g.Items)
             .FirstOrDefault(i => i.Contains("github.com", StringComparison.OrdinalIgnoreCase));
-        github ??= DefaultGithubUrl;
-        contacts.Add(new ContactEntry(ContactIconKind.Github, github.Trim()));
+        if (!string.IsNullOrWhiteSpace(github))
+        {
+            contacts.Add(new ContactEntry(ContactIconKind.Github, github.Trim()));
+        }
 
         return contacts;
     }
