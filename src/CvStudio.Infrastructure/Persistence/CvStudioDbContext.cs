@@ -21,10 +21,13 @@ public sealed class CvStudioDbContext : DbContext, IApplicationDbContext
             entity.ToTable("resumes");
             entity.HasKey(x => x.Id);
             entity.Property(x => x.Id).HasColumnName("id");
+            entity.Property(x => x.ClerkUserId).HasColumnName("clerk_user_id").HasMaxLength(128).IsRequired();
             entity.Property(x => x.Title).HasColumnName("title").HasMaxLength(160).IsRequired();
             entity.Property(x => x.TemplateKey).HasColumnName("template_key").HasMaxLength(80);
             entity.Property(x => x.CurrentContentJson).HasColumnName("current_content_json").HasColumnType("jsonb").IsRequired();
             entity.Property(x => x.UpdatedAtUtc).HasColumnName("updated_at_utc").IsRequired();
+
+            entity.HasIndex(x => new { x.ClerkUserId, x.UpdatedAtUtc });
 
             entity.HasMany(x => x.Versions)
                 .WithOne(x => x.Resume)

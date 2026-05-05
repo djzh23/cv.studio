@@ -17,6 +17,7 @@ public sealed class CvStudioMapperTests
         var entity = new Resume
         {
             Id = expectedId,
+            ClerkUserId = "mapper-test",
             Title = "My Resume",
             TemplateKey = "softwareentwickler",
             CurrentContentJson = CvStudioMapper.Serialize(data),

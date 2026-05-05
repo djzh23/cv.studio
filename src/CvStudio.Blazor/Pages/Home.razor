@@ -184,6 +184,7 @@ else
                                     <button type="button" class='tab-btn @TabClass("ausbildung")' @onclick='() => ActiveTab = "ausbildung"'><i class="bi bi-mortarboard"></i> Ausbildung</button>
                                     <button type="button" class='tab-btn @TabClass("kenntnisse")' @onclick='() => ActiveTab = "kenntnisse"'><i class="bi bi-tools"></i> Kenntnisse</button>
                                     <button type="button" class='tab-btn @TabClass("hobby")' @onclick='() => ActiveTab = "hobby"'><i class="bi bi-heart"></i> Hobbys</button>
+                                    <button type="button" class='tab-btn @TabClass("cvTitel")' @onclick='() => ActiveTab = "cvTitel"'><i class="bi bi-globe2"></i> CV-Titel</button>
                                 </div>
                             </div>
 
@@ -310,6 +311,34 @@ else
                                 </div>
                             }
 
+                            @if (ActiveTab == "cvTitel")
+                            {
+                                <div class="tab-content">
+                                <h2>CV-Sektionstitel</h2>
+                                <p class="muted">Optional: Ueberschriften fuer PDF, DOCX und Live-Vorschau (z.B. Franzoesisch). Leer lassen = deutscher Standard.</p>
+                                <div class="field-grid">
+                                    <label>Qualifikationsprofil <InputText class="form-control" maxlength="120" @bind-Value="Vm.CurrentResume.ResumeData.SectionTitles!.QualificationsProfile" placeholder="Profil de qualifications" /></label>
+                                    <label>Berufserfahrung <InputText class="form-control" maxlength="120" @bind-Value="Vm.CurrentResume.ResumeData.SectionTitles!.WorkExperience" placeholder="Expérience professionnelle" /></label>
+                                    <label>Ausbildung <InputText class="form-control" maxlength="120" @bind-Value="Vm.CurrentResume.ResumeData.SectionTitles!.Education" placeholder="Formation" /></label>
+                                    <label>Kenntnisse <InputText class="form-control" maxlength="120" @bind-Value="Vm.CurrentResume.ResumeData.SectionTitles!.Skills" placeholder="Compétences" /></label>
+                                    <label>Projekte <InputText class="form-control" maxlength="120" @bind-Value="Vm.CurrentResume.ResumeData.SectionTitles!.Projects" placeholder="Projets" /></label>
+                                    <label>Sprachen &amp; Interessen (Block) <InputText class="form-control" maxlength="140" @bind-Value="Vm.CurrentResume.ResumeData.SectionTitles!.LanguagesAndInterests" placeholder="Langues et centres d'intérêt" /></label>
+                                    <label>Kontakte (PDF C) <InputText class="form-control" maxlength="120" @bind-Value="Vm.CurrentResume.ResumeData.SectionTitles!.Contacts" placeholder="Coordonnées" /></label>
+                                    <label>Sprachen (PDF C) <InputText class="form-control" maxlength="120" @bind-Value="Vm.CurrentResume.ResumeData.SectionTitles!.Languages" placeholder="Langues" /></label>
+                                    <label>Interessen / Hobbys (PDF C) <InputText class="form-control" maxlength="120" @bind-Value="Vm.CurrentResume.ResumeData.SectionTitles!.Interests" placeholder="Centres d'intérêt" /></label>
+                                </div>
+                                <div class="form-section-divider">
+                                    <span>Zeilen-Labels (PDF A/B, DOCX)</span>
+                                </div>
+                                <div class="field-grid">
+                                    <label>Prefix Sprachenliste <InputText class="form-control" maxlength="80" @bind-Value="Vm.CurrentResume.ResumeData.SectionTitles!.LanguagesInlineLabel" placeholder="Langues : " /></label>
+                                    <label>Prefix Hobbys <InputText class="form-control" maxlength="80" @bind-Value="Vm.CurrentResume.ResumeData.SectionTitles!.InterestsInlineLabel" placeholder="Centres d'intérêt : " /></label>
+                                    <label>PDF Modern: Zeile Sprachen <InputText class="form-control" maxlength="80" @bind-Value="Vm.CurrentResume.ResumeData.SectionTitles!.DesignBLanguagesRowLabel" placeholder="Langues : " /></label>
+                                    <label>PDF Modern: Zeile Hobbys <InputText class="form-control" maxlength="80" @bind-Value="Vm.CurrentResume.ResumeData.SectionTitles!.DesignBInterestsRowLabel" placeholder="Centres d'intérêt : " /></label>
+                                </div>
+                                </div>
+                            }
+
                             @if (ActiveTab == "hobby")
                             {
                                 <div class="tab-content">
@@ -362,11 +391,11 @@ else
                         }
                         @if (!string.IsNullOrWhiteSpace(Vm.CurrentResume.ResumeData.Profile.Summary))
                         {
-                            <h4>Qualifikationsprofil</h4>
+                            <h4>@CvSectionTitleResolver.QualificationsProfile(Vm.CurrentResume.ResumeData)</h4>
                             <p>@Vm.CurrentResume.ResumeData.Profile.Summary</p>
                         }
 
-                        <h4>Berufserfahrung</h4>
+                        <h4>@CvSectionTitleResolver.WorkExperience(Vm.CurrentResume.ResumeData)</h4>
                         @if (Vm.CurrentResume.ResumeData.WorkItems.Count == 0)
                         {
                             <p class="muted">Keine Eintraege</p>
@@ -395,7 +424,7 @@ else
                             }
                         }
 
-                        <h4>Ausbildung</h4>
+                        <h4>@CvSectionTitleResolver.Education(Vm.CurrentResume.ResumeData)</h4>
                         @if (Vm.CurrentResume.ResumeData.EducationItems.Count == 0)
                         {
                             <p class="muted">Keine Eintraege</p>
@@ -412,7 +441,7 @@ else
                             }
                         }
 
-                        <h4>Kenntnisse</h4>
+                        <h4>@CvSectionTitleResolver.Skills(Vm.CurrentResume.ResumeData)</h4>
                         @if (Vm.CurrentResume.ResumeData.Skills.Count == 0)
                         {
                             <p class="muted">Keine Eintraege</p>
@@ -425,7 +454,7 @@ else
                             }
                         }
 
-                        <h4>Hobbys</h4>
+                        <h4>@CvSectionTitleResolver.Interests(Vm.CurrentResume.ResumeData)</h4>
                         @if (Vm.CurrentResume.ResumeData.Hobbies.Count == 0)
                         {
                             <p class="muted">Keine Eintraege</p>

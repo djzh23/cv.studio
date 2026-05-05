@@ -4,12 +4,12 @@ namespace CvStudio.Application.Services;
 
 public interface IResumeService
 {
-    Task<IReadOnlyList<ResumeSummaryDto>> ListAsync(CancellationToken cancellationToken = default);
+    Task<IReadOnlyList<ResumeSummaryDto>> ListAsync(string clerkUserId, CancellationToken cancellationToken = default);
     Task<IReadOnlyList<ResumeTemplateDto>> ListTemplatesAsync(CancellationToken cancellationToken = default);
-    Task<int> DeleteAllAsync(CancellationToken cancellationToken = default);
-    Task<ResumeDto> CreateFromTemplateAsync(string templateKey, CancellationToken cancellationToken = default);
-    Task<ResumeDto> CreateAsync(CreateResumeRequest request, CancellationToken cancellationToken = default);
-    Task<ResumeDto> GetCurrentAsync(Guid id, CancellationToken cancellationToken = default);
-    Task<ResumeDto> UpdateAsync(Guid id, UpdateResumeRequest request, CancellationToken cancellationToken = default);
+    Task<int> DeleteAllAsync(string clerkUserId, CancellationToken cancellationToken = default);
+    Task<ResumeDto> CreateFromTemplateAsync(string clerkUserId, string templateKey, CancellationToken cancellationToken = default);
+    Task<ResumeDto> CreateAsync(string clerkUserId, CreateResumeRequest request, CancellationToken cancellationToken = default);
+    Task<ResumeDto> GetCurrentAsync(string clerkUserId, Guid id, CancellationToken cancellationToken = default);
+    Task<ResumeDto> UpdateAsync(string clerkUserId, Guid id, UpdateResumeRequest request, CancellationToken cancellationToken = default);
 }
 

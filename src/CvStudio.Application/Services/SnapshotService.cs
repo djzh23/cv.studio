@@ -26,7 +26,7 @@ public sealed class SnapshotService : ISnapshotService
         _logger = logger;
     }
 
-    public async Task<ResumeVersionDto> CreateSnapshotAsync(Guid resumeId, CreateVersionRequest request, CancellationToken cancellationToken = default)
+    public async Task<ResumeVersionDto> CreateSnapshotAsync(string clerkUserId, Guid resumeId, CreateVersionRequest request, CancellationToken cancellationToken = default)
     {
         var errors = DataAnnotationsValidator.Validate(request);
         if (errors.Count > 0)
@@ -34,7 +34,7 @@ public sealed class SnapshotService : ISnapshotService
             throw new UnprocessableEntityException(errors);
         }
 
-        var resume = await _resumeRepository.GetByIdAsync(resumeId, cancellationToken)
+        var resume = await _resumeRepository.GetByIdAsync(resumeId, clerkUserId, cancellationToken)
             ?? throw new NotFoundException($"Resume '{resumeId}' was not found.");
 
         var nextVersion = await _versionRepository.GetNextVersionNumberAsync(resumeId, cancellationToken);
@@ -56,9 +56,9 @@ public sealed class SnapshotService : ISnapshotService
         return CvStudioMapper.ToDto(version);
     }
 
-    public async Task<IReadOnlyList<ResumeVersionDto>> ListSnapshotsAsync(Guid resumeId, CancellationToken cancellationToken = default)
+    public async Task<IReadOnlyList<ResumeVersionDto>> ListSnapshotsAsync(string clerkUserId, Guid resumeId, CancellationToken cancellationToken = default)
     {
-        var resume = await _resumeRepository.GetByIdAsync(resumeId, cancellationToken)
+        var resume = await _resumeRepository.GetByIdAsync(resumeId, clerkUserId, cancellationToken)
             ?? throw new NotFoundException($"Resume '{resumeId}' was not found.");
 
         _ = resume;
@@ -67,21 +67,27 @@ public sealed class SnapshotService : ISnapshotService
         return versions.Select(CvStudioMapper.ToDto).ToList();
     }
 
-    public async Task<ResumeVersionDto> GetSnapshotAsync(Guid resumeId, Guid versionId, CancellationToken cancellationToken = default)
+    public async Task<ResumeVersionDto> GetSnapshotAsync(string clerkUserId, Guid resumeId, Guid versionId, CancellationToken cancellationToken = default)
     {
+        _ = await _resumeRepository.GetByIdAsync(resumeId, clerkUserId, cancellationToken)
+            ?? throw new NotFoundException($"Resume '{resumeId}' was not found.");
+
         var version = await _versionRepository.GetByResumeAndVersionIdAsync(resumeId, versionId, cancellationToken)
             ?? throw new NotFoundException($"Version '{versionId}' for resume '{resumeId}' was not found.");
 
         return CvStudioMapper.ToDto(version);
     }
 
-    public async Task<ResumeVersionDto> UpdateSnapshotAsync(Guid resumeId, Guid versionId, UpdateVersionRequest request, CancellationToken cancellationToken = default)
+    public async Task<ResumeVersionDto> UpdateSnapshotAsync(string clerkUserId, Guid resumeId, Guid versionId, UpdateVersionRequest request, CancellationToken cancellationToken = default)
     {
         var errors = DataAnnotationsValidator.Validate(request);
         if (errors.Count > 0)
         {
             throw new UnprocessableEntityException(errors);
         }
+
+        _ = await _resumeRepository.GetByIdAsync(resumeId, clerkUserId, cancellationToken)
+            ?? throw new NotFoundException($"Resume '{resumeId}' was not found.");
 
         var version = await _versionRepository.GetTrackedByResumeAndVersionIdAsync(resumeId, versionId, cancellationToken)
             ?? throw new NotFoundException($"Version '{versionId}' for resume '{resumeId}' was not found.");
@@ -94,8 +100,11 @@ public sealed class SnapshotService : ISnapshotService
         return CvStudioMapper.ToDto(version);
     }
 
-    public async Task DeleteSnapshotAsync(Guid resumeId, Guid versionId, CancellationToken cancellationToken = default)
+    public async Task DeleteSnapshotAsync(string clerkUserId, Guid resumeId, Guid versionId, CancellationToken cancellationToken = default)
     {
+        _ = await _resumeRepository.GetByIdAsync(resumeId, clerkUserId, cancellationToken)
+            ?? throw new NotFoundException($"Resume '{resumeId}' was not found.");
+
         var version = await _versionRepository.GetTrackedByResumeAndVersionIdAsync(resumeId, versionId, cancellationToken)
             ?? throw new NotFoundException($"Version '{versionId}' for resume '{resumeId}' was not found.");
 

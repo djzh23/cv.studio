@@ -26,6 +26,12 @@ partial class CvStudioDbContextModelSnapshot : ModelSnapshot
                     .HasColumnType("uuid")
                     .HasColumnName("id");
 
+                b.Property<string>("ClerkUserId")
+                    .IsRequired()
+                    .HasMaxLength(128)
+                    .HasColumnType("character varying(128)")
+                    .HasColumnName("clerk_user_id");
+
                 b.Property<string>("CurrentContentJson")
                     .IsRequired()
                     .HasColumnType("jsonb")
@@ -47,6 +53,9 @@ partial class CvStudioDbContextModelSnapshot : ModelSnapshot
                     .HasColumnName("updated_at_utc");
 
                 b.HasKey("Id");
+
+                b.HasIndex("ClerkUserId", "UpdatedAtUtc")
+                    .HasDatabaseName("IX_resumes_clerk_user_id_updated_at_utc");
 
                 b.ToTable("resumes", (string)null);
             });
