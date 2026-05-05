@@ -78,7 +78,8 @@ public sealed class QuestPdfGenerator : IPdfGenerator
                     .FontFamily(DefaultPdfFontFamily)
                     .FontSize(Style.BaseFont)
                     .FontColor(Style.Body)
-                    .LineHeight(1.2f));
+                    .LineHeight(1.2f)
+                    .Fallback(f => f.FontFamily("Arial")));
 
                 page.Content().Column(column =>
                 {
@@ -138,7 +139,8 @@ public sealed class QuestPdfGenerator : IPdfGenerator
                     .FontFamily(DefaultPdfFontFamily)
                     .FontSize(10.8f)
                     .FontColor("#222222")
-                    .LineHeight(1.22f));
+                    .LineHeight(1.22f)
+                    .Fallback(f => f.FontFamily("Arial")));
 
                 page.Content().Column(column =>
                 {
